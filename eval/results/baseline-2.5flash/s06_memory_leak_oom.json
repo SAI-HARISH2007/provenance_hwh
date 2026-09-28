@@ -1,0 +1,28 @@
+{
+  "case_id": "s06_memory_leak_oom",
+  "verdict": {
+    "root_cause": "unknown",
+    "service": "unknown",
+    "action": "no_action",
+    "target": "",
+    "confidence": 0.0,
+    "summary": "unparseable output: Expecting ',' delimiter: line 14 column 1890 (char 2588)",
+    "evidence": [],
+    "report_markdown": ""
+  },
+  "variant": "baseline",
+  "run_id": "20260830T032341Z_baseline-s06-memory-leak-oom",
+  "trace": "traces/20260830T032341Z_baseline-s06-memory-leak-oom.jsonl",
+  "model": "gemini-2.5-flash",
+  "provider": "gemini",
+  "status": "fail",
+  "llm_calls": 1,
+  "input_tokens": 4251,
+  "output_tokens": 1116,
+  "would_be_cost_usd": 0.00407,
+  "wall_s": 19.03,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

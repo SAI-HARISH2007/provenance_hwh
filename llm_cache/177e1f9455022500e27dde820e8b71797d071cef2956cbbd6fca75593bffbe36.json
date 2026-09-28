@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_ed5df979-8d1d-4ee1-942e-d5c36a90d1a1",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 20,
+"pattern": "invalid",
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3718,
+"output_tokens": 41,
+"latency_ms": 691,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_ed5df979-8d1d-4ee1-942e-d5c36a90d1a1",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":20,\"pattern\":\"invalid\",\"service\":\"payments-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Check payments-api logs for \"invalid token\".",
+"content": ""
+}
+}

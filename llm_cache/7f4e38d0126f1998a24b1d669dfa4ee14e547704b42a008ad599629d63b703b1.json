@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_2741944",
+"name": "run_probe",
+"arguments": {
+"target": "inventory-api",
+"kind": "clock"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4146,
+"output_tokens": 24,
+"latency_ms": 15475,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_2741944",
+"function": {
+"arguments": "{\"target\":\"inventory-api\",\"kind\":\"clock\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TlZhOMfibeEWHAkmoBgkq0iARiE4n7GRUZrARjStGkpa69kCiCSmJ9iVnZYykmcNhmOk//xN/8qSZqHLmEcvzyhGDhNKoR/hhNUB+xm1hxDrir1OV3kpi7Wg="
+}
+}
+}
+],
+"content": ""
+}
+}

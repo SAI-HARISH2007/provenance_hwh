@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_16d08dd3-4a70-452c-952e-fec4cbc4dc85",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 20,
+"pattern": "JWT",
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3664,
+"output_tokens": 38,
+"latency_ms": 1200,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_16d08dd3-4a70-452c-952e-fec4cbc4dc85",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":20,\"pattern\":\"JWT\",\"service\":\"payments-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Search for JWT verification failures.",
+"content": ""
+}
+}

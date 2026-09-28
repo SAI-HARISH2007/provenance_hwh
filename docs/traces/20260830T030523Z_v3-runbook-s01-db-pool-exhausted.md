@@ -1,0 +1,58 @@
+# Trace `20260830T030523Z_v3-runbook-s01-db-pool-exhausted`
+
+- problem: `s01_db_pool_exhausted`  model: `gemini-3.5-flash-lite`  sandbox: `simulation`  agent_version: `e06603b`
+- status: **success**  score: None  tokens: None  wall: 49833 ms
+- events: {'run_start': 1, 'instruction': 2, 'llm_request': 6, 'llm_response': 6, 'tool_call': 11, 'tool_result': 11, 'error': 4, 'retry': 4, 'human_checkpoint': 1, 'feedback': 1, 'run_end': 1}
+
+## Timeline
+
+| seq | type | summary |
+|---|---|---|
+| 1 | run_start |  |
+| 2 | instruction | system `agent_system.md` (4805 chars) |
+| 3 | instruction | user `kickoff` (93 chars) |
+| 4 | llm_request |  |
+| 5 | llm_response | tool_calls; tools=['get_alert', 'recent_changes']; 2435 ms |
+| 6 | tool_call | `get_alert` attempt 1: `{}` |
+| 7 | tool_result | ok=True exit=None 0 ms: `'{"alert": {"service": "api-gateway", "severity": "P1", "message": "5xx rate 12% on /v1/checkout (threshold 2%) for 5m", '` |
+| 8 | tool_call | `recent_changes` attempt 1: `{}` |
+| 9 | tool_result | ok=True exit=None 0 ms: `'2026-08-29T05:32:00.000Z [config] inventory-api: CACHE_TTL_S 120 -> 300 (by lee)\n2026-08-30T00:02:00.000Z [deploy] api-g'` |
+| 10 | llm_request |  |
+| 11 | llm_response | tool_calls; tools=['query_logs', 'query_logs']; 1216 ms |
+| 12 | tool_call | `query_logs` attempt 1: `{'service': 'orders-api', 'level': 'ERROR'}` |
+| 13 | tool_result | ok=True exit=None 1 ms: `'2026-08-30T02:49:03.000Z ERROR orders-api: db error: timeout acquiring connection from pool after 5000ms rid=0a602609\n20'` |
+| 14 | tool_call | `query_logs` attempt 1: `{'level': 'ERROR', 'service': 'api-gateway'}` |
+| 15 | tool_result | ok=True exit=None 0 ms: `'2026-08-30T02:48:58.000Z ERROR api-gateway: 10.4.127.241 - "POST /v1/checkout HTTP/1.1" 503 5012ms upstream=orders-api r'` |
+| 16 | llm_request |  |
+| 17 | llm_response | tool_calls; tools=['get_metrics', 'get_metrics']; 1126 ms |
+| 18 | tool_call | `get_metrics` attempt 1: `{'service': 'postgres', 'metric': 'connections_used'}` |
+| 19 | tool_result | ok=True exit=None 0 ms: `'postgres.connections_used last 30 min (1/min, oldest→newest)\nmin=37.629 max=99.295 last=99.295  ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▂▂▃▃▄▄▅▅▆'` |
+| 20 | tool_call | `get_metrics` attempt 1: `{'metric': 'locks_waiting', 'service': 'postgres'}` |
+| 21 | tool_result | ok=True exit=None 0 ms: `'postgres.locks_waiting last 30 min (1/min, oldest→newest)\nmin=0 max=0 last=0  ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁\nvalues: 0 0'` |
+| 22 | llm_request |  |
+| 23 | llm_response | tool_calls; tools=['run_probe']; 1385 ms |
+| 24 | tool_call | `run_probe` attempt 1: `{'target': 'postgres', 'kind': 'db'}` |
+| 25 | tool_result | ok=True exit=None 0 ms: `'postgres: 100/100 connections in use; 61 from user=worker, 34 from user=orders, 5 superuser reserved; 0 locks waiting'` |
+| 26 | llm_request |  |
+| 27 | error | **RateLimitError** @llm recoverable=True: gemini/gemini-3.5-flash-lite attempt 1: Error code: 429 - [{'error': {'code': 429, 'message': 'You exceeded your current |
+| 28 | retry | retry of #-1 attempt 2 via backoff: RateLimitError from gemini; sleeping 3.6s |
+| 29 | error | **RateLimitError** @llm recoverable=True: gemini/gemini-3.5-flash-lite attempt 2: Error code: 429 - [{'error': {'code': 429, 'message': 'You exceeded your current |
+| 30 | retry | retry of #-1 attempt 3 via backoff: RateLimitError from gemini; sleeping 5.6s |
+| 31 | error | **RateLimitError** @llm recoverable=True: gemini/gemini-3.5-flash-lite attempt 3: Error code: 429 - [{'error': {'code': 429, 'message': 'You exceeded your current |
+| 32 | retry | retry of #-1 attempt 4 via backoff: RateLimitError from gemini; sleeping 9.0s |
+| 33 | error | **RateLimitError** @llm recoverable=True: gemini/gemini-3.5-flash-lite attempt 4: Error code: 429 - [{'error': {'code': 429, 'message': 'You exceeded your current |
+| 34 | retry | retry of #-1 attempt 5 via backoff: RateLimitError from gemini; sleeping 17.5s |
+| 35 | llm_response | tool_calls; tools=['get_config', 'get_config']; 1673 ms |
+| 36 | tool_call | `get_config` attempt 1: `{'service': 'orders-api'}` |
+| 37 | tool_result | ok=True exit=None 0 ms: `'{"service": "orders-api", "version": "orders-3.8.1", "config": {"DB_POOL_SIZE": 20, "DB_POOL_TIMEOUT_S": 5, "replicas": '` |
+| 38 | tool_call | `get_config` attempt 1: `{'service': 'worker'}` |
+| 39 | tool_result | ok=True exit=None 0 ms: `'{"service": "worker", "version": "worker-1.4.0", "config": {"concurrency": 64}}'` |
+| 40 | llm_request |  |
+| 41 | llm_response | tool_calls; tools=['submit_verdict']; 3359 ms |
+| 42 | tool_call | `submit_verdict` attempt 1: `{'summary': 'PostgreSQL connection pool exhausted because worker concurrency increased from 8 to 64, starving orders-api` |
+| 43 | tool_result | ok=True exit=None 0 ms: `'verdict accepted'` |
+| 44 | human_checkpoint | ❓ Approve remediation `increase_db_pool` on `postgres`? → **approved** by eval-policy |
+| 45 | tool_call | `remediate` attempt 1: `{'action': 'increase_db_pool', 'target': 'postgres'}` |
+| 46 | tool_result | ok=True exit=None 0 ms: `'{"executed": true, "resolved": false, "harm": false, "effect": "increase_db_pool on postgres applied; no change in sympt'` |
+| 47 | feedback | simulation → **no_effect**: increase_db_pool on postgres applied; no change in symptoms after 3 minutes |
+| 48 | run_end | success score=None |

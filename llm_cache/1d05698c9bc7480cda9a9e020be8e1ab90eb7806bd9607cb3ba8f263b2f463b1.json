@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_d1874d23-e552-4e72-bb3f-e8764ba2983a",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 20,
+"pattern": "timeout",
+"service": "orders-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2148,
+"output_tokens": 36,
+"latency_ms": 627,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_d1874d23-e552-4e72-bb3f-e8764ba2983a",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":20,\"pattern\":\"timeout\",\"service\":\"orders-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Search for timeout.",
+"content": ""
+}
+}

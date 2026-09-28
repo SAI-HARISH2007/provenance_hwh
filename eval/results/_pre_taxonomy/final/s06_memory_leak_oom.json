@@ -1,0 +1,56 @@
+{
+  "case_id": "s06_memory_leak_oom",
+  "verdict": {
+    "root_cause": "memory_leak_oom",
+    "service": "inventory-api",
+    "action": "rollback_deploy",
+    "target": "inventory-api",
+    "confidence": 1.0,
+    "summary": "inventory-api experiences continuous memory growth and OOMKilled (exit code 137) due to an unbounded in-process cache introduced in deploy inventory-1.10.0.",
+    "evidence": [
+      "inventory-api deploy inventory-1.10.0 'in-process SKU cache for hot items' shipped at 01:37:00.000Z",
+      "inventory-api memory percentage steadily climbs after deploy and hits OOM (code 137, rss 2048Mi) starting around 02:42 UTC",
+      "inventory-api pod restarts metric climbs from 0 to 6 in 10m",
+      "probe on inventory-api confirms OOMKilled 137 at 2048Mi limit"
+    ],
+    "report_markdown": "# Incident Report: inventory-api Memory Leak / OOMKilled\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, `inventory-api` fired a P2 alert for pod restarts and error rate (22% errors, 6 restarts in 10m). Investigation revealed that a recent deploy (`inventory-1.10.0`, adding an in-process SKU cache) introduced an unbounded memory leak, causing containers to hit the container memory limit and get OOMKilled (exit code 137).\n\n## Timeline\n- **01:37 UTC**: `inventory-1.10.0` deployed (\"in-process SKU cache for hot items\").\n- **01:37 - 02:42 UTC**: Memory usage steadily climbs from ~50% to 98% as the unbounded in-process cache accumulates items.\n- **02:42 UTC**: First recorded OOMKilled exit (code 137) at 2048Mi memory limit. Container begins restart loop.\n- **03:12 UTC**: Alert fires due to repeated container restarts and 502/error responses.\n\n## Root Cause\n**memory_leak_oom** in `inventory-api`. The in-process SKU cache introduced in version `1.10.0` does not bound cache size, TTL eviction, or memory consumption, leading to continuous memory growth and container OOM termination.\n\n## Evidence\n1. `recent_changes`: `inventory-1.10.0` deployed at 01:37 UTC with \"in-process SKU cache for hot items\".\n2. `get_metrics` (`mem_pct`): Shows steady upward climb starting right after deploy, reaching 98.55%.\n3. `query_logs`: Frequent container exits with code 137 (OOMKilled).\n4. `run_probe` (`http`): Confirms `inventory-api` health endpoint failing with `pod restarting; last exit OOMKilled 137, rss 2048Mi at kill`.\n\n## Proposed Remediation\nRoll back the deployment of `inventory-api` from version `1.10.0` to the previous stable version (`1.9.x` or roll back the bad deploy via pipeline).\n- **Safety**: Rolling back reverts the code introduction of the unbounded in-process cache, eliminating the memory leak.\n\n## Follow-ups\n1. Fix the in-process cache implementation in `inventory-api` to include LRU eviction and maximum size/memory limits before re-attempting introduction.\n2. Add memory utilization alerts warning well before OOM limits."
+  },
+  "variant": "final",
+  "run_id": "20260830T032200Z_final-s06-memory-leak-oom",
+  "trace": "traces/20260830T032200Z_final-s06-memory-leak-oom.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "status": "success",
+  "llm_calls": 7,
+  "input_tokens": 21950,
+  "output_tokens": 1027,
+  "wall_s": 0.46,
+  "probes_run": 1,
+  "verified": true,
+  "gate_rejections": 0,
+  "reviewer": {
+    "approve": true,
+    "issues": [],
+    "suggested_checks": [],
+    "note": "All evidence directly supported by metrics, logs, deploy history, and probes; safe and correct rollback action for an unbounded memory leak deploy."
+  },
+  "reviewer_approved": true,
+  "approval": {
+    "decision": "approved",
+    "by": "eval-policy"
+  },
+  "actions_executed": [
+    [
+      "rollback_deploy",
+      "inventory-api"
+    ]
+  ],
+  "harm_done": [],
+  "resolved": true,
+  "remediation_effect": {
+    "executed": true,
+    "resolved": true,
+    "harm": false,
+    "effect": "rollback_deploy on inventory-api applied; error rate returning to baseline, healthz 200 across services within 90s"
+  },
+  "would_be_cost_usd": 0.0
+}

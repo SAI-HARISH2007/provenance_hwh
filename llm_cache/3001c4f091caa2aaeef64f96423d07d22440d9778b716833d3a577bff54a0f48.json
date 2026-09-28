@@ -1,0 +1,52 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_669516",
+"name": "submit_verdict",
+"arguments": {
+"root_cause": "cache_eviction_stampede",
+"evidence": [
+"get_alert: orders-api p95 latency 3.9s fired at 2026-08-30T03:12:00.000Z",
+"recent_changes: orders-api orders-3.8.1 deployed at 2026-08-30T02:27:00.000Z adding ~1.5GB of new cache keys (cache product bundles)",
+"get_metrics redis.hit_rate_pct dropped from ~95-100% to ~31% right around the deploy/impact time",
+"get_metrics redis.evicted_keys_per_min jumped from 0 to ~48k evictions/min starting around index 15 (matching deploy time)",
+"get_metrics orders-api.latency_p95_ms jumped from ~120ms to ~3.9s right when evictions started",
+"get_config redis maxmemory is set to 2gb",
+"run_probe postgres: CPU 97%, heavy query doing JOIN bundles under massive repeat queries due to cache misses"
+],
+"summary": "orders-3.8.1 added ~1.5GB of new cache keys, exceeding Redis 2GB maxmemory and causing a cache eviction stampede with ~48k evictions/min, dropping hit rate to 31% and spiking orders-api p95 latency to 3.9s.",
+"report_markdown": "# Incident Report: Orders-API Latency Spike Due to Cache Eviction Stampede\n\n## Summary\nOn August 30, 2026 at 03:12 UTC, `orders-api` suffered a severe latency spike, with p95 latency reaching 3.9s (threshold 800ms). The root cause was a cache eviction stampede in Redis caused by version `orders-3.8.1`, which introduced product bundle caching amounting to ~1.5GB of new keys, overwhelming Redis's `maxmemory` limit of 2GB. This dropped the cache hit rate from ~98% to ~31%, causing massive key evictions (~48k/min) and driving up database load and API latency.\n\n## Timeline\n- **2026-08-30T02:27:00Z**: `orders-api` deployed version `orders-3.8.1` (\"cache product bundles (adds ~1.5GB of new keys)\").\n- **02:42 UTC**: Redis cache hit rate drops from ~95-100% to ~31%, and evicted keys spike from 0 to ~47k/min.\n- **02:42 UTC**: `orders-api` p95 latency jumps from ~120ms to ~3.9s.\n- **2026-08-30T03:12:00Z**: P2 alert fires for `orders-api` p95 latency.\n\n## Root Cause\n**cache_eviction_stampede**: Redis `maxmemory` was configured to 2GB, but the new deployment added ~1.5GB of bundle keys on top of existing cached data, exceeding capacity. This caused continuous LRU evictions (`maxmemory_policy: allkeys-lru`), destroying the cache hit rate and sending a flood of heavy database queries (`SELECT ... FROM orders JOIN bundles`) to Postgres, driving Postgres CPU to 97% and causing high API response latencies.\n\n## Evidence\n1. **Recent Changes**: `orders-3.8.1` explicitly states it adds ~1.5GB of new cache keys.\n2. **Redis Metrics**: `hit_rate_pct` plummeted from ~98% down to ~31%; `evicted_keys_per_min` jumped from 0 to ~48,000 evictions/min.\n3. **Orders-API Metrics**: `latency_p95_ms` correlated instantly with the start of Redis evictions, jumping from ~120ms to ~3.9s.\n4. **Redis Config**: `maxmemory` is set to `2gb`.\n5. **Database Probe**: Postgres connection pool and CPU are heavily saturated with heavy join queries retrieving un-cached bundle data.\n\n## Proposed Remediation\n- **Action**: `increase_cache_memory`\n- **Target**: `redis`\n- **Why it is safe**: Increasing Redis cache memory (e.g. from 2GB to 4GB) accommodates the newly added ~1.5GB bundle keys without evicting existing working set data. It requires no service restarts, code rollbacks, or data migrations, and immediately restores the cache hit rate.\n\n## Follow-ups\n1. Review cache sizing methodology for feature rollouts that introduce substantial new caching volumes.\n2. Optimize bundle payload size or implement TTLs/tiered caching if necessary.",
+"service": "redis",
+"target": "redis",
+"confidence": 1,
+"action": "increase_cache_memory"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3306,
+"output_tokens": 1135,
+"latency_ms": 9851,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_669516",
+"function": {
+"arguments": "{\"root_cause\":\"cache_eviction_stampede\",\"evidence\":[\"get_alert: orders-api p95 latency 3.9s fired at 2026-08-30T03:12:00.000Z\",\"recent_changes: orders-api orders-3.8.1 deployed at 2026-08-30T02:27:00.000Z adding ~1.5GB of new cache keys (cache product bundles)\",\"get_metrics redis.hit_rate_pct dropped from ~95-100% to ~31% right around the deploy/impact time\",\"get_metrics redis.evicted_keys_per_min jumped from 0 to ~48k evictions/min starting around index 15 (matching deploy time)\",\"get_metrics orders-api.latency_p95_ms jumped from ~120ms to ~3.9s right when evictions started\",\"get_config redis maxmemory is set to 2gb\",\"run_probe postgres: CPU 97%, heavy query doing JOIN bundles under massive repeat queries due to cache misses\"],\"summary\":\"orders-3.8.1 added ~1.5GB of new cache keys, exceeding Redis 2GB maxmemory and causing a cache eviction stampede with ~48k evictions/min, dropping hit rate to 31% and spiking orders-api p95 latency to 3.9s.\",\"report_markdown\":\"# Incident Report: Orders-API Latency Spike Due to Cache Eviction Stampede\\n\\n## Summary\\nOn August 30, 2026 at 03:12 UTC, `orders-api` suffered a severe latency spike, with p95 latency reaching 3.9s (threshold 800ms). The root cause was a cache eviction stampede in Redis caused by version `orders-3.8.1`, which introduced product bundle caching amounting to ~1.5GB of new keys, overwhelming Redis's `maxmemory` limit of 2GB. This dropped the cache hit rate from ~98% to ~31%, causing massive key evictions (~48k/min) and driving up database load and API latency.\\n\\n## Timeline\\n- **2026-08-30T02:27:00Z**: `orders-api` deployed version `orders-3.8.1` (\\\"cache product bundles (adds ~1.5GB of new keys)\\\").\\n- **02:42 UTC**: Redis cache hit rate drops from ~95-100% to ~31%, and evicted keys spike from 0 to ~47k/min.\\n- **02:42 UTC**: `orders-api` p95 latency jumps from ~120ms to ~3.9s.\\n- **2026-08-30T03:12:00Z**: P2 alert fires for `orders-api` p95 latency.\\n\\n## Root Cause\\n**cache_eviction_stampede**: Redis `maxmemory` was configured to 2GB, but the new deployment added ~1.5GB of bundle keys on top of existing cached data, exceeding capacity. This caused continuous LRU evictions (`maxmemory_policy: allkeys-lru`), destroying the cache hit rate and sending a flood of heavy database queries (`SELECT ... FROM orders JOIN bundles`) to Postgres, driving Postgres CPU to 97% and causing high API response latencies.\\n\\n## Evidence\\n1. **Recent Changes**: `orders-3.8.1` explicitly states it adds ~1.5GB of new cache keys.\\n2. **Redis Metrics**: `hit_rate_pct` plummeted from ~98% down to ~31%; `evicted_keys_per_min` jumped from 0 to ~48,000 evictions/min.\\n3. **Orders-API Metrics**: `latency_p95_ms` correlated instantly with the start of Redis evictions, jumping from ~120ms to ~3.9s.\\n4. **Redis Config**: `maxmemory` is set to `2gb`.\\n5. **Database Probe**: Postgres connection pool and CPU are heavily saturated with heavy join queries retrieving un-cached bundle data.\\n\\n## Proposed Remediation\\n- **Action**: `increase_cache_memory`\\n- **Target**: `redis`\\n- **Why it is safe**: Increasing Redis cache memory (e.g. from 2GB to 4GB) accommodates the newly added ~1.5GB bundle keys without evicting existing working set data. It requires no service restarts, code rollbacks, or data migrations, and immediately restores the cache hit rate.\\n\\n## Follow-ups\\n1. Review cache sizing methodology for feature rollouts that introduce substantial new caching volumes.\\n2. Optimize bundle payload size or implement TTLs/tiered caching if necessary.\",\"service\":\"redis\",\"target\":\"redis\",\"confidence\":1,\"action\":\"increase_cache_memory\"}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPI2vuFVBIbuzW5vzD8hQqEftvfIWwtjCFcBsF+CwnvjIj8CIhNGxFYxjO01+i3mhyr2b6jYC+aTVM32K9XSjniJXM5+gXOtKH8xe5wO6KGAskLw4sjPPQ"
+}
+}
+}
+],
+"content": ""
+}
+}

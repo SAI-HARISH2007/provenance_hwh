@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_800537",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "http://api-gateway:8080/healthz"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 5538,
+"output_tokens": 34,
+"latency_ms": 1206,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_800537",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"http://api-gateway:8080/healthz\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPyjs1oQI9avcXJxvxC+mexBeN1KDezq/sZuEB3CjpFbjin0ODQS3oC7I1SNmJwIK3MkRUFOSQKyob9K3vAbuUMFcFg8ttJhbVB9Yn8DCD1l4cj3R2YEGw"
+}
+}
+}
+],
+"content": ""
+}
+}

@@ -1,0 +1,33 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_3950ee30-69f3-449a-9466-7b061ae15a14",
+"name": "get_config",
+"arguments": {
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2820,
+"output_tokens": 116,
+"latency_ms": 924,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_3950ee30-69f3-449a-9466-7b061ae15a14",
+"function": {
+"arguments": "{\"service\":\"payments-api\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"reasoning": "The probe returned 200 for /v2/status, so endpoint exists. But payments-api got 404 on requests. Maybe they are hitting a different path (e.g., /v2/payments) which is not present. Could be that the base URL should be https://api.paygate.example/v2 (no trailing slash) and they appended path incorrectly causing double slash? But 404 suggests endpoint not found.\n\nCheck config of payments-api to see PAYGATE_URL.",
+"content": ""
+}
+}

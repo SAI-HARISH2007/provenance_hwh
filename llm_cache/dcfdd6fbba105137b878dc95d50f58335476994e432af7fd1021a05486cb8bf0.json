@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_3d447320-8b92-43f5-bd0a-95f451294aa0",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "auth-api:/jwks"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3595,
+"output_tokens": 395,
+"latency_ms": 1536,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_3d447320-8b92-43f5-bd0a-95f451294aa0",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"auth-api:/jwks\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"reasoning": "Config only shows cache TTL. Not JWKS. Maybe JWKS refresh interval is part of config but not shown. Could be default 5 min as per auth-api deploy note: \"verifiers refresh JWKS every 5 min\". Inventory-api may have different. But we have evidence of JWT failures. The root cause likely \"feature_flag_misconfig\"? No, it's JWT key rotation causing verification failures. That is a \"bad_config_deploy\"? Actually cause is that inventory-api didn't pick up new key; maybe due to stale JWKS cache config. Could be \"bad_config_deploy\" (config change causing failure). But the change was in auth-api deploy rotating key; inventory-api not updated config. The root cause label list includes \"bad_config_deploy\", \"feature_flag_misconfig\", \"secret_rotation\". There's also \"secret_rotation\". The JWT signing key rotation is a secret rotation. The cause is that inventory-api didn't have updated secret (JWKS). So root cause label \"secret_rotation\". That matches list. Proposed remediation: enable immediate JWKS refresh or reduce cache TTL, or restart inventory-api to force reload. Safer: update inventory-api config to reduce JWKS refresh interval or trigger a config reload. Since we cannot change code, propose \"update_config\" to set JWKS refresh interval to 30 seconds, but we don't know config key. Safer: \"restart_service\" inventory-api to force reload of JWKS. But rule: never restart stateful service; inventory-api is stateless, safe. So propose restart_service on inventory-api. That will cause it to fetch new JWKS and verify tokens. That is safe.\n\nWe need to verify mechanism with run_probe maybe check JWKS endpoint? Could probe auth-api JWKS. Let's run probe http to auth-api JWKS endpoint.",
+"content": ""
+}
+}

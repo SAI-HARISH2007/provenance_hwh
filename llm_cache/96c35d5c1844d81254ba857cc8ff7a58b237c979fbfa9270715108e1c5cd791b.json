@@ -1,0 +1,33 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "function-call-15675288930910734309",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "payments-api/v1/checkout"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 5394,
+"output_tokens": 27,
+"latency_ms": 2443,
+"model": "gemini-2.5-flash",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "function-call-15675288930910734309",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"payments-api/v1/checkout\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

@@ -1,0 +1,50 @@
+{
+  "case_id": "s04_disk_full",
+  "verdict": {
+    "root_cause": "disk_full",
+    "service": "postgres",
+    "action": "free_disk_space",
+    "target": "postgres",
+    "confidence": 1.0,
+    "summary": "PostgreSQL disk 100% full due to excessive query logging (log_min_duration_statement=0), causing database write failures and 58% error rate on orders-api.",
+    "evidence": [
+      "orders-api error logs showing `could not extend file` errors since 2026-08-30T02:47:16.000Z",
+      "postgres disk probe showing 100% disk usage with `/var/lib/postgresql/log` at 96G and growing 1.1G/min",
+      "recent_changes showing `postgres: enable log_min_duration_statement=0` enabled at 2026-08-30T01:02:00.000Z"
+    ],
+    "report_markdown": "### Incident Report: Orders API Failures Due to Disk Full on PostgreSQL\n\n#### Summary\nAt 2026-08-30T03:12:00.000Z, a P1 page fired for `orders-api` due to an order creation failure rate of ~58%. Investigation revealed that PostgreSQL ran out of disk space (`100% used`), causing database writes to fail with `could not extend file` errors.\n\n#### Timeline\n- **2026-08-30T01:02:00.000Z**: `log_min_duration_statement=0` was enabled on PostgreSQL for slow-query investigation, causing every single SQL query to be logged.\n- **2026-08-30T02:47:16.000Z**: `orders-api` begins failing database inserts (`could not extend file \"base/16384/2619\"`).\n- **2026-08-30T02:52:00.000Z**: Inventory-api deploy (`inventory-1.9.3`) occurs (unrelated to root cause).\n- **2026-08-30T03:12:00.000Z**: P1 alert fires for `orders-api` error rate.\n\n#### Root Cause\n`disk_full`: The PostgreSQL data/log disk filled up completely (100% used, 200GB/200GB) because query logging was set to verbose (`log_min_duration_statement=0`), generating 96GB of logs growing at 1.1GB/min and exhausting available disk space.\n\n#### Evidence\n- **Logs**: `orders-api` logs showed persistent `insert failed: could not extend file \"base/16384/2619\"` errors.\n- **Probe**: Disk probe on `postgres` returned `100% used (200G/200G); /var/lib/postgresql/log = 96G, growing 1.1G/min`.\n- **Changes**: `recent_changes` confirmed `log_min_duration_statement=0` was enabled earlier.\n\n#### Proposed Remediation\n1. Free disk space on PostgreSQL by clearing/truncating excess database logs and disabling `log_min_duration_statement` or reverting config.\n2. Safe because it directly addresses the resource exhaustion without impacting data integrity or restarting stateful engines.\n\n#### Follow-ups\n- Revert or adjust `log_min_duration_statement` so query logging is scoped to slow queries only.\n- Set up disk space monitoring and alerting for PostgreSQL storage usage."
+  },
+  "variant": "v2_verify",
+  "run_id": "20260830T033743Z_v2-verify-s04-disk-full",
+  "trace": "traces/20260830T033743Z_v2-verify-s04-disk-full.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "status": "success",
+  "llm_calls": 4,
+  "input_tokens": 10809,
+  "output_tokens": 926,
+  "wall_s": 0.37,
+  "probes_run": 1,
+  "verified": true,
+  "gate_rejections": 0,
+  "reviewer": null,
+  "reviewer_approved": null,
+  "approval": {
+    "decision": "approved",
+    "by": "eval-policy"
+  },
+  "actions_executed": [
+    [
+      "free_disk_space",
+      "postgres"
+    ]
+  ],
+  "harm_done": [],
+  "resolved": true,
+  "remediation_effect": {
+    "executed": true,
+    "resolved": true,
+    "harm": false,
+    "effect": "free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across services within 90s"
+  },
+  "would_be_cost_usd": 0.00145
+}

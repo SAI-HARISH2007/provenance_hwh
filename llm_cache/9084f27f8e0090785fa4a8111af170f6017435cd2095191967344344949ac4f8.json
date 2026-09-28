@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\n  \"approve\": false,\n  \"issues\": [\n    \"Proposed action 'enable_circuit_breaker' targets the worker, but a circuit breaker protects a downstream dependency from being called, whereas the worker is the *source* of the excess calls consuming the rate limit. Throttling, scaling down, or pausing the worker job is the appropriate action, not a circuit breaker.\"\n  ],\n  \"suggested_checks\": [],\n  \"note\": \"Action type is incorrect for the target; should throttle/scale/pause the worker instead of applying a circuit breaker.\"\n}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 2091,
+"output_tokens": 129,
+"latency_ms": 1608,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\n  \"approve\": false,\n  \"issues\": [\n    \"Proposed action 'enable_circuit_breaker' targets the worker, but a circuit breaker protects a downstream dependency from being called, whereas the worker is the *source* of the excess calls consuming the rate limit. Throttling, scaling down, or pausing the worker job is the appropriate action, not a circuit breaker.\"\n  ],\n  \"suggested_checks\": [],\n  \"note\": \"Action type is incorrect for the target; should throttle/scale/pause the worker instead of applying a circuit breaker.\"\n}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPKNEZrHhDDSSgpAO5P1+DTXmdGLw1yuYNDlHR0Yt2hjAL/yxZ6CdfoLjfvIc2ma4b8kZfZY1TQqOTCVKqGeH82OxyeF4YuBCAyCJZsCJek72wdMqutLzX"
+}
+}
+}
+}

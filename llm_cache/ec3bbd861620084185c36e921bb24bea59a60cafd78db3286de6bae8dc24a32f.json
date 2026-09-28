@@ -1,0 +1,53 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_749140",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"service": "auth-api"
+}
+},
+{
+"id": "call_749141",
+"name": "get_config",
+"arguments": {
+"service": "auth-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 1943,
+"output_tokens": 42,
+"latency_ms": 1555,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_749140",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"service\":\"auth-api\"}",
+"name": "query_logs"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIP53StmumOh53+iXYC/VIjUgYDbfxuTdYrPtWnzuG05mg7bhm8HmtON4co0kDSQwqmXxBaJ+BoIogrhLSUPUHw2ZnTFxXZ9Q8B3Lfgg4E7vczkP6Eiv7b4"
+}
+}
+},
+{
+"id": "call_749141",
+"function": {
+"arguments": "{\"service\":\"auth-api\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

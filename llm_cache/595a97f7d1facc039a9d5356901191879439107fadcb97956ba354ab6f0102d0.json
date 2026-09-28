@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_e9ba17b8-b702-4d82-affe-ac9973c393ed",
+"name": "query_logs",
+"arguments": {
+"level": "WARN",
+"limit": 20,
+"pattern": "kid",
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2407,
+"output_tokens": 54,
+"latency_ms": 812,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_e9ba17b8-b702-4d82-affe-ac9973c393ed",
+"function": {
+"arguments": "{\"level\":\"WARN\",\"limit\":20,\"pattern\":\"kid\",\"service\":\"inventory-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "No JWT errors in error logs. Maybe they are INFO. Let's search for \"signature\" or \"kid\".",
+"content": ""
+}
+}

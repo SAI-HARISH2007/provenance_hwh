@@ -1,0 +1,69 @@
+{
+  "case_id": "s12_clock_skew_hard",
+  "verdict": {
+    "root_cause": "clock_skew",
+    "service": "payments-api",
+    "action": "sync_clock",
+    "target": "payments-api",
+    "confidence": 1.0,
+    "summary": "payments-api node clock skewed by -412.3 seconds after a node reboot, causing JWT InvalidIssuedAt verification failures for ES256 tokens",
+    "evidence": [
+      "payments-api log shows jwt verification failed: InvalidIssuedAt for ES256 tokens starting around 02:54 UTC",
+      "payments-api clock probe shows ntp offset -412.3s — chronyd not running after node reboot (payments-3)",
+      "auth-api clock probe shows ntp offset 0.002s"
+    ],
+    "report_markdown": "# Incident Report: Payments API Auth Failures due to Clock Skew\n\n## Summary\nAt 2026-08-30T03:12:00Z, an alert fired for `api-gateway` due to elevated 401 errors on `/v1/checkout`. Investigation revealed that `payments-api` was experiencing a massive error rate spike (~90%) due to JWT verification failures (`InvalidIssuedAt`) on ES256 tokens issued by `auth-api`.\n\n## Timeline\n- **02:02 UTC**: Infrastructure event: `payments-api` host node (`payments-3`) rebooted after kernel patch. `chronyd` failed to start or sync.\n- **02:39 UTC**: `auth-api` deployed version `auth-1.6.0`, switching JWT signing to ES256.\n- **02:54 UTC**: First `InvalidIssuedAt` log warnings observed as `payments-api` evaluated tokens issued by `auth-api` with timestamps shifted by its unsynced clock.\n- **03:12 UTC**: P1 alert fired.\n\n## Root Cause\n`clock_skew`: The node hosting `payments-api` (`payments-3`) rebooted at 02:02 UTC and its NTP service (`chronyd`) failed to run, leaving the system clock 412.3 seconds behind actual time. When `auth-api` started issuing ES256 tokens with `iat` timestamps matching real-time, `payments-api` rejected them as originating in the future (`InvalidIssuedAt`).\n\n## Evidence\n- `payments-api` logs: Repeated `jwt verification failed: InvalidIssuedAt` entries.\n- `run_probe (kind: clock, target: payments-api)`: `payments-api (node payments-3) ntp offset -412.3s — chronyd not running`.\n- `run_probe (kind: clock, target: auth-api)`: `auth-api ntp offset 0.002s`.\n\n## Proposed Remediation\n`sync_clock`: Resync the system clock on `payments-3` (restart `chronyd` and sync via NTP). This is safe and directly addresses the clock offset causing the JWT validation failures.\n\n## Follow-ups\n- Ensure `chronyd` is enabled and reliably starts on boot for all Kubernetes nodes / EC2 instances.\n"
+  },
+  "variant": "mem_gate",
+  "run_id": "20260927T110904Z_mem-gate-s12-clock-skew-hard",
+  "trace": "traces/20260927T110904Z_mem-gate-s12-clock-skew-hard.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "status": "success",
+  "llm_calls": 5,
+  "input_tokens": 15186,
+  "output_tokens": 855,
+  "wall_s": 1.1,
+  "probes_run": 2,
+  "verified": true,
+  "gate_rejections": 0,
+  "reviewer": null,
+  "reviewer_approved": null,
+  "approval": {
+    "decision": "approved",
+    "by": "eval-policy"
+  },
+  "actions_executed": [
+    [
+      "sync_clock",
+      "payments-api"
+    ]
+  ],
+  "harm_done": [],
+  "resolved": true,
+  "remediation_effect": {
+    "executed": true,
+    "resolved": true,
+    "harm": false,
+    "effect": "sync_clock on payments-api applied; error rate returning to baseline, healthz 200 across services within 90s"
+  },
+  "memory_hits": 0,
+  "memory_used": false,
+  "memory_rejections": 0,
+  "memory_checks": [],
+  "memory_cited": [],
+  "memory_retained": {
+    "incident": "s12_clock_skew_hard",
+    "when": "2026-07-24 16:10 UTC",
+    "tags": [
+      "incident:s12_clock_skew_hard",
+      "root_cause:clock_skew",
+      "service:payments-api",
+      "action:sync_clock",
+      "verified:yes",
+      "resolved:yes",
+      "harm:no"
+    ],
+    "chars": 732
+  },
+  "would_be_cost_usd": 0.00186
+}

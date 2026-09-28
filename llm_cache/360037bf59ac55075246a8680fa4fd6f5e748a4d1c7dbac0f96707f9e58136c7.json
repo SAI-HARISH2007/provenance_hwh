@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_b3cd6fc3-bfb7-42d7-9f3a-80e11e09e985",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 20,
+"pattern": "auth-api",
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3916,
+"output_tokens": 63,
+"latency_ms": 808,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_b3cd6fc3-bfb7-42d7-9f3a-80e11e09e985",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":20,\"pattern\":\"auth-api\",\"service\":\"payments-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Maybe the payments-api is returning 401 due to internal auth to downstream (e.g., auth-api). Let's check payments-api logs for \"auth-api\".",
+"content": ""
+}
+}

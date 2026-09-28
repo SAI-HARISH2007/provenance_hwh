@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_671190",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "http://inventory-api/healthz"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3078,
+"output_tokens": 29,
+"latency_ms": 1084,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_671190",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"http://inventory-api/healthz\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPuiXVqbZV7jkAyDqEuTXVovYEq4jTmlL42Gd+J+xBKBjx5rexV1uWVwnVnPBEqtFT9qhQualp+W2z70FmVwIsP3qpNlE2AQUtx7C6I9eg4MD2CcmtZgHH"
+}
+}
+}
+],
+"content": ""
+}
+}

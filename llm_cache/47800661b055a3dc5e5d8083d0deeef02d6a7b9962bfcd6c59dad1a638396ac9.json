@@ -1,0 +1,70 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_2201440",
+"name": "run_probe",
+"arguments": {
+"target": "inventory-api",
+"kind": "clock"
+}
+},
+{
+"id": "call_2201441",
+"name": "run_probe",
+"arguments": {
+"target": "auth-api",
+"kind": "clock"
+}
+},
+{
+"id": "call_2201442",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4271,
+"output_tokens": 72,
+"latency_ms": 1497,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_2201440",
+"function": {
+"arguments": "{\"target\":\"inventory-api\",\"kind\":\"clock\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TQ7TzFXgRn5gE9BiUjb4KgRPmJMZ2CZWyO0qa9ME2jJQjyLTgiV/itxXspw00rV+I0jOeLOs9CzuePfVxfZ9Ib7f5HP1UF7kmPRwXQ93A8kSoosc5a86Zqm8="
+}
+}
+},
+{
+"id": "call_2201441",
+"function": {
+"arguments": "{\"target\":\"auth-api\",\"kind\":\"clock\"}",
+"name": "run_probe"
+},
+"type": "function"
+},
+{
+"id": "call_2201442",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"service\":\"inventory-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

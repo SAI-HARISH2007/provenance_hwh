@@ -1,0 +1,71 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_2199944",
+"name": "get_metrics",
+"arguments": {
+"service": "orders-api",
+"metric": "error_rate_pct"
+}
+},
+{
+"id": "call_2199945",
+"name": "query_logs",
+"arguments": {
+"pattern": "53100",
+"level": "ERROR",
+"service": "orders-api"
+}
+},
+{
+"id": "call_2199946",
+"name": "run_probe",
+"arguments": {
+"kind": "db",
+"target": "postgres"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2079,
+"output_tokens": 84,
+"latency_ms": 1512,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_2199944",
+"function": {
+"arguments": "{\"service\":\"orders-api\",\"metric\":\"error_rate_pct\"}",
+"name": "get_metrics"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TkBwoJevuhd5GblX0RqYHJchlhops1tI7Vt9mdYSYEirNDfyhOkF26iBEjLlhaij3P/8Jz5KhfNYjm/UFWnKzOyBFxdOp9M7n9dhsYAeOQvG7169j30+HIGM="
+}
+}
+},
+{
+"id": "call_2199945",
+"function": {
+"arguments": "{\"pattern\":\"53100\",\"level\":\"ERROR\",\"service\":\"orders-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+},
+{
+"id": "call_2199946",
+"function": {
+"arguments": "{\"kind\":\"db\",\"target\":\"postgres\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

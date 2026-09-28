@@ -1,0 +1,69 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_2876103",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"service": "orders-api"
+}
+},
+{
+"id": "call_2876104",
+"name": "get_metrics",
+"arguments": {
+"service": "orders-api",
+"metric": "error_rate_pct"
+}
+},
+{
+"id": "call_2876105",
+"name": "get_config",
+"arguments": {
+"service": "orders-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2282,
+"output_tokens": 70,
+"latency_ms": 1477,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_2876103",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"service\":\"orders-api\"}",
+"name": "query_logs"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TJWyze7qEYF3CgzANzi9huYeYCaGTjATDu9QEXiqInBNiDsOfKsct4FjAzRM5rGiG0Ko1zPDTDpJxwgVGOxB19m1EVCUj8oZt6/pIFkO2+ieYJiwitrnLeco="
+}
+}
+},
+{
+"id": "call_2876104",
+"function": {
+"arguments": "{\"service\":\"orders-api\",\"metric\":\"error_rate_pct\"}",
+"name": "get_metrics"
+},
+"type": "function"
+},
+{
+"id": "call_2876105",
+"function": {
+"arguments": "{\"service\":\"orders-api\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

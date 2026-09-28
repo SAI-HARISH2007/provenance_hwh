@@ -1,0 +1,56 @@
+{
+  "case_id": "s04_disk_full",
+  "verdict": {
+    "root_cause": "disk_full",
+    "service": "postgres",
+    "action": "free_disk_space",
+    "target": "postgres",
+    "confidence": 1.0,
+    "summary": "Postgres disk exhausted (100% full, 96GB logs) due to verbose statement logging enabled earlier, causing database write failures and 58% error rate on orders-api.",
+    "evidence": [
+      "get_alert: orders-api error rate spiked at ~03:10 UTC",
+      "query_logs: orders-api logs show postgres insert errors \"could not extend file\" starting around 02:47 UTC",
+      "run_probe disk on postgres: /var/lib/postgresql is 100% used (200G/200G), with /var/lib/postgresql/log at 96G and growing 1.1G/min",
+      "recent_changes: enabled log_min_duration_statement=0 on postgres at 01:02 UTC"
+    ],
+    "report_markdown": "# Incident Report: Orders API Failures Due to Disk Exhaustion\n\n## Summary\nAt 03:12 UTC, a P1 alert fired for `orders-api` due to an order creation failure rate of ~58%. Investigation revealed that database inserts were failing with \"could not extend file\" errors. The root cause is a full disk on the postgres server (100% capacity used), driven by massive Postgres log growth following the verbose query logging change deployed earlier.\n\n## Timeline\n- **01:02 UTC**: Raj configures Postgres with `log_min_duration_statement=0` to investigate slow queries.\n- **02:47 UTC**: First database write failures (`could not extend file`) begin appearing in `orders-api` logs as disk space runs out.\n- **02:52 UTC**: Inventory API deploys `inventory-1.9.3` (unrelated, but services are degraded).\n- **03:12 UTC**: P1 alert fires for `orders-api` failure rate spike.\n- **03:12 UTC**: Probe confirms `/var/lib/postgresql` is at 100% capacity (200G/200G), with `/var/lib/postgresql/log` consuming 96G and growing at 1.1G/min.\n\n## Root Cause\n`disk_full`: Enabling `log_min_duration_statement=0` logged every single SQL statement executed by Postgres at maximum verbosity. Over ~2 hours, this generated 96GB of logs, entirely filling the Postgres data/log volume (200GB total) and preventing Postgres from extending data files.\n\n## Evidence\n1. **Logs**: `orders-api` logs flooded with `ERROR orders-api: insert failed: could not extend file \"base/16384/2619\"`.\n2. **Probe**: `run_probe` on `postgres` (disk) returned: `/var/lib/postgresql: 100% used (200G/200G); /var/lib/postgresql/log = 96G, growing 1.1G/min`.\n3. **Recent Changes**: Change at 01:02 UTC enabled `log_min_duration_statement=0`.\n4. **Metrics**: `orders-api` error rate jumped from ~0.4% to ~60% around the time writes failed.\n\n## Proposed Remediation\nFree disk space by clearing/truncating the bloated Postgres log files and reverting `log_min_duration_statement` config, allowing database writes to resume.\n"
+  },
+  "variant": "v2_verify",
+  "run_id": "20260927T110357Z_v2-verify-s04-disk-full",
+  "trace": "traces/20260927T110357Z_v2-verify-s04-disk-full.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "status": "success",
+  "llm_calls": 4,
+  "input_tokens": 10853,
+  "output_tokens": 901,
+  "wall_s": 0.02,
+  "probes_run": 1,
+  "verified": true,
+  "gate_rejections": 0,
+  "reviewer": null,
+  "reviewer_approved": null,
+  "approval": {
+    "decision": "approved",
+    "by": "eval-policy"
+  },
+  "actions_executed": [
+    [
+      "free_disk_space",
+      "postgres"
+    ]
+  ],
+  "harm_done": [],
+  "resolved": true,
+  "remediation_effect": {
+    "executed": true,
+    "resolved": true,
+    "harm": false,
+    "effect": "free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across services within 90s"
+  },
+  "memory_hits": 0,
+  "memory_used": false,
+  "memory_rejections": 0,
+  "memory_checks": [],
+  "memory_cited": [],
+  "would_be_cost_usd": 0.00145
+}

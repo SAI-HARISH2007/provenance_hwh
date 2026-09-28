@@ -1,0 +1,31 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_8869b5b3-3132-4dab-961f-4cb852c77da8",
+"name": "get_alert",
+"arguments": {}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 1694,
+"output_tokens": 36,
+"latency_ms": 597,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_8869b5b3-3132-4dab-961f-4cb852c77da8",
+"function": {
+"arguments": "{}",
+"name": "get_alert"
+},
+"type": "function"
+}
+],
+"reasoning": "We need to start with get_alert and recent_changes. Let's call get_alert.",
+"content": ""
+}
+}

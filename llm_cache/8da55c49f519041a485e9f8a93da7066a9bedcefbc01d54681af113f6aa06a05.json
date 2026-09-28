@@ -1,0 +1,53 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_460396",
+"name": "query_logs",
+"arguments": {
+"service": "auth-api"
+}
+},
+{
+"id": "call_460397",
+"name": "get_metrics",
+"arguments": {
+"service": "auth-api",
+"metric": "error_rate_pct"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2642,
+"output_tokens": 46,
+"latency_ms": 1594,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_460396",
+"function": {
+"arguments": "{\"service\":\"auth-api\"}",
+"name": "query_logs"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIP22KOTrX5cQRzHEDKLBVR1ymdPwEV/15yQYBG8NlIDEbCzDxjkUeeYMW3L/P0phawIx763GKUXl2zur8UgrvcDGY8T3TD1hvV8WoXQOi1JdpSEyc4V4KP"
+}
+}
+},
+{
+"id": "call_460397",
+"function": {
+"arguments": "{\"service\":\"auth-api\",\"metric\":\"error_rate_pct\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

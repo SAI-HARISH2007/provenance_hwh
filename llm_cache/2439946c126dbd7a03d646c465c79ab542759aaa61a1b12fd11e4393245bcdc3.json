@@ -1,0 +1,33 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_80c3b411-0ad1-4e68-a148-d1e5912bd374",
+"name": "recent_changes",
+"arguments": {
+"last_hours": 24
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4199,
+"output_tokens": 62,
+"latency_ms": 883,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_80c3b411-0ad1-4e68-a148-d1e5912bd374",
+"function": {
+"arguments": "{\"last_hours\":24}",
+"name": "recent_changes"
+},
+"type": "function"
+}
+],
+"reasoning": "We need to gather evidence to support disabling feature flag. Need to see if there is a feature flag controlling JWKS cache. Use recent_changes maybe includes flag changes. Let's query recent_changes for feature flags.",
+"content": ""
+}
+}

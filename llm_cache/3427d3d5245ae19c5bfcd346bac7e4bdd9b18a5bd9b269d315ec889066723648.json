@@ -1,0 +1,48 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_19025",
+"name": "submit_verdict",
+"arguments": {
+"target": "redis",
+"action": "increase_cache_memory",
+"summary": "orders-api p95 latency spiked to 4s due to a cache eviction stampede caused by Redis memory exhaustion following the orders-3.8.1 deploy.",
+"root_cause": "cache_eviction_stampede",
+"evidence": [
+"orders-3.8.1 deploy at 2026-08-30T02:27:00.000Z added ~1.5GB of new keys to Redis caching product bundles",
+"Redis memory reached 102.7% (2GB limit) at 03:02 UTC, causing massive evictions (~47,000 keys/min) and dropping hit rate from ~100% to ~31%",
+"Orders-api p95 latency spiked from ~120ms to ~4,000ms simultaneously at 03:02 UTC due to cache eviction stampede and increased DB load (postgres CPU 97%)"
+],
+"service": "orders-api",
+"report_markdown": "# Incident Report: Orders-API High Latency due to Redis Cache Eviction Stampede\n\n## Summary\nAt 2026-08-30T03:12:00Z, a P2 alert fired for `orders-api` due to p95 latency reaching 3.9s (threshold 800ms). Investigation revealed that a recent feature deployment (`orders-3.8.1` at 02:27 UTC) introduced caching for product bundles, adding ~1.5GB of new keys. This exceeded Redis's 2GB `maxmemory` limit, triggering continuous LRU evictions (~47,000 keys/min), tanking the cache hit rate from ~100% to ~31%, and causing a severe cache eviction stampede that overloaded PostgreSQL and spiked `orders-api` p95 latency.\n\n## Timeline\n- **2026-08-30T02:27:00Z**: `orders-3.8.1` deployed (adds product bundle caching, ~1.5GB keys).\n- **2026-08-30T03:02:00Z**: Redis memory reaches 102.7% limit; evictions spike to ~47,000 keys/min; cache hit rate drops from ~100% to ~31%.\n- **2026-08-30T03:02:16Z**: `orders-api` p95 latency jumps from ~120ms to ~3,900ms.\n- **2026-08-30T03:12:00Z**: Alert fires for `orders-api` p95 latency.\n\n## Root Cause\n**cache_eviction_stampede**: The new feature added 1.5GB of keys to a 2GB Redis instance, causing constant key churn/eviction under maxmemory policy `allkeys-lru`. This destroyed cache effectiveness and caused a stampede of cache misses hitting the database.\n\n## Evidence\n- `recent_changes`: `orders-3.8.1: cache product bundles (adds ~1.5GB of new keys)` deployed at 02:27 UTC.\n- `redis.used_memory_pct`: Rose past 100% to 102.7% starting around 03:02 UTC.\n- `redis.evicted_keys_per_min`: Jumped from 0 to ~47,000–49,000 evictions per minute at 03:02 UTC.\n- `redis.hit_rate_pct`: Dropped from ~100% to ~31% simultaneously.\n- `orders-api.latency_p95_ms`: Jumped from ~120ms to ~4,000ms at 03:02 UTC.\n\n## Proposed Remediation\nIncrease Redis cache memory (`increase_cache_memory`) to accommodate the new product bundle keys and stop the eviction loop. This is completely safe and non-disruptive as it avoids restarting Redis or rolling back functionality.\n\n## Follow-ups\n- Right-size Redis `maxmemory` permanently to account for data growth.\n- Add memory usage and eviction alerts for Redis.\n",
+"confidence": 1
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4275,
+"output_tokens": 994,
+"latency_ms": 3860,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_19025",
+"function": {
+"arguments": "{\"target\":\"redis\",\"action\":\"increase_cache_memory\",\"summary\":\"orders-api p95 latency spiked to 4s due to a cache eviction stampede caused by Redis memory exhaustion following the orders-3.8.1 deploy.\",\"root_cause\":\"cache_eviction_stampede\",\"evidence\":[\"orders-3.8.1 deploy at 2026-08-30T02:27:00.000Z added ~1.5GB of new keys to Redis caching product bundles\",\"Redis memory reached 102.7% (2GB limit) at 03:02 UTC, causing massive evictions (~47,000 keys/min) and dropping hit rate from ~100% to ~31%\",\"Orders-api p95 latency spiked from ~120ms to ~4,000ms simultaneously at 03:02 UTC due to cache eviction stampede and increased DB load (postgres CPU 97%)\"],\"service\":\"orders-api\",\"report_markdown\":\"# Incident Report: Orders-API High Latency due to Redis Cache Eviction Stampede\\n\\n## Summary\\nAt 2026-08-30T03:12:00Z, a P2 alert fired for `orders-api` due to p95 latency reaching 3.9s (threshold 800ms). Investigation revealed that a recent feature deployment (`orders-3.8.1` at 02:27 UTC) introduced caching for product bundles, adding ~1.5GB of new keys. This exceeded Redis's 2GB `maxmemory` limit, triggering continuous LRU evictions (~47,000 keys/min), tanking the cache hit rate from ~100% to ~31%, and causing a severe cache eviction stampede that overloaded PostgreSQL and spiked `orders-api` p95 latency.\\n\\n## Timeline\\n- **2026-08-30T02:27:00Z**: `orders-3.8.1` deployed (adds product bundle caching, ~1.5GB keys).\\n- **2026-08-30T03:02:00Z**: Redis memory reaches 102.7% limit; evictions spike to ~47,000 keys/min; cache hit rate drops from ~100% to ~31%.\\n- **2026-08-30T03:02:16Z**: `orders-api` p95 latency jumps from ~120ms to ~3,900ms.\\n- **2026-08-30T03:12:00Z**: Alert fires for `orders-api` p95 latency.\\n\\n## Root Cause\\n**cache_eviction_stampede**: The new feature added 1.5GB of keys to a 2GB Redis instance, causing constant key churn/eviction under maxmemory policy `allkeys-lru`. This destroyed cache effectiveness and caused a stampede of cache misses hitting the database.\\n\\n## Evidence\\n- `recent_changes`: `orders-3.8.1: cache product bundles (adds ~1.5GB of new keys)` deployed at 02:27 UTC.\\n- `redis.used_memory_pct`: Rose past 100% to 102.7% starting around 03:02 UTC.\\n- `redis.evicted_keys_per_min`: Jumped from 0 to ~47,000–49,000 evictions per minute at 03:02 UTC.\\n- `redis.hit_rate_pct`: Dropped from ~100% to ~31% simultaneously.\\n- `orders-api.latency_p95_ms`: Jumped from ~120ms to ~4,000ms at 03:02 UTC.\\n\\n## Proposed Remediation\\nIncrease Redis cache memory (`increase_cache_memory`) to accommodate the new product bundle keys and stop the eviction loop. This is completely safe and non-disruptive as it avoids restarting Redis or rolling back functionality.\\n\\n## Follow-ups\\n- Right-size Redis `maxmemory` permanently to account for data growth.\\n- Add memory usage and eviction alerts for Redis.\\n\",\"confidence\":1}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPdQQtmIx63FsxkiN3HMxld2zQAaP8DSMuMa8RUWP1PmB7w6ZV7Eeb0b04loCPNtTFcsQYgdcrnG/BcRQOr0oTOSVRUNrNpoFGrf7hiaVQKoeE8tMKHxdc"
+}
+}
+}
+],
+"content": ""
+}
+}

@@ -1,0 +1,33 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_63a96015-60ab-4f26-bed9-b22973b98b63",
+"name": "recent_changes",
+"arguments": {
+"last_hours": 24
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 1944,
+"output_tokens": 29,
+"latency_ms": 495,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_63a96015-60ab-4f26-bed9-b22973b98b63",
+"function": {
+"arguments": "{\"last_hours\":24}",
+"name": "recent_changes"
+},
+"type": "function"
+}
+],
+"reasoning": "Now recent_changes.",
+"content": ""
+}
+}

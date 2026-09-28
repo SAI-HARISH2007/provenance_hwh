@@ -1,0 +1,33 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_92b99c1f-9965-4e1b-9e84-2e5c3e4d3c6a",
+"name": "get_config",
+"arguments": {
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3633,
+"output_tokens": 118,
+"latency_ms": 1917,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_92b99c1f-9965-4e1b-9e84-2e5c3e4d3c6a",
+"function": {
+"arguments": "{\"service\":\"payments-api\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"reasoning": "Error rate spiked after deploy at 03:03. The logs show errors from 02:48 onward, before deploy? Deploy at 03:03, but errors start at 02:48. Maybe the new config was rolled out earlier? Could be a flag? But flag is for orders-api. The error started before deploy, maybe the new PayGate v2 endpoint was already in config earlier? Or maybe the service restarted earlier.\n\nCheck for recent config of payments-api.",
+"content": ""
+}
+}

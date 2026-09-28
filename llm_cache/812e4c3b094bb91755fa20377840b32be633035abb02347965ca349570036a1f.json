@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_43443",
+"name": "run_probe",
+"arguments": {
+"kind": "tcp",
+"target": "redis"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 5184,
+"output_tokens": 22,
+"latency_ms": 1266,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_43443",
+"function": {
+"arguments": "{\"kind\":\"tcp\",\"target\":\"redis\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPmTJTS58P9liNqhXj5wqXDxHNmtU4q17CNvFsoCU7eqTq9V0uoI5mtTNgoA2rMkcVEqsj+U/uZU33yjps4gtMyUoh76t1czZvvimuDGnxL8rHihgwyQA6"
+}
+}
+}
+],
+"content": ""
+}
+}

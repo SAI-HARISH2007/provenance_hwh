@@ -1,0 +1,70 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_814350",
+"name": "get_metrics",
+"arguments": {
+"service": "payments-api",
+"metric": "latency_p95_ms"
+}
+},
+{
+"id": "call_814351",
+"name": "get_metrics",
+"arguments": {
+"service": "payments-api",
+"metric": "error_rate_pct"
+}
+},
+{
+"id": "call_814352",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 1992,
+"output_tokens": 82,
+"latency_ms": 1622,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_814350",
+"function": {
+"arguments": "{\"service\":\"payments-api\",\"metric\":\"latency_p95_ms\"}",
+"name": "get_metrics"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPCjp8iUOVOKame5mtNvc03NOlOQjsUqS+12GXlUOTr6odaCk37LCPEPocz7uXs7UuxlpQ2ePZyEfJJ7nZfLRwuJqGa/hAj2lwZBg11l7GTyj8s2E2Mw09"
+}
+}
+},
+{
+"id": "call_814351",
+"function": {
+"arguments": "{\"service\":\"payments-api\",\"metric\":\"error_rate_pct\"}",
+"name": "get_metrics"
+},
+"type": "function"
+},
+{
+"id": "call_814352",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"service\":\"payments-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

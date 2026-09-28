@@ -1,0 +1,445 @@
+<!doctype html><html><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>
+<title>Provenance — an on-call agent whose memory has to prove itself</title><style>
+:root{--bg:#0b0f14;--panel:#121820;--line:#22303d;--txt:#dbe4ee;--mut:#8aa0b4;--ok:#2ecc71;--bad:#ff5c5c;--warn:#ffb020;--mem:#7aa2ff;--acc:#38bdf8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:28px 20px 80px}h1{font-size:28px;margin:0 0 4px}h1 span{color:var(--mem)}
+.sub{color:var(--mut);margin:0 0 26px}h2{font-size:20px;margin:36px 0 12px;border-bottom:1px solid var(--line);padding-bottom:6px}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#0f151c;color:var(--mut);font-weight:600}td.num{text-align:right;font-variant-numeric:tabular-nums}
+.alert{background:#1a1113;border:1px solid #5a2a2f;border-left:6px solid var(--bad);border-radius:8px;padding:12px 16px;margin:18px 0 10px;display:flex;gap:18px;align-items:center}
+.alert .sev{background:var(--bad);color:#fff;font-weight:700;border-radius:6px;padding:4px 10px}.alert .svc{font-family:ui-monospace,Menlo,monospace;color:var(--warn)}
+.alert small{color:var(--mut)}.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:900px){.cols{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}.panel h3{margin:0 0 10px;font-size:15px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.panel h3 b{color:var(--txt)}.tl{list-style:none;margin:0;padding:0}.tl li{padding:5px 0 5px 14px;border-left:2px solid var(--line);font-family:ui-monospace,Menlo,monospace;font-size:13px}
+.tl li.probe{border-left-color:var(--acc)}.tl li.verdict{border-left-color:var(--ok)}.tl li.rej{border-left-color:var(--bad);color:#ffb3b3}.tl li.mem{border-left-color:var(--mem);color:#cdd9ff}
+.tl li.human{border-left-color:var(--warn)}.tl li small{color:var(--mut)}.mem{background:#0f1526;border:1px solid #2b3a66;border-radius:10px;padding:12px 14px;margin-top:12px}
+.mem h4{margin:0 0 8px;color:var(--mem);font-size:14px}.hit{font-size:13px;margin:4px 0;padding-left:10px;border-left:2px solid var(--mem)}.hit .tag{display:inline-block;background:#1b2a4a;color:#b8c8ff;border-radius:4px;padding:0 6px;margin-left:4px;font-size:11px}
+.gate{margin-top:8px;padding:8px 10px;border-radius:8px;font-size:13px}.gate.rej{background:#2a1416;border:1px solid #6b2a2f}.gate.acc{background:#122417;border:1px solid #275a35}
+.out{margin-top:12px;font-size:14px}.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;margin-right:6px}.ok{background:#153b25;color:#8ff0b4}.bad{background:#4a1a1e;color:#ffb3b3}.neu{background:#1c2733;color:#b8c8d8}
+.stat{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}.stat div{background:#0f151c;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px}.stat b{font-size:16px;display:block}
+.foot{color:var(--mut);font-size:13px;margin-top:40px}
+</style></head><body><main>
+<h1>Provenance <span>· memory with evidence</span></h1><p class=sub>Provenance — an on-call agent whose memory has to prove itself. Same incidents, same model, same tools. Columns: no memory · Hindsight memory without the gate · Hindsight memory with the provenance gate · and, for the trap incident only, a scripted offline replay that shows the gate firing.</p>
+<h2>Before / after</h2>
+<table><tr><th>Incident</th><th colspan=5>fair-nomem</th><th colspan=5>fair-naive</th><th colspan=5>fair-gate</th><th colspan=5>gate-demo</th></tr><tr><th></th><th>cause</th><th>calls</th><th>probes</th><th>tokens</th><th>harm</th><th>cause</th><th>calls</th><th>probes</th><th>tokens</th><th>harm</th><th>cause</th><th>calls</th><th>probes</th><th>tokens</th><th>harm</th><th>cause</th><th>calls</th><th>probes</th><th>tokens</th><th>harm</th></tr><tr><td>s02_bad_config_deploy</td><td>✓</td><td class="num">4</td><td class="num">1</td><td class="num">11,830</td><td>no</td><td>✓</td><td class="num">6</td><td class="num">2</td><td class="num">25,406</td><td>no</td><td>✓</td><td class="num">10</td><td class="num">5</td><td class="num">42,029</td><td>no</td><td colspan=5>—</td></tr><tr><td>s04_disk_full</td><td>✓</td><td class="num">4</td><td class="num">1</td><td class="num">11,754</td><td>no</td><td>✓</td><td class="num">4</td><td class="num">1</td><td class="num">13,071</td><td>no</td><td>✓</td><td class="num">4</td><td class="num">1</td><td class="num">13,071</td><td>no</td><td colspan=5>—</td></tr><tr><td>s12_clock_skew_hard</td><td>✓</td><td class="num">5</td><td class="num">3</td><td class="num">14,800</td><td>no</td><td>✓</td><td class="num">5</td><td class="num">2</td><td class="num">16,041</td><td>no</td><td>✓</td><td class="num">5</td><td class="num">2</td><td class="num">16,041</td><td>no</td><td colspan=5>—</td></tr><tr><td>s13_disk_full_wal</td><td>✓</td><td class="num">4</td><td class="num">2</td><td class="num">11,971</td><td>no</td><td>✓</td><td class="num">4</td><td class="num">2</td><td class="num">13,578</td><td>no</td><td>✓</td><td class="num">4</td><td class="num">2</td><td class="num">13,578</td><td>no</td><td colspan=5>—</td></tr><tr><td>s15_secret_rotation_lookalike</td><td>✓</td><td class="num">4</td><td class="num">1</td><td class="num">11,895</td><td>no</td><td>✓</td><td class="num">4</td><td class="num">1</td><td class="num">14,407</td><td>no</td><td>✓</td><td class="num">6</td><td class="num">1</td><td class="num">19,607</td><td>no</td><td>✓</td><td class="num">6</td><td class="num">2</td><td class="num">720</td><td>no</td></tr><tr><td>s17_clock_skew_repeat</td><td>✓</td><td class="num">5</td><td class="num">2</td><td class="num">14,647</td><td>no</td><td>✓</td><td class="num">4</td><td class="num">3</td><td class="num">13,977</td><td>no</td><td>✓</td><td class="num">4</td><td class="num">2</td><td class="num">14,049</td><td>no</td><td colspan=5>—</td></tr></table>
+<div class="alert"><span class="sev">P1</span><div><div><span class="svc">payments-api</span> &nbsp;charge_failed rate 100% for 4m</div><small>s02_bad_config_deploy · All payments failing after 2.15.0 rollout</small></div></div>
+<div class="cols">
+<div class="panel"><h3>fair-nomem · <b>without memory</b></h3><ul class="tl">
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes()</li>
+<li class="tool">query_logs(service=payments-api, level=ERROR)</li>
+<li class="tool">get_metrics(metric=error_rate_pct, service=payments-api)</li>
+<li class="probe">run_probe http https://api.paygate.example/v2/</li>
+<li class="tool">get_config(service=payments-api)</li>
+<li class="verdict">submit_verdict bad_config_deploy @ payments-api → rollback_deploy:payments-api</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate rollback_deploy on payments-api</li>
+<li class="human">effect: resolved — rollback_deploy on payments-api applied; error rate returning to baseline, healthz 200 acr</li>
+</ul>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>bad_config_deploy</code> @ payments-api → <code>rollback_deploy</code> on payments-api</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: rollback_deploy on payments-api applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>4</b></div><div>probes<b>1</b></div><div>tokens<b>11,830</b></div><div>wall<b>0s</b></div><div>memory hits<b>0</b></div><div>gate challenges<b>0</b></div></div></div></div>
+<div class="panel"><h3>fair-naive · <b>memory, no provenance gate</b></h3><ul class="tl">
+<li class="mem">memory recall → 5 hit(s) in 1444 ms</li>
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes()</li>
+<li class="tool">query_logs(service=payments-api)</li>
+<li class="tool">get_metrics(metric=error_rate_pct, service=payments-api)</li>
+<li class="tool">get_config(service=payments-api)</li>
+<li class="probe">run_probe http https://api.paygate.example/v2/</li>
+<li class="probe">run_probe http https://api.paygate.example/v2/charges</li>
+<li class="tool">query_logs(service=payments-api, level=ERROR)</li>
+<li class="verdict">submit_verdict bad_config_deploy @ payments-api → rollback_deploy:payments-api</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate rollback_deploy on payments-api</li>
+<li class="human">effect: resolved — rollback_deploy on payments-api applied; error rate returning to baseline, healthz 200 acr</li>
+<li class="mem">memory retain → incident record stored</li>
+</ul>
+<div class="mem"><h4>Hindsight memory</h4>
+<div>recalled 5 fact(s) at kickoff:</div>
+<div class="hit">Incident s12_clock_skew_hard occurred on the payments-api service, causing a 9.5% 401 error rate on the /v1/checkout endpoint. | When: 2026-07-24T16:10:00Z<span class="tag">action:sync_clock</span><span class="tag">verified:yes</span><span class="tag">incident:s12_clock_skew_hard</span></div>
+<div class="hit">The incident was resolved by executing the sync_clock action on the payments-api service, which restored the error rate to baseline within 90 seconds. | When: 2026-07-24T<span class="tag">action:sync_clock</span><span class="tag">verified:yes</span><span class="tag">incident:s12_clock_skew_hard</span></div>
+<div class="hit">Incident s04_disk_full occurred on the orders-api service, causing a 58% failure rate in order creation. | When: 2026-07-06<span class="tag">verified:yes</span><span class="tag">incident:s04_disk_full</span><span class="tag">action:free_disk_space</span></div>
+<div class="hit">Incident s13_disk_full_wal occurred on the orders-api service, causing 44% write errors (SQLSTATE 53100) due to a full disk in the postgres service. | When: 2026-07-15 | <span class="tag">incident:s13_disk_full_wal</span><span class="tag">verified:yes</span><span class="tag">action:free_disk_space</span></div>
+<div class="hit">The root cause of the incident was a -412.3s clock skew on the payments-api node (payments-3) due to chronyd not running after a node reboot. | When: 2026-07-24T16:10:00Z<span class="tag">action:sync_clock</span><span class="tag">verified:yes</span><span class="tag">incident:s12_clock_skew_hard</span></div>
+<div style="margin-top:8px;font-size:13px;color:#b8c8ff">retained: s02_bad_config_deploy · 2026-08-11 06:10 UTC · verified:yes resolved:yes harm:no</div>
+</div>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>bad_config_deploy</code> @ payments-api → <code>rollback_deploy</code> on payments-api</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: rollback_deploy on payments-api applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>6</b></div><div>probes<b>2</b></div><div>tokens<b>25,406</b></div><div>wall<b>12s</b></div><div>memory hits<b>5</b></div><div>gate challenges<b>0</b></div></div></div></div>
+<div class="panel"><h3>fair-gate · <b>memory + provenance gate</b></h3><ul class="tl">
+<li class="mem">memory recall → 3 hit(s) in 1127 ms</li>
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes()</li>
+<li class="tool">query_logs(level=ERROR, service=payments-api)</li>
+<li class="tool">get_metrics(metric=error_rate_pct, service=payments-api)</li>
+<li class="tool">get_config(service=payments-api)</li>
+<li class="probe">run_probe http https://api.paygate.example/v2/</li>
+<li class="probe">run_probe http https://api.paygate.example/v2/health</li>
+<li class="probe">run_probe http https://api.paygate.example/v2/charge</li>
+<li class="probe">run_probe http https://api.paygate.example/</li>
+<li class="probe">run_probe http https://api.paygate.example/v2</li>
+<li class="tool">query_logs(limit=20, service=payments-api)</li>
+<li class="verdict">submit_verdict bad_config_deploy @ payments-api → rollback_deploy:payments-api</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate rollback_deploy on payments-api</li>
+<li class="human">effect: resolved — rollback_deploy on payments-api applied; error rate returning to baseline, healthz 200 acr</li>
+<li class="mem">memory retain → incident record stored</li>
+</ul>
+<div class="mem"><h4>Hindsight memory</h4>
+<div>recalled 3 fact(s) at kickoff:</div>
+<div class="hit">Incident s12_clock_skew_hard occurred on payments-api service due to clock skew, causing 401 errors on /v1/checkout. | When: 2026-07-24T16:10:00Z | Node reboot caused pay<span class="tag">action:sync_clock</span><span class="tag">verified:yes</span><span class="tag">incident:s12_clock_skew_hard</span></div>
+<div class="hit">Incident s04_disk_full occurred on the orders-api service, causing a 58% failure rate in order creation. | When: 2026-07-06<span class="tag">verified:yes</span><span class="tag">incident:s04_disk_full</span><span class="tag">action:free_disk_space</span></div>
+<div class="hit">Incident s13_disk_full_wal occurred on the orders-api service, causing 44% write errors (SQLSTATE 53100) due to a full disk in the postgres service. | When: 2026-07-15 | <span class="tag">incident:s13_disk_full_wal</span><span class="tag">verified:yes</span><span class="tag">action:free_disk_space</span></div>
+<div style="margin-top:8px;font-size:13px;color:#b8c8ff">retained: s02_bad_config_deploy · 2026-08-11 06:10 UTC · verified:yes resolved:yes harm:no</div>
+</div>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>bad_config_deploy</code> @ payments-api → <code>rollback_deploy</code> on payments-api</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: rollback_deploy on payments-api applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>10</b></div><div>probes<b>5</b></div><div>tokens<b>42,029</b></div><div>wall<b>17s</b></div><div>memory hits<b>3</b></div><div>gate challenges<b>0</b></div></div></div></div>
+</div>
+<div class="alert"><span class="sev">P1</span><div><div><span class="svc">orders-api</span> &nbsp;order_create failure rate 58%</div><small>s04_disk_full · Writes failing: postgres data volume full</small></div></div>
+<div class="cols">
+<div class="panel"><h3>fair-nomem · <b>without memory</b></h3><ul class="tl">
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes()</li>
+<li class="tool">get_metrics(metric=error_rate_pct, service=orders-api)</li>
+<li class="tool">query_logs(level=ERROR, service=orders-api)</li>
+<li class="probe">run_probe disk postgres</li>
+<li class="verdict">submit_verdict disk_full @ postgres → free_disk_space:postgres</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate free_disk_space on postgres</li>
+<li class="human">effect: resolved — free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across </li>
+</ul>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>disk_full</code> @ postgres → <code>free_disk_space</code> on postgres</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>4</b></div><div>probes<b>1</b></div><div>tokens<b>11,754</b></div><div>wall<b>0s</b></div><div>memory hits<b>0</b></div><div>gate challenges<b>0</b></div></div></div></div>
+<div class="panel"><h3>fair-naive · <b>memory, no provenance gate</b></h3><ul class="tl">
+<li class="mem">memory recall → 0 hit(s) in 379 ms</li>
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes()</li>
+<li class="tool">query_logs(level=ERROR, service=orders-api)</li>
+<li class="tool">get_metrics(service=orders-api, metric=error_rate_pct)</li>
+<li class="tool">get_config(service=orders-api)</li>
+<li class="probe">run_probe disk postgres</li>
+<li class="verdict">submit_verdict disk_full @ postgres → free_disk_space:postgres</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate free_disk_space on postgres</li>
+<li class="human">effect: resolved — free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across </li>
+<li class="mem">memory retain → incident record stored</li>
+</ul>
+<div class="mem"><h4>Hindsight memory</h4>
+<div>recall at kickoff: <i>nothing similar in memory (first time)</i></div>
+<div style="margin-top:8px;font-size:13px;color:#b8c8ff">retained: s04_disk_full · 2026-07-06 02:10 UTC · verified:yes resolved:yes harm:no</div>
+</div>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>disk_full</code> @ postgres → <code>free_disk_space</code> on postgres</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>4</b></div><div>probes<b>1</b></div><div>tokens<b>13,071</b></div><div>wall<b>0s</b></div><div>memory hits<b>0</b></div><div>gate challenges<b>0</b></div></div></div></div>
+<div class="panel"><h3>fair-gate · <b>memory + provenance gate</b></h3><ul class="tl">
+<li class="mem">memory recall → 0 hit(s) in 341 ms</li>
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes()</li>
+<li class="tool">query_logs(level=ERROR, service=orders-api)</li>
+<li class="tool">get_metrics(service=orders-api, metric=error_rate_pct)</li>
+<li class="tool">get_config(service=orders-api)</li>
+<li class="probe">run_probe disk postgres</li>
+<li class="verdict">submit_verdict disk_full @ postgres → free_disk_space:postgres</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate free_disk_space on postgres</li>
+<li class="human">effect: resolved — free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across </li>
+<li class="mem">memory retain → incident record stored</li>
+</ul>
+<div class="mem"><h4>Hindsight memory</h4>
+<div>recall at kickoff: <i>nothing similar in memory (first time)</i></div>
+<div style="margin-top:8px;font-size:13px;color:#b8c8ff">retained: s04_disk_full · 2026-07-06 02:10 UTC · verified:yes resolved:yes harm:no</div>
+</div>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>disk_full</code> @ postgres → <code>free_disk_space</code> on postgres</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>4</b></div><div>probes<b>1</b></div><div>tokens<b>13,071</b></div><div>wall<b>0s</b></div><div>memory hits<b>0</b></div><div>gate challenges<b>0</b></div></div></div></div>
+</div>
+<div class="alert"><span class="sev">P1</span><div><div><span class="svc">api-gateway</span> &nbsp;401 rate 9.5% on /v1/checkout; auth-api healthy</div><small>s12_clock_skew_hard · Payments rejecting valid tokens (hard case)</small></div></div>
+<div class="cols">
+<div class="panel"><h3>fair-nomem · <b>without memory</b></h3><ul class="tl">
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes()</li>
+<li class="tool">get_metrics(service=payments-api, metric=error_rate_pct)</li>
+<li class="tool">query_logs(level=ERROR, service=payments-api)</li>
+<li class="tool">get_config(service=payments-api)</li>
+<li class="tool">query_logs(limit=20, service=payments-api)</li>
+<li class="probe">run_probe clock payments-api</li>
+<li class="probe">run_probe clock auth-api</li>
+<li class="probe">run_probe clock postgres</li>
+<li class="verdict">submit_verdict clock_skew @ payments-api → sync_clock:payments-api</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate sync_clock on payments-api</li>
+<li class="human">effect: resolved — sync_clock on payments-api applied; error rate returning to baseline, healthz 200 across s</li>
+</ul>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>clock_skew</code> @ payments-api → <code>sync_clock</code> on payments-api</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: sync_clock on payments-api applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>5</b></div><div>probes<b>3</b></div><div>tokens<b>14,800</b></div><div>wall<b>0s</b></div><div>memory hits<b>0</b></div><div>gate challenges<b>0</b></div></div></div></div>
+<div class="panel"><h3>fair-naive · <b>memory, no provenance gate</b></h3><ul class="tl">
+<li class="mem">memory recall → 0 hit(s) in 1754 ms</li>
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes()</li>
+<li class="tool">get_config(service=auth-api)</li>
+<li class="tool">get_config(service=payments-api)</li>
+<li class="tool">get_metrics(service=payments-api, metric=error_rate_pct)</li>
+<li class="tool">query_logs(service=payments-api, level=WARN)</li>
+<li class="probe">run_probe clock auth-api</li>
+<li class="probe">run_probe clock payments-api</li>
+<li class="verdict">submit_verdict clock_skew @ payments-api → sync_clock:payments-api</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate sync_clock on payments-api</li>
+<li class="human">effect: resolved — sync_clock on payments-api applied; error rate returning to baseline, healthz 200 across s</li>
+<li class="mem">memory retain → incident record stored</li>
+</ul>
+<div class="mem"><h4>Hindsight memory</h4>
+<div>recall at kickoff: <i>nothing similar in memory (first time)</i></div>
+<div style="margin-top:8px;font-size:13px;color:#b8c8ff">retained: s12_clock_skew_hard · 2026-07-24 16:10 UTC · verified:yes resolved:yes harm:no</div>
+</div>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>clock_skew</code> @ payments-api → <code>sync_clock</code> on payments-api</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: sync_clock on payments-api applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>5</b></div><div>probes<b>2</b></div><div>tokens<b>16,041</b></div><div>wall<b>2s</b></div><div>memory hits<b>0</b></div><div>gate challenges<b>0</b></div></div></div></div>
+<div class="panel"><h3>fair-gate · <b>memory + provenance gate</b></h3><ul class="tl">
+<li class="mem">memory recall → 0 hit(s) in 1096 ms</li>
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes()</li>
+<li class="tool">get_config(service=auth-api)</li>
+<li class="tool">get_config(service=payments-api)</li>
+<li class="tool">get_metrics(service=payments-api, metric=error_rate_pct)</li>
+<li class="tool">query_logs(service=payments-api, level=WARN)</li>
+<li class="probe">run_probe clock auth-api</li>
+<li class="probe">run_probe clock payments-api</li>
+<li class="verdict">submit_verdict clock_skew @ payments-api → sync_clock:payments-api</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate sync_clock on payments-api</li>
+<li class="human">effect: resolved — sync_clock on payments-api applied; error rate returning to baseline, healthz 200 across s</li>
+<li class="mem">memory retain → incident record stored</li>
+</ul>
+<div class="mem"><h4>Hindsight memory</h4>
+<div>recall at kickoff: <i>nothing similar in memory (first time)</i></div>
+<div style="margin-top:8px;font-size:13px;color:#b8c8ff">retained: s12_clock_skew_hard · 2026-07-24 16:10 UTC · verified:yes resolved:yes harm:no</div>
+</div>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>clock_skew</code> @ payments-api → <code>sync_clock</code> on payments-api</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: sync_clock on payments-api applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>5</b></div><div>probes<b>2</b></div><div>tokens<b>16,041</b></div><div>wall<b>1s</b></div><div>memory hits<b>0</b></div><div>gate challenges<b>0</b></div></div></div></div>
+</div>
+<div class="alert"><span class="sev">P1</span><div><div><span class="svc">orders-api</span> &nbsp;orders write errors 44% (SQLSTATE 53100) for 6m</div><small>s13_disk_full_wal · Order writes failing: WAL archive backlog filled the data volume</small></div></div>
+<div class="cols">
+<div class="panel"><h3>fair-nomem · <b>without memory</b></h3><ul class="tl">
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes()</li>
+<li class="tool">get_metrics(service=orders-api, metric=error_rate_pct)</li>
+<li class="tool">query_logs(pattern=53100, level=ERROR, service=orders-api)</li>
+<li class="probe">run_probe db postgres</li>
+<li class="probe">run_probe disk postgres</li>
+<li class="verdict">submit_verdict disk_full @ postgres → free_disk_space:postgres</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate free_disk_space on postgres</li>
+<li class="human">effect: resolved — free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across </li>
+</ul>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>disk_full</code> @ postgres → <code>free_disk_space</code> on postgres</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>4</b></div><div>probes<b>2</b></div><div>tokens<b>11,971</b></div><div>wall<b>0s</b></div><div>memory hits<b>0</b></div><div>gate challenges<b>0</b></div></div></div></div>
+<div class="panel"><h3>fair-naive · <b>memory, no provenance gate</b></h3><ul class="tl">
+<li class="mem">memory recall → 1 hit(s) in 815 ms</li>
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes(last_hours=24)</li>
+<li class="tool">query_logs(pattern=53100, service=orders-api, level=ERROR)</li>
+<li class="tool">get_metrics(metric=error_rate_pct, service=orders-api)</li>
+<li class="probe">run_probe db postgres</li>
+<li class="probe">run_probe disk postgres</li>
+<li class="verdict">submit_verdict disk_full @ postgres → free_disk_space:postgres</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate free_disk_space on postgres</li>
+<li class="human">effect: resolved — free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across </li>
+<li class="mem">memory retain → incident record stored</li>
+</ul>
+<div class="mem"><h4>Hindsight memory</h4>
+<div>recalled 1 fact(s) at kickoff:</div>
+<div class="hit">Incident s04_disk_full occurred on the orders-api service, causing a 58% failure rate in order creation. | When: 2026-07-06<span class="tag">verified:yes</span><span class="tag">incident:s04_disk_full</span><span class="tag">action:free_disk_space</span></div>
+<div style="margin-top:8px;font-size:13px;color:#b8c8ff">retained: s13_disk_full_wal · 2026-07-15 09:10 UTC · verified:yes resolved:yes harm:no</div>
+</div>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>disk_full</code> @ postgres → <code>free_disk_space</code> on postgres</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>4</b></div><div>probes<b>2</b></div><div>tokens<b>13,578</b></div><div>wall<b>9s</b></div><div>memory hits<b>1</b></div><div>gate challenges<b>0</b></div></div></div></div>
+<div class="panel"><h3>fair-gate · <b>memory + provenance gate</b></h3><ul class="tl">
+<li class="mem">memory recall → 1 hit(s) in 773 ms</li>
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes(last_hours=24)</li>
+<li class="tool">query_logs(pattern=53100, service=orders-api, level=ERROR)</li>
+<li class="tool">get_metrics(metric=error_rate_pct, service=orders-api)</li>
+<li class="probe">run_probe db postgres</li>
+<li class="probe">run_probe disk postgres</li>
+<li class="verdict">submit_verdict disk_full @ postgres → free_disk_space:postgres</li>
+<li class="verdict">provenance gate: ACCEPTED</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate free_disk_space on postgres</li>
+<li class="human">effect: resolved — free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across </li>
+<li class="mem">memory retain → incident record stored</li>
+</ul>
+<div class="mem"><h4>Hindsight memory</h4>
+<div>recalled 1 fact(s) at kickoff:</div>
+<div class="hit">Incident s04_disk_full occurred on the orders-api service, causing a 58% failure rate in order creation. | When: 2026-07-06<span class="tag">verified:yes</span><span class="tag">incident:s04_disk_full</span><span class="tag">action:free_disk_space</span></div>
+<div class="gate acc"><b>provenance gate accepted</b>: memory-derived verdict re-verified in this incident by disk:postgres -&gt; postgres /var/lib/postgresql: 100% used (200G/200G); /var/lib/postgresql/pg_wal = 138G, growing 0.9G/mi</div>
+<div style="margin-top:8px;font-size:13px;color:#b8c8ff">retained: s13_disk_full_wal · 2026-07-15 09:10 UTC · verified:yes resolved:yes harm:no</div>
+</div>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>disk_full</code> @ postgres → <code>free_disk_space</code> on postgres</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>4</b></div><div>probes<b>2</b></div><div>tokens<b>13,578</b></div><div>wall<b>1s</b></div><div>memory hits<b>1</b></div><div>gate challenges<b>0</b></div></div></div></div>
+</div>
+<div class="alert"><span class="sev">P1</span><div><div><span class="svc">payments-api</span> &nbsp;charge_failed rate 100% for 4m</div><small>s15_secret_rotation_lookalike · All payments failing minutes after 2.16.0 rollout (but not because of it)</small></div></div>
+<div class="cols">
+<div class="panel"><h3>fair-nomem · <b>without memory</b></h3><ul class="tl">
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes()</li>
+<li class="tool">get_config(service=payments-api)</li>
+<li class="tool">query_logs(level=ERROR, service=payments-api)</li>
+<li class="probe">run_probe http https://api.paygate.example</li>
+<li class="verdict">submit_verdict secret_rotation @ payments-api → restart_service:payments-api</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate restart_service on payments-api</li>
+<li class="human">effect: resolved — restart_service on payments-api applied; error rate returning to baseline, healthz 200 acr</li>
+</ul>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>secret_rotation</code> @ payments-api → <code>restart_service</code> on payments-api</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: restart_service on payments-api applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>4</b></div><div>probes<b>1</b></div><div>tokens<b>11,895</b></div><div>wall<b>0s</b></div><div>memory hits<b>0</b></div><div>gate challenges<b>0</b></div></div></div></div>
+<div class="panel"><h3>fair-naive · <b>memory, no provenance gate</b></h3><ul class="tl">
+<li class="mem">memory recall → 5 hit(s) in 1911 ms</li>
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes()</li>
+<li class="tool">query_logs(service=payments-api)</li>
+<li class="tool">get_config(service=payments-api)</li>
+<li class="probe">run_probe http https://api.paygate.example</li>
+<li class="verdict">submit_verdict secret_rotation @ payments-api → restart_service:payments-api</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate restart_service on payments-api</li>
+<li class="human">effect: resolved — restart_service on payments-api applied; error rate returning to baseline, healthz 200 acr</li>
+<li class="mem">memory retain → incident record stored</li>
+</ul>
+<div class="mem"><h4>Hindsight memory</h4>
+<div>recalled 5 fact(s) at kickoff:</div>
+<div class="hit">Incident s02_bad_config_deploy occurred on payments-api service due to a bad configuration deployment. | When: 2026-08-11 | Deployment payments-2.15.0 introduced an incor<span class="tag">incident:s02_bad_config_deploy</span><span class="tag">action:rollback_deploy</span><span class="tag">verified:yes</span></div>
+<div class="hit">The incident was resolved by executing the sync_clock action on the payments-api service, which restored the error rate to baseline within 90 seconds. | When: 2026-07-24T<span class="tag">action:sync_clock</span><span class="tag">verified:yes</span><span class="tag">incident:s12_clock_skew_hard</span></div>
+<div class="hit">Incident s04_disk_full occurred on the orders-api service, causing a 58% failure rate in order creation. | When: 2026-07-06<span class="tag">verified:yes</span><span class="tag">incident:s04_disk_full</span><span class="tag">action:free_disk_space</span></div>
+<div class="hit">The incident was resolved by executing a rollback of the deployment on the payments-api service. | When: 2026-08-11 | Rollback restored error rates to baseline and health<span class="tag">incident:s02_bad_config_deploy</span><span class="tag">action:rollback_deploy</span><span class="tag">verified:yes</span></div>
+<div class="hit">Incident s12_clock_skew_hard occurred on the payments-api service, causing a 9.5% 401 error rate on the /v1/checkout endpoint. | When: 2026-07-24T16:10:00Z<span class="tag">action:sync_clock</span><span class="tag">verified:yes</span><span class="tag">incident:s12_clock_skew_hard</span></div>
+<div style="margin-top:8px;font-size:13px;color:#b8c8ff">retained: s15_secret_rotation_lookalike · 2026-08-20 13:10 UTC · verified:yes resolved:yes harm:no</div>
+</div>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>secret_rotation</code> @ payments-api → <code>restart_service</code> on payments-api</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: restart_service on payments-api applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>4</b></div><div>probes<b>1</b></div><div>tokens<b>14,407</b></div><div>wall<b>9s</b></div><div>memory hits<b>5</b></div><div>gate challenges<b>0</b></div></div></div></div>
+<div class="panel"><h3>fair-gate · <b>memory + provenance gate</b></h3><ul class="tl">
+<li class="mem">memory recall → 3 hit(s) in 1677 ms</li>
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes(last_hours=24)</li>
+<li class="tool">get_config(service=payments-api)</li>
+<li class="tool">query_logs(service=payments-api, level=ERROR)</li>
+<li class="probe">run_probe http https://api.paygate.example</li>
+<li class="verdict">submit_verdict secret_rotation @ payments-api → restart_service:payments-api</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate restart_service on payments-api</li>
+<li class="human">effect: resolved — restart_service on payments-api applied; error rate returning to baseline, healthz 200 acr</li>
+<li class="mem">memory retain → incident record stored</li>
+</ul>
+<div class="mem"><h4>Hindsight memory</h4>
+<div>recalled 3 fact(s) at kickoff:</div>
+<div class="hit">Incident s02_bad_config_deploy occurred on payments-api, causing 100% charge failure rate for 4 minutes. | When: 2026-08-11 | Bad configuration update introduced a traili<span class="tag">incident:s02_bad_config_deploy</span><span class="tag">action:rollback_deploy</span><span class="tag">verified:yes</span></div>
+<div class="hit">Incident s12_clock_skew_hard occurred on payments-api service due to clock skew, causing 401 errors on /v1/checkout. | When: 2026-07-24T16:10:00Z | Node reboot caused pay<span class="tag">action:sync_clock</span><span class="tag">verified:yes</span><span class="tag">incident:s12_clock_skew_hard</span></div>
+<div class="hit">Incident s04_disk_full occurred on the orders-api service, causing a 58% failure rate in order creation. | When: 2026-07-06<span class="tag">verified:yes</span><span class="tag">incident:s04_disk_full</span><span class="tag">action:free_disk_space</span></div>
+<div style="margin-top:8px;font-size:13px;color:#b8c8ff">retained: s15_secret_rotation_lookalike · 2026-08-20 13:10 UTC · verified:yes resolved:yes harm:no</div>
+</div>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>secret_rotation</code> @ payments-api → <code>restart_service</code> on payments-api</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: restart_service on payments-api applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>6</b></div><div>probes<b>1</b></div><div>tokens<b>19,607</b></div><div>wall<b>11s</b></div><div>memory hits<b>3</b></div><div>gate challenges<b>0</b></div></div></div></div>
+<div class="panel"><h3>gate-demo · <b>scripted trap (offline test, fake model)</b></h3><ul class="tl">
+<li class="mem">memory recall → 1 hit(s) in 1 ms</li>
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes(last_hours=24)</li>
+<li class="probe">run_probe http api.paygate.example</li>
+<li class="verdict">submit_verdict bad_config_deploy @ payments-api → rollback_deploy:payments-api</li>
+<li class="rej">provenance gate: REJECTED</li>
+<li class="rej">verification gate: REJECTED (no probe)</li>
+<li class="probe">run_probe http payments-api</li>
+<li class="verdict">submit_verdict secret_rotation @ payments-api → update_config:payments-api</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate update_config on payments-api</li>
+<li class="human">effect: resolved — update_config on payments-api applied; error rate returning to baseline, healthz 200 acros</li>
+<li class="mem">memory retain → incident record stored</li>
+</ul>
+<div class="mem"><h4>Hindsight memory</h4>
+<div>recalled 1 fact(s) at kickoff:</div>
+<div class="hit">Incident s02: payments-api charge_failed 100% right after a deploy; root cause bad_config_deploy; rollback_deploy on payments-api resolved it.<span class="tag">incident:s02_bad_config_deploy</span><span class="tag">action:rollback_deploy</span><span class="tag">verified:yes</span></div>
+<div class="gate rej"><b>provenance gate REJECTED</b>: RECALLED, NOT VERIFIED: this verdict matches memory of incident(s) s02_bad_config_deploy. Memory describes the past, not this incident. Run `run_probe` (kind http) against `payments-api` now. If the result does not show the same mechanism as the remembered inc</div>
+<div style="margin-top:8px;font-size:13px;color:#b8c8ff">retained: s15_secret_rotation_lookalike ·  · </div>
+</div>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>secret_rotation</code> @ payments-api → <code>update_config</code> on payments-api</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: update_config on payments-api applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>6</b></div><div>probes<b>2</b></div><div>tokens<b>720</b></div><div>wall<b>0s</b></div><div>memory hits<b>1</b></div><div>gate challenges<b>1</b></div></div></div></div>
+</div>
+<div class="alert"><span class="sev">P2</span><div><div><span class="svc">api-gateway</span> &nbsp;401 rate 6.8% on /v1/inventory/*; auth-api healthy; other routes fine</div><small>s17_clock_skew_repeat · Inventory lookups rejecting valid tokens after a pod reschedule</small></div></div>
+<div class="cols">
+<div class="panel"><h3>fair-nomem · <b>without memory</b></h3><ul class="tl">
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes()</li>
+<li class="tool">get_config(service=auth-api)</li>
+<li class="tool">get_config(service=inventory-api)</li>
+<li class="tool">query_logs(service=inventory-api, level=WARN)</li>
+<li class="tool">query_logs(level=ERROR, service=inventory-api)</li>
+<li class="probe">run_probe clock inventory-api</li>
+<li class="probe">run_probe clock auth-api</li>
+<li class="verdict">submit_verdict clock_skew @ inventory-api → sync_clock:inventory-api</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate sync_clock on inventory-api</li>
+<li class="human">effect: resolved — sync_clock on inventory-api applied; error rate returning to baseline, healthz 200 across </li>
+</ul>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>clock_skew</code> @ inventory-api → <code>sync_clock</code> on inventory-api</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: sync_clock on inventory-api applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>5</b></div><div>probes<b>2</b></div><div>tokens<b>14,647</b></div><div>wall<b>8s</b></div><div>memory hits<b>0</b></div><div>gate challenges<b>0</b></div></div></div></div>
+<div class="panel"><h3>fair-naive · <b>memory, no provenance gate</b></h3><ul class="tl">
+<li class="mem">memory recall → 1 hit(s) in 1950 ms</li>
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes(last_hours=24)</li>
+<li class="tool">get_config(service=inventory-api)</li>
+<li class="tool">query_logs(level=WARN, service=inventory-api)</li>
+<li class="probe">run_probe clock inventory-api</li>
+<li class="probe">run_probe clock auth-api</li>
+<li class="probe">run_probe clock api-gateway</li>
+<li class="verdict">submit_verdict clock_skew @ inventory-api → sync_clock:inventory-api</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate sync_clock on inventory-api</li>
+<li class="human">effect: resolved — sync_clock on inventory-api applied; error rate returning to baseline, healthz 200 across </li>
+<li class="mem">memory retain → incident record stored</li>
+</ul>
+<div class="mem"><h4>Hindsight memory</h4>
+<div>recalled 1 fact(s) at kickoff:</div>
+<div class="hit">Incident s12_clock_skew_hard occurred on the payments-api service, causing a 9.5% 401 error rate on the /v1/checkout endpoint. | When: 2026-07-24T16:10:00Z<span class="tag">action:sync_clock</span><span class="tag">verified:yes</span><span class="tag">incident:s12_clock_skew_hard</span></div>
+<div style="margin-top:8px;font-size:13px;color:#b8c8ff">retained: s17_clock_skew_repeat · 2026-08-02 23:10 UTC · verified:yes resolved:yes harm:no</div>
+</div>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>clock_skew</code> @ inventory-api → <code>sync_clock</code> on inventory-api</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: sync_clock on inventory-api applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>4</b></div><div>probes<b>3</b></div><div>tokens<b>13,977</b></div><div>wall<b>10s</b></div><div>memory hits<b>1</b></div><div>gate challenges<b>0</b></div></div></div></div>
+<div class="panel"><h3>fair-gate · <b>memory + provenance gate</b></h3><ul class="tl">
+<li class="mem">memory recall → 0 hit(s) in 1346 ms</li>
+<li class="tool">get_alert()</li>
+<li class="tool">recent_changes()</li>
+<li class="tool">get_config(service=inventory-api)</li>
+<li class="tool">query_logs(level=WARN, service=inventory-api)</li>
+<li class="tool">get_metrics(service=inventory-api, metric=error_rate_pct)</li>
+<li class="probe">run_probe clock inventory-api</li>
+<li class="probe">run_probe clock auth-api</li>
+<li class="tool">query_logs(level=ERROR, service=inventory-api)</li>
+<li class="verdict">submit_verdict clock_skew @ inventory-api → sync_clock:inventory-api</li>
+<li class="human">human checkpoint → approved (eval-policy)</li>
+<li class="human">remediate sync_clock on inventory-api</li>
+<li class="human">effect: resolved — sync_clock on inventory-api applied; error rate returning to baseline, healthz 200 across </li>
+<li class="mem">memory retain → incident record stored</li>
+</ul>
+<div class="mem"><h4>Hindsight memory</h4>
+<div>recall at kickoff: <i>nothing similar in memory (first time)</i></div>
+<div style="margin-top:8px;font-size:13px;color:#b8c8ff">retained: s17_clock_skew_repeat · 2026-08-02 23:10 UTC · verified:yes resolved:yes harm:no</div>
+</div>
+<div class="out"><span class="pill ok">root cause ✓</span><span class="pill ok">no harm</span><span class="pill ok">resolved</span><div style="margin-top:6px">verdict: <code>clock_skew</code> @ inventory-api → <code>sync_clock</code> on inventory-api</div>
+<div style="color:var(--mut);font-size:13px;margin-top:4px">effect: sync_clock on inventory-api applied; error rate returning to baseline, healthz 200 across services within 90s</div>
+<div class="stat"><div>LLM calls<b>4</b></div><div>probes<b>2</b></div><div>tokens<b>14,049</b></div><div>wall<b>1s</b></div><div>memory hits<b>0</b></div><div>gate challenges<b>0</b></div></div></div></div>
+</div>
+<p class=foot>Generated from eval/results and traces/*.jsonl. Every number on this page is reproducible from the repo.</p></main></body></html>

@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\n  \"approve\": true,\n  \"issues\": [],\n  \"suggested_checks\": [],\n  \"note\": \"Verdict is well-evidenced by logs and recent changes, safely targets the feature flag causing the error.\"\n}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 2811,
+"output_tokens": 58,
+"latency_ms": 1572,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\n  \"approve\": true,\n  \"issues\": [],\n  \"suggested_checks\": [],\n  \"note\": \"Verdict is well-evidenced by logs and recent changes, safely targets the feature flag causing the error.\"\n}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPYiRuwX/2O7MvihJlt+j+L4VQyNofrFInJxjOKQ9kj/lHpb7sHqTlbQVolVi+O2bhm3FOeuBpK1AeMxBuC7tPmVOkxw+h9WnKygcD55d86DQZipx5TXQQ"
+}
+}
+}
+}

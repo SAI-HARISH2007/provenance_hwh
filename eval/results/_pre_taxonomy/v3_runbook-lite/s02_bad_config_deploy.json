@@ -1,0 +1,49 @@
+{
+  "case_id": "s02_bad_config_deploy",
+  "verdict": {
+    "root_cause": "bad_config_deploy",
+    "service": "payments-api",
+    "action": "rollback_deploy",
+    "target": "payments-api",
+    "confidence": 1.0,
+    "summary": "payments-api charge failures caused by bad config deploy introducing incorrect PayGate v2 URL (404 errors)",
+    "evidence": [
+      "recent_changes shows deploy of payments-api version payments-2.15.0 at 2026-08-30T03:03:00.000Z migrating PAYGATE_URL to https://api.paygate.example/v2/",
+      "query_logs for payments-api shows 404 errors when calling PayGate endpoints",
+      "run_probe for https://api.paygate.example/v2/ returned healthy (200), indicating the endpoint path /v2/ itself or constructed URLs are incorrect/misconfigured for the API client or vendor API structure"
+    ],
+    "report_markdown": "# Incident Report: payments-api Charge Failures\n\n## Summary\nAt 2026-08-30T03:12:00Z, `payments-api` experienced a 100% failure rate on charges (`charge_failed`), resulting in a P1 alert and bringing the service down. Investigation revealed that a recent deploy (`payments-2.15.0`) at 03:03 UTC changed the `PAYGATE_URL` configuration to use `/v2/` endpoints, which is causing requests to fail with `404 Not Found`.\n\n## Timeline\n- **2026-08-30T03:03:00Z**: `payments-api` deployed version `payments-2.15.0` (migrated `PAYGATE_URL` to `https://api.paygate.example/v2/`).\n- **2026-08-30T03:12:00Z**: Alert fires: `charge_failed rate 100% for 4m`.\n- **2026-08-30T03:15:00Z**: Investigation checks logs, config, and probes the vendor API.\n\n## Root Cause\n**bad_config_deploy**: The deploy of `payments-2.15.0` misconfigured `PAYGATE_URL` to `https://api.paygate.example/v2/`, causing all payment requests to result in HTTP 404 errors from the payment gateway.\n\n## Evidence\n- `recent_changes`: `payments-api: payments-2.15.0: migrate to PayGate v2 endpoints (by dana) detail: PAYGATE_URL: https://api.paygate.example -> https://api.paygate.example/v2/`\n- `query_logs`: `payments-api` logs show repeated `paygate request failed: status=404` errors.\n- `run_probe`: Probing `https://api.paygate.example/v2/` returned `200` (vendor is healthy, but specific API requests from the app are failing due to the bad base URL path/routing).\n\n## Proposed Remediation\nRoll back the `payments-api` deploy to the previous stable version (or revert the `PAYGATE_URL` configuration). Given the deployment change, rolling back the deploy is the standard and safe action.\n\n## Follow-ups\n1. Verify PayGate v2 API documentation and path requirements before re-attempting migration.\n2. Add integration tests verifying PayGate connectivity during CI/CD."
+  },
+  "variant": "v3_runbook",
+  "run_id": "20260830T030928Z_v3-runbook-s02-bad-config-deploy",
+  "trace": "traces/20260830T030928Z_v3-runbook-s02-bad-config-deploy.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "status": "success",
+  "llm_calls": 4,
+  "input_tokens": 12836,
+  "output_tokens": 892,
+  "wall_s": 128.46,
+  "probes_run": 1,
+  "verified": true,
+  "gate_rejections": 0,
+  "reviewer": null,
+  "approval": {
+    "decision": "approved",
+    "by": "eval-policy"
+  },
+  "actions_executed": [
+    [
+      "rollback_deploy",
+      "payments-api"
+    ]
+  ],
+  "harm_done": [],
+  "resolved": true,
+  "remediation_effect": {
+    "executed": true,
+    "resolved": true,
+    "harm": false,
+    "effect": "rollback_deploy on payments-api applied; error rate returning to baseline, healthz 200 across services within 90s"
+  },
+  "would_be_cost_usd": 0.0
+}

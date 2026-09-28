@@ -1,0 +1,51 @@
+{
+  "case_id": "s08_third_party_rate_limited",
+  "verdict": {
+    "root_cause": "third_party_rate_limited",
+    "service": "payments-api",
+    "action": "enable_circuit_breaker",
+    "target": "payments-api",
+    "confidence": 1.0,
+    "summary": "payments-api is returning HTTP 429 errors because the worker refund backfill job exhausted the third-party PayGate rate limit.",
+    "evidence": [
+      "get_alert shows payments-api alerting on charge_failed 38% (HTTP 429 from vendor)",
+      "recent_changes shows worker deployed at 2026-08-30T02:46:00.000Z with a one-off refund backfill job (18k refunds) at concurrency 32 sharing the production API key",
+      "payments-api logs show 429 Too Many Requests errors from PayGate starting right after the worker deploy at 02:47:28.000Z",
+      "run_probe against https://api.paygate.example/status confirms vendor is healthy but rate-limit dashboard shows key …c9 is at 100% of 600/min with 92% of calls coming from worker/1.4.1"
+    ],
+    "report_markdown": "# Incident Report: payments-api Rate Limited by PayGate Vendor\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, `payments-api` began failing 38% of charges due to HTTP 429 (Too Many Requests) errors from the PayGate vendor API. Investigation revealed that a one-off refund backfill job deployed in `worker` (`worker-1.4.1`) at 02:46:00.000Z overwhelmed the shared PayGate API rate limit (600 requests/minute), starving legitimate payment traffic from `payments-api`.\n\n## Timeline\n- **02:46:00.000Z**: `worker` (`worker-1.4.1`) deployed with a one-off refund backfill job (18k refunds) at concurrency 32, sharing the production API key.\n- **02:47:28.000Z**: `payments-api` logs first `429 Too Many Requests` error from PayGate.\n- **03:12:00.000Z**: P2 page fires as `payments-api` charge failure rate hits 38%.\n- **03:12:00Z+**: Investigation confirms `worker` backfill has consumed 100% of the PayGate rate limit (92% of calls coming from `worker/1.4.1`).\n\n## Root Cause\n`third_party_rate_limited`: The background worker job (`worker-1.4.1`) flooded the third-party payment gateway (`PayGate`) with refund requests using the shared production API key, exhausting the 600 requests/minute rate limit and causing `payments-api` charges to fail with HTTP 429 errors.\n\n## Evidence\n- **Alert**: `payments-api` reporting `charge_failed 38% (HTTP 429 from vendor)`.\n- **Recent Changes**: `worker-1.4.1` deployed at 02:46:00.000Z with backfill job calling PayGate directly sharing production key.\n- **Logs**: `payments-api` error logs showing continuous `paygate 429 Too Many Requests retry-after=30 (limit 600/min for key pk_live_…c9)` starting at 02:47:28.000Z.\n- **Probe**: `run_probe` to `https://api.paygate.example` confirmed vendor is healthy, but rate-limit dashboard showed key `…c9` at 100% capacity with 92% of calls originating from `worker/1.4.1`.\n\n## Proposed Remediation\nEnable the circuit breaker on `payments-api` (`enable_circuit_breaker`) and/or pause the worker backfill job to protect the payment gateway quota and allow legitimate customer transactions to proceed.\n"
+  },
+  "variant": "v1_tools",
+  "run_id": "20260830T033654Z_v1-tools-s08-third-party-rate-limited",
+  "trace": "traces/20260830T033654Z_v1-tools-s08-third-party-rate-limited.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "status": "success",
+  "llm_calls": 5,
+  "input_tokens": 13869,
+  "output_tokens": 1082,
+  "wall_s": 20.42,
+  "probes_run": 1,
+  "verified": true,
+  "gate_rejections": 0,
+  "reviewer": null,
+  "reviewer_approved": null,
+  "approval": {
+    "decision": "approved",
+    "by": "eval-policy"
+  },
+  "actions_executed": [
+    [
+      "enable_circuit_breaker",
+      "payments-api"
+    ]
+  ],
+  "harm_done": [],
+  "resolved": false,
+  "remediation_effect": {
+    "executed": true,
+    "resolved": false,
+    "harm": false,
+    "effect": "enable_circuit_breaker on payments-api applied; no change in symptoms after 3 minutes"
+  },
+  "would_be_cost_usd": 0.00182
+}

@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"All checks passed; solid evidence linking worker concurrency change to postgres exhaustion.\"}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 5043,
+"output_tokens": 40,
+"latency_ms": 1156,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"All checks passed; solid evidence linking worker concurrency change to postgres exhaustion.\"}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIP0443QXnnlYW9nS7HWQbr6UWnKJ/Urqqzh4aF3/fL4BlPVizHpyoddmVNjVieh7xvbwPtIzB8Mf0TB2VDgQojenM8uEmJnfeCsOaU//j54/m95+nIWb0R"
+}
+}
+}
+}

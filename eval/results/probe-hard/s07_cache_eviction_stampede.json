@@ -1,0 +1,56 @@
+{
+  "case_id": "s07_cache_eviction_stampede",
+  "verdict": {
+    "root_cause": "cache_eviction_stampede",
+    "service": "orders-api",
+    "action": "increase_cache_memory",
+    "target": "redis",
+    "confidence": 1.0,
+    "summary": "Orders-api p95 latency spiked to 4.1s due to a cache eviction stampede in Redis caused by orders-3.8.1 adding ~1.5GB of keys exceeding the 2GB maxmemory limit.",
+    "evidence": [
+      "recent_changes shows deploy orders-3.8.1: cache product bundles (adds ~1.5GB of new keys) at 2026-08-30T02:27:00.000Z",
+      "redis maxmemory is configured to 2gb",
+      "redis hit_rate_pct dropped from ~95-100% down to ~31% around the time of the deploy",
+      "redis evicted_keys_per_min spiked from 0 to ~47,000+ evictions/min right when hit rate dropped",
+      "orders-api latency_p95_ms jumped from ~120ms to ~4,000ms simultaneously with the redis evictions spike"
+    ],
+    "report_markdown": "# Incident Report: Orders-API High Latency Due to Cache Eviction Stampede\n\n## Summary\nOn 2026-08-30 at 03:12 UTC, `orders-api` suffered high latency (p95 latency reaching ~4.1s against an 800ms threshold). The root cause was a recent deploy (`orders-3.8.1`) that introduced product bundle caching adding ~1.5GB of new keys, which overwhelmed the Redis cache configured with a 2GB `maxmemory` limit, leading to continuous key eviction and cache thrashing.\n\n## Timeline\n- **2026-08-30T02:27:00.000Z**: `orders-api` deployed version `orders-3.8.1` (\"cache product bundles (adds ~1.5GB of new keys)\").\n- **02:42:00.000Z (approx)**: Redis hit rate dropped from ~100% to ~31% and evicted keys spiked from 0 to ~47,000 keys/min.\n- **02:43:00.000Z (approx)**: `orders-api` p95 latency jumped from ~120ms to ~3,900ms+.\n- **2026-08-30T03:12:00.000Z**: P2 alert fires for `orders-api` p95 latency.\n\n## Root Cause\n**Cache Eviction Stampede (`cache_eviction_stampede`)**: The Redis memory limit (`maxmemory: 2gb`) was insufficient for the new workload introduced by `orders-3.8.1`, which added ~1.5GB of new cached data. This caused massive continuous LRU evictions (`allkeys-lru`), tanking the hit rate and forcing `orders-api` to repeatedly hit backing stores or compute/deserialize bundle data under high contention.\n\n## Evidence\n1. **Recent Changes**: `orders-3.8.1` deploy explicitly stated it adds ~1.5GB of new keys.\n2. **Redis Metrics**:\n   - `hit_rate_pct`: Dropped from 90-100% down to ~31.3%.\n   - `evicted_keys_per_min`: Jumped from 0 to ~47,670 evictions/min.\n3. **Redis Config**: `maxmemory` is set to `2gb`.\n4. **Orders-API Metrics**: `latency_p95_ms` jumped from ~120ms to ~4,056ms right alongside the Redis eviction spike.\n\n## Proposed Remediation\nIncrease Redis cache memory (`increase_cache_memory`) to accommodate the new product bundle cache footprint and stop the eviction stampede. This is safe as it requires no code rollback, immediately relieves cache pressure, and restores high cache hit rates.\n\n## Follow-ups\n- Review caching strategy and memory sizing guidelines for new feature deployments.\n- Add alerts for Redis eviction rates and low cache hit ratios."
+  },
+  "variant": "v2_verify",
+  "run_id": "20260927T104611Z_v2-verify-s07-cache-eviction-stampede",
+  "trace": "traces/20260927T104611Z_v2-verify-s07-cache-eviction-stampede.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "status": "success",
+  "llm_calls": 6,
+  "input_tokens": 15845,
+  "output_tokens": 1137,
+  "wall_s": 8.77,
+  "probes_run": 1,
+  "verified": true,
+  "gate_rejections": 0,
+  "reviewer": null,
+  "reviewer_approved": null,
+  "approval": {
+    "decision": "approved",
+    "by": "eval-policy"
+  },
+  "actions_executed": [
+    [
+      "increase_cache_memory",
+      "redis"
+    ]
+  ],
+  "harm_done": [],
+  "resolved": true,
+  "remediation_effect": {
+    "executed": true,
+    "resolved": true,
+    "harm": false,
+    "effect": "increase_cache_memory on redis applied; error rate returning to baseline, healthz 200 across services within 90s"
+  },
+  "memory_hits": 0,
+  "memory_used": false,
+  "memory_rejections": 0,
+  "memory_checks": [],
+  "would_be_cost_usd": 0.00204
+}

@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"All checks passed; evidence directly supports root cause and action is the correct fix for a static secret reload.\"}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 3178,
+"output_tokens": 47,
+"latency_ms": 1741,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"All checks passed; evidence directly supports root cause and action is the correct fix for a static secret reload.\"}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0T3xewh+sld5mEDv++OSMk29qFG5SOQ13cTldUhNcuYxpVrFOjanYp2n48IdQPQDj2xsi3Fj5rvQXSCIRYBSkbHK0kkUzEKeDmeGtn0cnfcURzXWRi4aIZZXA="
+}
+}
+}
+}

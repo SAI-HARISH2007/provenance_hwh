@@ -1,0 +1,33 @@
+{
+  "case_id": "s01_db_pool_exhausted",
+  "verdict": {
+    "root_cause": "db_connection_pool_exhausted",
+    "service": "orders-api",
+    "action": "increase_db_pool",
+    "target": "orders-api",
+    "confidence": 0.95,
+    "summary": "Increasing the worker email concurrency from 8 to 64 caused a surge in concurrent database connections, exhausting the PostgreSQL connection pool and causing orders-api to timeout and throw 5xx errors on checkout.",
+    "evidence": [
+      "postgres.connections_used: 38.154 -> 99.295",
+      "postgres LOG: FATAL: sorry, too many clients already",
+      "orders-api ERROR: db error: timeout acquiring connection from pool after 5000ms",
+      "RECENT CHANGES: worker: raise email job concurrency 8→64"
+    ],
+    "report_markdown": "# Incident Report: API Gateway 5xx Spike on /v1/checkout\n\n## Summary\nAt 03:12 UTC, the `api-gateway` triggered a P1 alert due to an elevated 5xx error rate (reaching ~12%) on the `/v1/checkout` endpoint. The root cause was traced to database connection pool exhaustion on the `postgres` database, triggered by an excessive increase in background worker concurrency (`worker` email job concurrency raised from 8 to 64), which depleted available database connections and caused `orders-api` requests to time out acquiring connections.\n\n## Timeline\n- **2026-08-30T02:34:00Z**: Worker concurrency increased from 8 to 64 to clear an email job backlog.\n- **2026-08-30T02:45:26Z**: First `postgres` log entry: `FATAL: sorry, too many clients already`.\n- **2026-08-30T02:47:42Z**: `orders-api` begins logging connection pool timeout errors (`timeout acquiring connection from pool after 5000ms`).\n- **2026-08-30T03:12:00Z**: `api-gateway` 5xx alert fires as checkout requests consistently fail via upstream `orders-api` timeouts.\n\n## Root Cause\nThe recent operational change to raise the worker email job concurrency from 8 to 64 overwhelmed the database connection pool limit (`max_connections: 100`). As workers and API services competed for database connections, `postgres` began rejecting new connections (`sorry, too many clients already`), causing `orders-api` to fail when processing downstream requests from `api-gateway`'s `/v1/checkout` calls.\n\n## Evidence\n- PostgreSQL metrics show `postgres.connections_used` rising rapidly from ~38 to nearly 100 (`99.295`).\n- Repeated PostgreSQL error logs: `FATAL: sorry, too many clients already`.\n- `orders-api` logs showing continuous connection timeouts: `ERROR orders-api: db error: timeout acquiring connection from pool after 5000ms`.\n- Concurrent change log showing `worker` concurrency raised to 64 just prior to the connection saturation.\n\n## Remediation\n1. Increase the database connection pool size or connection limits, or scale back the `worker` email job concurrency.\n2. Apply the action to increase the `orders-api` DB pool size and/or tune PostgreSQL `max_connections`.\n\n## Follow-ups\n- Review connection pool sizing across all microservices relative to PostgreSQL's `max_connections`.\n- Implement backpressure or rate limiting on background worker database usage to prevent sudden spikes from starving user-facing APIs."
+  },
+  "variant": "baseline",
+  "run_id": "20260830T033242Z_baseline-s01-db-pool-exhausted",
+  "trace": "traces/20260830T033242Z_baseline-s01-db-pool-exhausted.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "provider": "gemini",
+  "status": "success",
+  "llm_calls": 1,
+  "input_tokens": 21131,
+  "output_tokens": 853,
+  "would_be_cost_usd": 0.00245,
+  "wall_s": 5.02,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

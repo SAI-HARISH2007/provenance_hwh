@@ -1,0 +1,55 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_416000",
+"name": "query_logs",
+"arguments": {
+"limit": 20,
+"level": "ERROR",
+"service": "auth-api"
+}
+},
+{
+"id": "call_416001",
+"name": "run_probe",
+"arguments": {
+"target": "http://auth-api.internal/health",
+"kind": "http"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2699,
+"output_tokens": 59,
+"latency_ms": 1595,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_416000",
+"function": {
+"arguments": "{\"limit\":20,\"level\":\"ERROR\",\"service\":\"auth-api\"}",
+"name": "query_logs"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPf9UXrb665ZJxrQ+s7bgz6KjPgxt6ASvipAuGjXE1qqx32aEiX1yl5ZiQLjpL5PVvPS2p5anaoCfn/wfizm7ZRq1g6I7ukllpf0KuzD0xmL+lvvEIcdK/"
+}
+}
+},
+{
+"id": "call_416001",
+"function": {
+"arguments": "{\"target\":\"http://auth-api.internal/health\",\"kind\":\"http\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

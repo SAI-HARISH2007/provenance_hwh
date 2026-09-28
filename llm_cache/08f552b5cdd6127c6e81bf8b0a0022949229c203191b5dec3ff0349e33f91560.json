@@ -1,0 +1,54 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_594049",
+"name": "get_metrics",
+"arguments": {
+"service": "postgres",
+"metric": "connections_used"
+}
+},
+{
+"id": "call_594050",
+"name": "get_metrics",
+"arguments": {
+"service": "postgres",
+"metric": "locks_waiting"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4840,
+"output_tokens": 48,
+"latency_ms": 1748,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_594049",
+"function": {
+"arguments": "{\"service\":\"postgres\",\"metric\":\"connections_used\"}",
+"name": "get_metrics"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPrYm7Vcha48yNjMe07OH5M/cYYBC57TlJSP4M6sCWiHR734M00i6+8VwD0L2cGO2rUvKJ+iTe80YTuwSqRyRcHEonpiwhiXeW6Dn8ZZ4QeCK7B1qem18z"
+}
+}
+},
+{
+"id": "call_594050",
+"function": {
+"arguments": "{\"service\":\"postgres\",\"metric\":\"locks_waiting\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

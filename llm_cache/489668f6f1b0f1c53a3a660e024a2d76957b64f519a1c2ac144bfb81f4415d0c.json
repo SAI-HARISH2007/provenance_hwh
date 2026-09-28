@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_1143704",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "orders-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4336,
+"output_tokens": 24,
+"latency_ms": 1829,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_1143704",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"orders-api\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPlkvti6SUL7AqmgC2SIBaupH6WFPQTI9k6bu33rFl793dgRxDOfGqJj0ifi/DABKDhCytQmSRNiDM46jr35xlegkN+wRGIARrBD6/VHeiIJKyhZcIgLq+"
+}
+}
+}
+],
+"content": ""
+}
+}

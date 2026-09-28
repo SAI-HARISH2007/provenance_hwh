@@ -1,0 +1,28 @@
+{
+  "case_id": "s08_third_party_rate_limited",
+  "verdict": {
+    "root_cause": "unknown",
+    "service": "unknown",
+    "action": "no_action",
+    "target": "",
+    "confidence": 0.0,
+    "summary": "unparseable output: Expecting ',' delimiter: line 14 column 1221 (char 2120)",
+    "evidence": [],
+    "report_markdown": ""
+  },
+  "variant": "baseline",
+  "run_id": "20260830T032420Z_baseline-s08-third-party-rate-limited",
+  "trace": "traces/20260830T032420Z_baseline-s08-third-party-rate-limited.jsonl",
+  "model": "gemini-2.5-flash",
+  "provider": "gemini",
+  "status": "fail",
+  "llm_calls": 1,
+  "input_tokens": 4796,
+  "output_tokens": 1182,
+  "would_be_cost_usd": 0.00439,
+  "wall_s": 18.62,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

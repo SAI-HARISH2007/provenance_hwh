@@ -1,0 +1,54 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_525821",
+"name": "get_metrics",
+"arguments": {
+"service": "orders-api",
+"metric": "error_rate_pct"
+}
+},
+{
+"id": "call_525822",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"service": "orders-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 1985,
+"output_tokens": 52,
+"latency_ms": 2010,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_525821",
+"function": {
+"arguments": "{\"service\":\"orders-api\",\"metric\":\"error_rate_pct\"}",
+"name": "get_metrics"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPI14s9sVRY4UY8gVeC+OaxOGybebo9SKrcTt+flKz7hrPodTN+I72zTswIkeaSIc78GKibGY3XqRfE9E2r2gprvVqZNuYBNKZ7+dIRsPfDi0h5aJfwoRv"
+}
+}
+},
+{
+"id": "call_525822",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"service\":\"orders-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

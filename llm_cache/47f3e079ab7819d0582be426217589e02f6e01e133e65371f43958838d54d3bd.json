@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_692415",
+"name": "run_probe",
+"arguments": {
+"kind": "clock",
+"target": "auth-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 5264,
+"output_tokens": 24,
+"latency_ms": 2180,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_692415",
+"function": {
+"arguments": "{\"kind\":\"clock\",\"target\":\"auth-api\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPiPAWqgH3Z0aH+O0n33w8lw1dO2kPaKitvSTM7S8LvUgyg80OKStZt41qbmqWwiKTrialX11/7lesviWYqVrGNW4fW0bhxs54LxOaVAXCuUjDycVy467j"
+}
+}
+}
+],
+"content": ""
+}
+}

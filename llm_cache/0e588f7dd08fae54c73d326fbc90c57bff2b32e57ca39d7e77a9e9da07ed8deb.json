@@ -1,0 +1,45 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "function-call-9343434878995012481",
+"name": "submit_verdict",
+"arguments": {
+"summary": "payments-api is returning 401 errors because it cannot validate JWT tokens signed with ES256, which were introduced by a recent auth-api deploy. The auth-api deploy enabled ES256 signing via a feature flag, but payments-api is not compatible with these new tokens.",
+"target": "auth-api",
+"service": "auth-api",
+"root_cause": "feature_flag_misconfig",
+"report_markdown": "\nIncident Report:\nSummary: `payments-api` is returning 401 Unauthorized errors, leading to a degraded state for the service and 401s observed at the `api-gateway`. This is due to `payments-api` failing to validate JWT tokens signed with the new ES256 algorithm.\n\nTimeline:\n- 2026-08-30T02:39:00Z: `auth-api` deployed `auth-1.6.0`, switching JWT signing to ES256 (dual-verify enabled).\n- 2026-08-30T02:50:12Z: `api-gateway` started reporting 401 errors on `/v1/checkout` from `payments-api`.\n- 2026-08-30T02:50:00Z (approx): `payments-api` `error_rate_pct` sharply increased.\n- 2026-08-30T03:12:00Z: Alert fired.\n\nRoot cause: `feature_flag_misconfig`. The `auth-api` deploy introduced a feature flag to switch JWT signing to ES256. While `auth-api` itself supports dual-verification, `payments-api` is not compatible with the new ES256-signed tokens, leading to authentication failures.\n\nEvidence:\n- `get_alert` shows `api-gateway` reporting 401s on `/v1/checkout` and `payments-api` is degraded.\n- `recent_changes` shows `auth-api` deployed `auth-1.6.0` at 02:39:00Z with the detail \"switch JWT signing to ES256 (dual-verify enabled)\".\n- `query_logs(service='api-gateway', level='ERROR', pattern='401')` shows 401 errors from `payments-api` starting around 02:50:12Z.\n- `get_metrics(service='payments-api', metric='error_rate_pct')` shows a sharp increase in error rate for `payments-api` around 02:50:00Z, correlating with the `auth-api` deploy and the `api-gateway` 401s.\n- `run_probe(kind='http', target='payments-api/v1/checkout')` returned a 200 for `/healthz`, indicating the service process is healthy, but this probe does not test authenticated endpoints and therefore does not contradict the hypothesis of JWT validation failure.\n\nProposed remediation: `disable_feature_flag` in `auth-api`.\nThis action is safe because it will revert the JWT signing algorithm back to the previous state (likely RS256), which `payments-api` is known to support. This will resolve the authentication failures without requiring a full rollback of the `auth-api` deploy or a restart of `payments-api`.\n\nFollow-ups:\n- Investigate why `payments-api` is not compatible with ES256-signed JWT tokens.\n- Plan for a coordinated rollout of ES256 support across all services.\n- Add more specific logging to `payments-api` for authentication failures.\n",
+"action": "disable_feature_flag",
+"confidence": 0.9,
+"evidence": [
+"get_alert_response",
+"recent_changes_response",
+"query_logs_response",
+"get_metrics_response",
+"run_probe_response"
+]
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 5464,
+"output_tokens": 911,
+"latency_ms": 7687,
+"model": "gemini-2.5-flash",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "function-call-9343434878995012481",
+"function": {
+"arguments": "{\"summary\":\"payments-api is returning 401 errors because it cannot validate JWT tokens signed with ES256, which were introduced by a recent auth-api deploy. The auth-api deploy enabled ES256 signing via a feature flag, but payments-api is not compatible with these new tokens.\",\"target\":\"auth-api\",\"service\":\"auth-api\",\"root_cause\":\"feature_flag_misconfig\",\"report_markdown\":\"\\nIncident Report:\\nSummary: `payments-api` is returning 401 Unauthorized errors, leading to a degraded state for the service and 401s observed at the `api-gateway`. This is due to `payments-api` failing to validate JWT tokens signed with the new ES256 algorithm.\\n\\nTimeline:\\n- 2026-08-30T02:39:00Z: `auth-api` deployed `auth-1.6.0`, switching JWT signing to ES256 (dual-verify enabled).\\n- 2026-08-30T02:50:12Z: `api-gateway` started reporting 401 errors on `/v1/checkout` from `payments-api`.\\n- 2026-08-30T02:50:00Z (approx): `payments-api` `error_rate_pct` sharply increased.\\n- 2026-08-30T03:12:00Z: Alert fired.\\n\\nRoot cause: `feature_flag_misconfig`. The `auth-api` deploy introduced a feature flag to switch JWT signing to ES256. While `auth-api` itself supports dual-verification, `payments-api` is not compatible with the new ES256-signed tokens, leading to authentication failures.\\n\\nEvidence:\\n- `get_alert` shows `api-gateway` reporting 401s on `/v1/checkout` and `payments-api` is degraded.\\n- `recent_changes` shows `auth-api` deployed `auth-1.6.0` at 02:39:00Z with the detail \\\"switch JWT signing to ES256 (dual-verify enabled)\\\".\\n- `query_logs(service='api-gateway', level='ERROR', pattern='401')` shows 401 errors from `payments-api` starting around 02:50:12Z.\\n- `get_metrics(service='payments-api', metric='error_rate_pct')` shows a sharp increase in error rate for `payments-api` around 02:50:00Z, correlating with the `auth-api` deploy and the `api-gateway` 401s.\\n- `run_probe(kind='http', target='payments-api/v1/checkout')` returned a 200 for `/healthz`, indicating the service process is healthy, but this probe does not test authenticated endpoints and therefore does not contradict the hypothesis of JWT validation failure.\\n\\nProposed remediation: `disable_feature_flag` in `auth-api`.\\nThis action is safe because it will revert the JWT signing algorithm back to the previous state (likely RS256), which `payments-api` is known to support. This will resolve the authentication failures without requiring a full rollback of the `auth-api` deploy or a restart of `payments-api`.\\n\\nFollow-ups:\\n- Investigate why `payments-api` is not compatible with ES256-signed JWT tokens.\\n- Plan for a coordinated rollout of ES256 support across all services.\\n- Add more specific logging to `payments-api` for authentication failures.\\n\",\"action\":\"disable_feature_flag\",\"confidence\":0.9,\"evidence\":[\"get_alert_response\",\"recent_changes_response\",\"query_logs_response\",\"get_metrics_response\",\"run_probe_response\"]}",
+"name": "submit_verdict"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

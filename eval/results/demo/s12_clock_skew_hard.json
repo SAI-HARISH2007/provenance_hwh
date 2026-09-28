@@ -1,0 +1,55 @@
+{
+  "case_id": "s12_clock_skew_hard",
+  "verdict": {
+    "root_cause": "clock_skew",
+    "service": "payments-api",
+    "action": "sync_clock",
+    "target": "payments-api",
+    "confidence": 1.0,
+    "summary": "401 error spike caused by -412.3s clock skew on payments-api due to chronyd not running after host reboot",
+    "evidence": [
+      "payments-api (node payments-3) ntp offset -412.3s — chronyd not running",
+      "2026-08-30T02:02:00.000Z infra payments-api host reboot after kernel patch (node payments-3)",
+      "api-gateway error_rate_pct jumped at minute 14 (coinciding with payments-api node reboot / clock drift)"
+    ],
+    "report_markdown": "# Incident Report: API Gateway 401 Rate Spike on Checkout\n\n## Summary\nAt 03:12 UTC, a P1 alert fired for a 9.5% 401 Unauthorized rate on `/v1/checkout` routed through `api-gateway`, while `auth-api` was reported healthy. Investigation revealed that a recent node reboot of `payments-api` left chronyd stopped, causing a -412.3-second clock skew on `payments-api` (node `payments-3`). Because token validation (JWT expiration / `nbf` / `iat` checks) depends on accurate time, tokens received by `payments-api` failed verification due to the severe clock skew, returning 401 errors.\n\n## Timeline\n- **02:02:00 UTC**: `payments-api` node (`payments-3`) rebooted after kernel patch by `ops-bot`. Chronyd failed to start automatically upon reboot.\n- **02:39:00 UTC**: `auth-api` deployed version `auth-1.6.0` (switch JWT signing to ES256, dual-verify enabled).\n- **03:12:00 UTC**: Alert fires: 401 rate 9.5% on `/v1/checkout`.\n\n## Root Cause\n- **Root Cause Label**: `clock_skew`\n- **Service**: `payments-api`\n- **Explanation**: Following the kernel patch reboot at 02:02 UTC, chronyd was not running on node `payments-3` hosting `payments-api`, resulting in a -412.3-second clock offset. Requests involving `payments-api` failed JWT time validation (`nbf`/`exp`), causing 401 responses.\n\n## Evidence\n1. `run_probe` with `kind: clock` on `payments-api` returned: `payments-api (node payments-3) ntp offset -412.3s — chronyd not running`.\n2. `get_metrics` for `api-gateway` `error_rate_pct` showed a sharp jump from ~0.3% to ~9.5% at minute 14.\n3. Clocks on `auth-api` and `api-gateway` were accurate (offsets < 0.003s).\n\n## Proposed Remediation\n- **Action**: `sync_clock` on `payments-api`.\n- **Safety**: Synchronizing the clock via NTP / starting chronyd restores correct time validation without restarting stateful databases or rolling back unrelated deployments.\n\n## Follow-ups\n- Ensure chronyd service configuration is set to start automatically on boot for all infrastructure nodes following kernel patches.\n"
+  },
+  "variant": "final",
+  "run_id": "20260830T135444Z_final-s12-clock-skew-hard",
+  "trace": "traces/20260830T135444Z_final-s12-clock-skew-hard.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "status": "success",
+  "llm_calls": 7,
+  "input_tokens": 19263,
+  "output_tokens": 966,
+  "wall_s": 60.73,
+  "probes_run": 3,
+  "verified": true,
+  "gate_rejections": 0,
+  "reviewer": {
+    "approve": true,
+    "issues": [],
+    "suggested_checks": [],
+    "note": "Clock skew on payments-api directly verified by probe and explains authentication/authorization failures."
+  },
+  "reviewer_approved": true,
+  "approval": {
+    "decision": "approved",
+    "by": "human"
+  },
+  "actions_executed": [
+    [
+      "sync_clock",
+      "payments-api"
+    ]
+  ],
+  "harm_done": [],
+  "resolved": true,
+  "remediation_effect": {
+    "executed": true,
+    "resolved": true,
+    "harm": false,
+    "effect": "sync_clock on payments-api applied; error rate returning to baseline, healthz 200 across services within 90s"
+  },
+  "would_be_cost_usd": 0.00231
+}

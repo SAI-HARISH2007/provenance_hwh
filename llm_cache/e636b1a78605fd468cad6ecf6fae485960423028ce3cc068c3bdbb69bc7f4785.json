@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_d87792e9-c1fa-4ad4-ae3f-8bf2622c0bbe",
+"name": "run_probe",
+"arguments": {
+"kind": "disk",
+"target": "postgres"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 5418,
+"output_tokens": 42,
+"latency_ms": 646,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_d87792e9-c1fa-4ad4-ae3f-8bf2622c0bbe",
+"function": {
+"arguments": "{\"kind\":\"disk\",\"target\":\"postgres\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"reasoning": "We need to run a disk probe on postgres. target likely hostname? Use \"postgres\".",
+"content": ""
+}
+}

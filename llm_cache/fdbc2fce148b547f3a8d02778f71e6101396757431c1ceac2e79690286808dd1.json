@@ -1,0 +1,54 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_1981923",
+"name": "get_metrics",
+"arguments": {
+"metric": "hit_rate_pct",
+"service": "redis"
+}
+},
+{
+"id": "call_1981924",
+"name": "get_metrics",
+"arguments": {
+"metric": "evicted_keys_per_min",
+"service": "redis"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2028,
+"output_tokens": 55,
+"latency_ms": 1229,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_1981923",
+"function": {
+"arguments": "{\"metric\":\"hit_rate_pct\",\"service\":\"redis\"}",
+"name": "get_metrics"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TVP3wdOTylr9stIJ1yzwbehY7o970tzOdR39Q2ppgUZNLVw2/owUMzeri3RE5WKUIY5iwoeEC4topsxtAgjvsIUtmQ0OgkzPBNfe6okfoDc5wZd6I1Xvwz2w="
+}
+}
+},
+{
+"id": "call_1981924",
+"function": {
+"arguments": "{\"metric\":\"evicted_keys_per_min\",\"service\":\"redis\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

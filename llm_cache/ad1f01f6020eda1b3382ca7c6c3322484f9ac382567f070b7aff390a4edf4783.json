@@ -1,0 +1,50 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_2793935",
+"name": "submit_verdict",
+"arguments": {
+"confidence": 1,
+"report_markdown": "# Incident Report: payments-api Secret Rotation Outage\n\n## Summary\nAt 2026-08-30T03:12:00Z, `payments-api` began failing 100% of charges due to `401 Unauthorized` errors from the external payment gateway (`paygate`). The root cause is a secret rotation that occurred at 03:04:00Z where `PAYGATE_API_KEY` was rotated from `v7` to `v8` at the vendor and in Vault, revoking `v7`. Because `payments-api` loads its API key statically at process start and had not been restarted since the rotation, it continued presenting the revoked `v7` key.\n\n## Timeline\n- **2026-08-30T03:04:00Z**: Vault scheduled 90-day rotation: `PAYGATE_API_KEY` rotated from `v7` to `v8` (old key revoked at vendor).\n- **2026-08-30T03:12:00Z**: `payments-api` alert fires (`charge_failed rate 100% for 4m`).\n- **Investigation**: Inspected config (`PAYGATE_API_KEY_VERSION: v7 (loaded at process start 3d ago)`), logs (`401 invalid_api_key`), and probed `paygate` (confirmed vendor healthy, v7 revoked, v8 active).\n\n## Root Cause\n`secret_rotation`: Vault rotated the API key from `v7` to `v8` and revoked `v7`, but `payments-api` loads secrets at process start and was not restarted to pick up the new key `v8`.\n\n## Evidence\n- `get_alert`: `payments-api` status `down`, `charge_failed rate 100% for 4m`.\n- `recent_changes`: Vault rotation of `PAYGATE_API_KEY` from `v7` to `v8` at 03:04:00Z with explicit instruction that consumers must reload the secret (`payments-api reads it at process start`).\n- `get_config`: `payments-api` showing config `PAYGATE_API_KEY_VERSION: v7 (loaded at process start 3d ago)`.\n- `query_logs`: Continuous `ERROR payments-api: paygate request failed: status=401 body={\"error\":\"invalid_api_key\",\"key_version\":\"v7\"}`.\n- `run_probe`: HTTP probe to `https://api.paygate.example/status` confirmed vendor healthy with note `key v7 revoked 8 min ago, v8 active`.\n\n## Proposed Remediation\nRestart `payments-api` (`restart_service`) to force the service to load the new Vault secret (`v8`). This is safe and standard for config/secret updates where dynamic reloading is not implemented.\n\n## Follow-ups\n- Implement dynamic secret reloading or runtime secret fetching in `payments-api` so future Vault rotations do not require manual process restarts.",
+"target": "payments-api",
+"service": "payments-api",
+"evidence": [
+"get_alert showed payments-api down with charge_failed rate 100%",
+"recent_changes showed vault rotated PAYGATE_API_KEY from v7 to v8 at 03:04:00.000Z with note: consumers must reload the secret; payments-api reads it at process start",
+"get_config showed payments-api config has PAYGATE_API_KEY_VERSION: v7 (loaded at process start 3d ago)",
+"query_logs showed payments-api logging 401 invalid_api_key for key_version=v7",
+"run_probe verified paygate vendor API is healthy but reports key v7 revoked and v8 active"
+],
+"summary": "payments-api failing with 100% charge failures due to using revoked API key v7 after Vault secret rotation to v8",
+"action": "restart_service",
+"root_cause": "secret_rotation"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4078,
+"output_tokens": 923,
+"latency_ms": 3999,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_2793935",
+"function": {
+"arguments": "{\"confidence\":1,\"report_markdown\":\"# Incident Report: payments-api Secret Rotation Outage\\n\\n## Summary\\nAt 2026-08-30T03:12:00Z, `payments-api` began failing 100% of charges due to `401 Unauthorized` errors from the external payment gateway (`paygate`). The root cause is a secret rotation that occurred at 03:04:00Z where `PAYGATE_API_KEY` was rotated from `v7` to `v8` at the vendor and in Vault, revoking `v7`. Because `payments-api` loads its API key statically at process start and had not been restarted since the rotation, it continued presenting the revoked `v7` key.\\n\\n## Timeline\\n- **2026-08-30T03:04:00Z**: Vault scheduled 90-day rotation: `PAYGATE_API_KEY` rotated from `v7` to `v8` (old key revoked at vendor).\\n- **2026-08-30T03:12:00Z**: `payments-api` alert fires (`charge_failed rate 100% for 4m`).\\n- **Investigation**: Inspected config (`PAYGATE_API_KEY_VERSION: v7 (loaded at process start 3d ago)`), logs (`401 invalid_api_key`), and probed `paygate` (confirmed vendor healthy, v7 revoked, v8 active).\\n\\n## Root Cause\\n`secret_rotation`: Vault rotated the API key from `v7` to `v8` and revoked `v7`, but `payments-api` loads secrets at process start and was not restarted to pick up the new key `v8`.\\n\\n## Evidence\\n- `get_alert`: `payments-api` status `down`, `charge_failed rate 100% for 4m`.\\n- `recent_changes`: Vault rotation of `PAYGATE_API_KEY` from `v7` to `v8` at 03:04:00Z with explicit instruction that consumers must reload the secret (`payments-api reads it at process start`).\\n- `get_config`: `payments-api` showing config `PAYGATE_API_KEY_VERSION: v7 (loaded at process start 3d ago)`.\\n- `query_logs`: Continuous `ERROR payments-api: paygate request failed: status=401 body={\\\"error\\\":\\\"invalid_api_key\\\",\\\"key_version\\\":\\\"v7\\\"}`.\\n- `run_probe`: HTTP probe to `https://api.paygate.example/status` confirmed vendor healthy with note `key v7 revoked 8 min ago, v8 active`.\\n\\n## Proposed Remediation\\nRestart `payments-api` (`restart_service`) to force the service to load the new Vault secret (`v8`). This is safe and standard for config/secret updates where dynamic reloading is not implemented.\\n\\n## Follow-ups\\n- Implement dynamic secret reloading or runtime secret fetching in `payments-api` so future Vault rotations do not require manual process restarts.\",\"target\":\"payments-api\",\"service\":\"payments-api\",\"evidence\":[\"get_alert showed payments-api down with charge_failed rate 100%\",\"recent_changes showed vault rotated PAYGATE_API_KEY from v7 to v8 at 03:04:00.000Z with note: consumers must reload the secret; payments-api reads it at process start\",\"get_config showed payments-api config has PAYGATE_API_KEY_VERSION: v7 (loaded at process start 3d ago)\",\"query_logs showed payments-api logging 401 invalid_api_key for key_version=v7\",\"run_probe verified paygate vendor API is healthy but reports key v7 revoked and v8 active\"],\"summary\":\"payments-api failing with 100% charge failures due to using revoked API key v7 after Vault secret rotation to v8\",\"action\":\"restart_service\",\"root_cause\":\"secret_rotation\"}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TNDysmoceyrP3XZbDonZ1GEvstoT6+VFurYipkK2RBk1yRtBg5++MhOHiAPkyISbhqtDOEu+xC49CiLS4ZJ3aLgd0ndzwWCT88PQp6rXOUGsjNHkMajskW7U="
+}
+}
+}
+],
+"content": ""
+}
+}

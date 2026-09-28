@@ -1,0 +1,48 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_933588",
+"name": "submit_verdict",
+"arguments": {
+"confidence": 1,
+"service": "inventory-api",
+"report_markdown": "# Incident Report: inventory-api Authentication Failures Due to Clock Skew\n\n## Summary\nAt 2026-08-30T03:12:00Z, an alert fired for high 401 rates on `/v1/inventory/*` via `api-gateway`. Investigation revealed that `inventory-api` pods were rejecting valid JWTs because their system clocks were ~287 seconds behind actual time, causing tokens issued by `auth-api` to appear as \"not yet valid\" (`nbf` in the future).\n\n## Timeline\n- **2026-08-30T02:14:00Z**: `ops-bot` reschedules `inventory-api` pods from node `inv-2` to node `inv-5` during a node drain. Node `inv-5` had chrony installed last week, but the chrony service unit was not enabled or running.\n- **2026-08-30T02:31:00Z**: `auth-api` rotates its JWT signing key (version `2026-09b`).\n- **2026-08-30T02:54:52Z onwards**: `inventory-api` begins rejecting incoming JWTs with `jwt rejected: token not yet valid (nbf in the future by 287s)`.\n- **2026-08-30T03:12:00Z**: `api-gateway` alerts on elevated 401 error rate (~68%) for `/v1/inventory/*`.\n\n## Root Cause\n**Clock skew** (`clock_skew`). When `inventory-api` pods were moved to node `inv-5`, they landed on a node where `chronyd` was not running, leading to significant clock drift (-287.4 seconds). Consequently, JWT validation checks failed because tokens minted by `auth-api` had an `nbf` timestamp in the future relative to `inventory-api`'s local clock.\n\n## Evidence\n1. **Logs**: `inventory-api` logs flooded with `WARN inventory-api: jwt rejected: token not yet valid (nbf in the future by 287s)`.\n2. **Metrics**: `inventory-api.error_rate_pct` spiked from ~0.4% to ~68% starting at ~02:14Z / 02:54Z.\n3. **Probe**: `run_probe` on `inventory-api` (node `inv-5`) reported: `ntp offset -287.4s — chronyd inactive (unit disabled)`.\n\n## Proposed Remediation\n1. Enable and start `chronyd` on node `inv-5` (or sync clock via NTP).\n2. Alternatively, run `sync_clock` action on `inventory-api` / node `inv-5`.\n\nThis is completely safe as it synchronizes system time to correct time drift without restarting application services or altering persistent data.\n",
+"action": "sync_clock",
+"target": "inventory-api",
+"root_cause": "clock_skew",
+"summary": "inventory-api pods on node inv-5 suffered a 287s clock skew due to disabled chronyd, causing JWT validation failures (nbf in the future).",
+"evidence": [
+"inventory-api logs show JWT rejection: token not yet valid (nbf in the future by ~287s)",
+"recent_changes show inventory-api pods were rescheduled to node inv-5 where chrony unit is present but not enabled",
+"run_probe clock on inventory-api confirms ntp offset -287.4s with chronyd inactive"
+]
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4177,
+"output_tokens": 846,
+"latency_ms": 3966,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_933588",
+"function": {
+"arguments": "{\"confidence\":1,\"service\":\"inventory-api\",\"report_markdown\":\"# Incident Report: inventory-api Authentication Failures Due to Clock Skew\\n\\n## Summary\\nAt 2026-08-30T03:12:00Z, an alert fired for high 401 rates on `/v1/inventory/*` via `api-gateway`. Investigation revealed that `inventory-api` pods were rejecting valid JWTs because their system clocks were ~287 seconds behind actual time, causing tokens issued by `auth-api` to appear as \\\"not yet valid\\\" (`nbf` in the future).\\n\\n## Timeline\\n- **2026-08-30T02:14:00Z**: `ops-bot` reschedules `inventory-api` pods from node `inv-2` to node `inv-5` during a node drain. Node `inv-5` had chrony installed last week, but the chrony service unit was not enabled or running.\\n- **2026-08-30T02:31:00Z**: `auth-api` rotates its JWT signing key (version `2026-09b`).\\n- **2026-08-30T02:54:52Z onwards**: `inventory-api` begins rejecting incoming JWTs with `jwt rejected: token not yet valid (nbf in the future by 287s)`.\\n- **2026-08-30T03:12:00Z**: `api-gateway` alerts on elevated 401 error rate (~68%) for `/v1/inventory/*`.\\n\\n## Root Cause\\n**Clock skew** (`clock_skew`). When `inventory-api` pods were moved to node `inv-5`, they landed on a node where `chronyd` was not running, leading to significant clock drift (-287.4 seconds). Consequently, JWT validation checks failed because tokens minted by `auth-api` had an `nbf` timestamp in the future relative to `inventory-api`'s local clock.\\n\\n## Evidence\\n1. **Logs**: `inventory-api` logs flooded with `WARN inventory-api: jwt rejected: token not yet valid (nbf in the future by 287s)`.\\n2. **Metrics**: `inventory-api.error_rate_pct` spiked from ~0.4% to ~68% starting at ~02:14Z / 02:54Z.\\n3. **Probe**: `run_probe` on `inventory-api` (node `inv-5`) reported: `ntp offset -287.4s — chronyd inactive (unit disabled)`.\\n\\n## Proposed Remediation\\n1. Enable and start `chronyd` on node `inv-5` (or sync clock via NTP).\\n2. Alternatively, run `sync_clock` action on `inventory-api` / node `inv-5`.\\n\\nThis is completely safe as it synchronizes system time to correct time drift without restarting application services or altering persistent data.\\n\",\"action\":\"sync_clock\",\"target\":\"inventory-api\",\"root_cause\":\"clock_skew\",\"summary\":\"inventory-api pods on node inv-5 suffered a 287s clock skew due to disabled chronyd, causing JWT validation failures (nbf in the future).\",\"evidence\":[\"inventory-api logs show JWT rejection: token not yet valid (nbf in the future by ~287s)\",\"recent_changes show inventory-api pods were rescheduled to node inv-5 where chrony unit is present but not enabled\",\"run_probe clock on inventory-api confirms ntp offset -287.4s with chronyd inactive\"]}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0Tpqa0flKRkrvQAYGeSkgP5thuH5ZBsUSC3f+W3pCceMVJUud6TsyeEINam4QyhhKPU9OaqILQ2eNpcxcA6rCd03AepAeikHhwv1nkcwlygJwtlbA2hWuwn4I="
+}
+}
+}
+],
+"content": ""
+}
+}

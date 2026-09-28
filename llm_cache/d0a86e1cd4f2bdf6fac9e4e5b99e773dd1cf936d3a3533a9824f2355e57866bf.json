@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_d21f00ba-d446-4ec7-9979-b7658a65e079",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "https://api.paygate.example/v2/charge"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3914,
+"output_tokens": 64,
+"latency_ms": 1270,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_d21f00ba-d446-4ec7-9979-b7658a65e079",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"https://api.paygate.example/v2/charge\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"reasoning": "The health endpoint returns 200, so PayGate is up. Maybe the specific charge endpoint path is different. Let's probe a charge endpoint: maybe /charge.",
+"content": ""
+}
+}

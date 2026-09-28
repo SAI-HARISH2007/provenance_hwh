@@ -1,0 +1,35 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_50dcb685-8a44-4813-bbc5-4d9fb2479ce5",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"service": "api-gateway",
+"target": "api-gateway"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3060,
+"output_tokens": 151,
+"latency_ms": 932,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_50dcb685-8a44-4813-bbc5-4d9fb2479ce5",
+"function": {
+"arguments": "{\"kind\":\"http\",\"service\":\"api-gateway\",\"target\":\"api-gateway\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"reasoning": "Config doesn't show JWKS. Maybe stored elsewhere. Could be that api-gateway caches JWKS for 5 minutes, but rotation happened at 02:31, and tokens now signed with new kid. If cache TTL is longer, verification fails until cache refresh. But error rate spiked and persists (still high). Maybe JWKS fetch failing due to DNS resolution? Let's probe DNS for auth-api JWKS endpoint. Assume hostname jwks.auth.internal. Not known. Could probe auth-api health endpoint.Run HTTP probe to inventory endpoint via gateway to see response.",
+"content": ""
+}
+}

@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_2215069",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "https://api.paygate.example/v2/health"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4256,
+"output_tokens": 34,
+"latency_ms": 1414,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_2215069",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"https://api.paygate.example/v2/health\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TXDK28QZ44EEOhJn3mEOGz0N/1naWQdFBq8P/kzg4MDtERDK2jGHnuf2uzYDaoc/R9We3dI2iLu2oGSrHBnoaqjgxwWN5S0I7oHtKW9F1XuKW85tq66Qx47o="
+}
+}
+}
+],
+"content": ""
+}
+}

@@ -1,0 +1,65 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "function-call-767084312196661106",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"service": "orders-api"
+}
+},
+{
+"id": "function-call-767084312196657889",
+"name": "get_metrics",
+"arguments": {
+"service": "postgres",
+"metric": "connections_used"
+}
+},
+{
+"id": "function-call-767084312196658768",
+"name": "get_metrics",
+"arguments": {
+"metric": "locks_waiting",
+"service": "postgres"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 1979,
+"output_tokens": 66,
+"latency_ms": 3315,
+"model": "gemini-2.5-flash",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "function-call-767084312196661106",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"service\":\"orders-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+},
+{
+"id": "function-call-767084312196657889",
+"function": {
+"arguments": "{\"service\":\"postgres\",\"metric\":\"connections_used\"}",
+"name": "get_metrics"
+},
+"type": "function"
+},
+{
+"id": "function-call-767084312196658768",
+"function": {
+"arguments": "{\"metric\":\"locks_waiting\",\"service\":\"postgres\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

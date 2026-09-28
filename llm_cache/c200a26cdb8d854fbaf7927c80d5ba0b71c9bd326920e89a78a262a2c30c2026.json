@@ -1,0 +1,14 @@
+{
+"text": " if a token has a TTL of 15 minutes (900 seconds), and payments-api's clock is 411 seconds behind.\nIf payments-api's clock is 411 seconds behind, then when it receives a token issued at $T$, its local time is $T - 411$.\nThe token's `iat` is $T$.\nSince local time $T - 411 < T$, the token is \"not yet valid\" (used before issued) because $T - 411 < T$.\nWait, why didn't this happen for RS256 tokens?\nMaybe the RS256 verification in payments-api didn't check `iat`? Or maybe the clock skew only started",
+"tool_calls": [],
+"stop_reason": "length",
+"input_tokens": 22099,
+"output_tokens": 164,
+"latency_ms": 16345,
+"model": "gemini-3.5-flash",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"content": " if a token has a TTL of 15 minutes (900 seconds), and payments-api's clock is 411 seconds behind.\nIf payments-api's clock is 411 seconds behind, then when it receives a token issued at $T$, its local time is $T - 411$.\nThe token's `iat` is $T$.\nSince local time $T - 411 < T$, the token is \"not yet valid\" (used before issued) because $T - 411 < T$.\nWait, why didn't this happen for RS256 tokens?\nMaybe the RS256 verification in payments-api didn't check `iat`? Or maybe the clock skew only started"
+}
+}

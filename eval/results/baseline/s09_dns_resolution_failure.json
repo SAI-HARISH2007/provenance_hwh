@@ -1,0 +1,31 @@
+{
+  "case_id": "s09_dns_resolution_failure",
+  "verdict": {
+    "root_cause": "bad_config_deploy",
+    "service": "orders-api",
+    "action": "update_config",
+    "target": "orders-api",
+    "confidence": 1.0,
+    "summary": "The inventory-api service was migrated to a new namespace ('fulfilment') and its old DNS name was retired, while orders-api was deployed with a stale dependency URL pointing to the old DNS name (`inventory-api.default.svc:8080`).",
+    "evidence": [
+      "2026-08-30T02:48:00.000Z [infra] inventory-api: migrate service to new namespace 'fulfilment' (old DNS name retired)",
+      "ERROR orders-api: inventory client: request failed dial tcp inventory-api.default.svc:8080: i/o timeout"
+    ],
+    "report_markdown": "# Incident Report: Orders-API Inventory Dependency Errors\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, `orders-api` experienced a P1 alert due to high error rates (47.28%) communicating with its inventory dependency. This was caused by a recent infrastructure migration where `inventory-api` moved to a new namespace (`fulfilment`), retiring its old DNS endpoint while `orders-api` was configured with the outdated connection string.\n\n## Timeline\n- **02:46:00.000Z**: `orders-api` deployed version `orders-3.8.2` (inventory client timeout/retries change).\n- **02:48:00.000Z**: `inventory-api` migrated to namespace `fulfilment` and old DNS name retired.\n- **02:49:25.000Z**: `orders-api` begins logging TCP connection timeouts to `inventory-api.default.svc:8080`.\n- **03:12:00.000Z**: P1 alert fires for `orders-api` inventory dependency errors.\n\n## Root Cause\nThe `inventory-api` service was migrated to a new Kubernetes namespace (`fulfilment`), retiring the old DNS name (`inventory-api.default.svc`). `orders-api` is attempting to reach the retired DNS address, resulting in TCP i/o timeouts.\n\n## Evidence\n- Infrastructure log: `2026-08-30T02:48:00.000Z [infra] inventory-api: migrate service to new namespace 'fulfilment' (old DNS name retired)`\n- Application log: `ERROR orders-api: inventory client: request failed dial tcp inventory-api.default.svc:8080: i/o timeout`\n\n## Remediation\nUpdate the `orders-api` configuration/environment variables to point to the new inventory service DNS name in the `fulfilment` namespace (e.g., `inventory-api.fulfilment.svc:8080`).\n\n## Follow-ups\n1. Ensure service dependency endpoints are updated dynamically or validated via integration tests prior to namespace migrations.\n2. Implement alerting for unresolved DNS or persistent downstream connection failures during infrastructure migrations."
+  },
+  "variant": "baseline",
+  "run_id": "20260927T092400Z_baseline-s09-dns-resolution-failure",
+  "trace": "traces/20260927T092400Z_baseline-s09-dns-resolution-failure.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "provider": "gemini",
+  "status": "success",
+  "llm_calls": 1,
+  "input_tokens": 4447,
+  "output_tokens": 759,
+  "would_be_cost_usd": 0.00075,
+  "wall_s": 0.0,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

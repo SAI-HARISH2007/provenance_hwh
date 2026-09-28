@@ -1,0 +1,35 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_1785136",
+"name": "get_alert",
+"arguments": {}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2936,
+"output_tokens": 10,
+"latency_ms": 1436,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_1785136",
+"function": {
+"arguments": "{}",
+"name": "get_alert"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0T/FLlgleT0xiDDsYhJmodS0UDmYFJVl9gZgmLfL31voaR+1BR161drwbuuX+a1fkFmDoiho9ZxUKcbCTphWcKT+L8NbcJQqKzOwG6PEw3Un57xY1M7eghwnU="
+}
+}
+}
+],
+"content": ""
+}
+}

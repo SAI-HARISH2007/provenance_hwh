@@ -1,0 +1,32 @@
+{
+  "case_id": "s06_memory_leak_oom",
+  "verdict": {
+    "root_cause": "memory_leak_oom",
+    "service": "inventory-api",
+    "action": "rollback_deploy",
+    "target": "inventory-api",
+    "confidence": 0.95,
+    "summary": "The newly deployed in-process SKU cache in version inventory-1.10.0 introduced a memory leak leading to high heap pressure, OOM pod restarts, and an elevated error rate.",
+    "evidence": [
+      "2026-08-30T01:37:00.000Z [deploy] inventory-api: inventory-1.10.0: in-process SKU cache for hot items",
+      "inventory-api: mem_pct: now 95.097 (max 98.551); restarts: now 6",
+      "WARN inventory-api: gc pressure: heap ... rss growing"
+    ],
+    "report_markdown": "# Incident Report: inventory-api Memory Exhaustion and Restarts\n\n## Summary\nAt 2026-08-30T03:12:00Z, an alert fired for `inventory-api` due to frequent pod restarts (6 restarts in 10 minutes) and an error rate spike of ~22%. The root cause was traced back to a recent deployment introducing an unbounded in-process SKU cache causing severe memory leaks and OOM kills.\n\n## Timeline\n- **01:37** - `inventory-1.10.0` deployed with an in-process SKU cache for hot items.\n- **02:49 - 03:04** - Frequent GC pressure warnings logged as heap usage approaches limits.\n- **03:12** - Alert fires for `inventory-api` pod restarts and 22% error rate.\n\n## Root Cause\nA memory leak caused by the newly introduced in-process cache in `inventory-1.10.0`, resulting in OOM-induced pod restarts and degraded service.\n\n## Evidence\n- Recent deployment: `inventory-api: inventory-1.10.0: in-process SKU cache for hot items`\n- Metric spikes: `inventory-api` memory at 95.1% and 6 pod restarts.\n- Log warnings: Repeated `WARN inventory-api: gc pressure: heap ... rss growing` messages.\n\n## Remediation\n- Roll back `inventory-api` to the previous stable version (`inventory-1.9.x`).\n\n## Follow-ups\n1. Audit in-process caching logic to ensure proper TTL/eviction and size limits.\n2. Add memory utilization alerts before pods hit OOM thresholds."
+  },
+  "variant": "baseline",
+  "run_id": "20260830T025657Z_baseline-s06-memory-leak-oom",
+  "trace": "traces/20260830T025657Z_baseline-s06-memory-leak-oom.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "provider": "gemini",
+  "status": "success",
+  "llm_calls": 1,
+  "input_tokens": 4246,
+  "output_tokens": 621,
+  "would_be_cost_usd": 0.0,
+  "wall_s": 3.52,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

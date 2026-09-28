@@ -1,0 +1,37 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_540498",
+"name": "get_config",
+"arguments": {
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3860,
+"output_tokens": 18,
+"latency_ms": 1640,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_540498",
+"function": {
+"arguments": "{\"service\":\"payments-api\"}",
+"name": "get_config"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPmW1xRuQkXwm+TB+Bbp7HmftNdrU/abxoq8q/3kx6BwzTj6abf6shJLrReJrv/FrsInrkSjXfMJXLV/hyNdVeE5dCci/wdE1OIZnUbpasCEqscve8yjxW"
+}
+}
+}
+],
+"content": ""
+}
+}

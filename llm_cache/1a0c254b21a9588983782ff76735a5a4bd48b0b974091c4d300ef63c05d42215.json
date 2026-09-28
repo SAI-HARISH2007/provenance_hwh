@@ -1,0 +1,48 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_557613",
+"name": "submit_verdict",
+"arguments": {
+"action": "rollback_deploy",
+"target": "inventory-api",
+"confidence": 1,
+"evidence": [
+"inventory-api container exited with code 137 (OOM killed) repeatedly starting right after deploy inventory-1.10.0 (in-process SKU cache for hot items) at 2026-08-30T01:37:00.000Z",
+"inventory-api mem_pct steadily climbed to over 98% following the deploy",
+"recent_changes shows deploy inventory-1.10.0 added in-process cache without eviction limits or memory bounds"
+],
+"summary": "inventory-api OOM killed (exit code 137) due to unconstrained in-process SKU cache added in inventory-1.10.0.",
+"report_markdown": "# Incident Report: inventory-api Memory Exhaustion & OOM Kills\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, `inventory-api` began paging due to container restarts and high error rates (22%). Investigation revealed that `inventory-api` containers were repeatedly exiting with code 137 (OOM killed) due to unconstrained memory growth following the deployment of version `inventory-1.10.0`.\n\n## Timeline\n- **2026-08-30T01:37:00.000Z**: `inventory-1.10.0` deployed (\"in-process SKU cache for hot items\").\n- **2026-08-30T02:42:42.000Z**: First OOM kill (code 137) observed in `inventory-api` logs as memory utilization reached 98.5%.\n- **2026-08-30T03:12:00.000Z**: Alert fires for `inventory-api` pod restarts and error rate.\n\n## Root Cause\n**Memory Leak / OOM (`memory_leak_oom`)**: The newly introduced in-process SKU cache in `inventory-1.10.0` lacks an item eviction policy or maximum capacity limit, causing unbounded memory consumption over time until the container hits its memory limit and is OOM-killed (exit code 137).\n\n## Evidence\n- `recent_changes`: Deploy `inventory-1.10.0` added \"in-process SKU cache for hot items\".\n- `query_logs` on `inventory-api`: Multiple log entries showing `container exited (code 137); restarting`.\n- `get_metrics` (`mem_pct`): Steady climb in memory usage from ~50% up to 98.5% following the deploy.\n\n## Proposed Remediation\n**Rollback deploy (`rollback_deploy`)** of `inventory-api` to version `inventory-3.8.1` (or the previous stable version `inventory-1.9.x` / prior deployment).\n*Why it is safe*: Reverting the faulty binary immediately removes the unconstrained in-process cache, restoring stable memory utilization.\n\n## Follow-ups\n1. Implement max size / LRU eviction policy for the in-process SKU cache before re-introducing it.\n2. Add container memory alerts / metrics dashboards.",
+"root_cause": "memory_leak_oom",
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3130,
+"output_tokens": 764,
+"latency_ms": 3926,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_557613",
+"function": {
+"arguments": "{\"action\":\"rollback_deploy\",\"target\":\"inventory-api\",\"confidence\":1,\"evidence\":[\"inventory-api container exited with code 137 (OOM killed) repeatedly starting right after deploy inventory-1.10.0 (in-process SKU cache for hot items) at 2026-08-30T01:37:00.000Z\",\"inventory-api mem_pct steadily climbed to over 98% following the deploy\",\"recent_changes shows deploy inventory-1.10.0 added in-process cache without eviction limits or memory bounds\"],\"summary\":\"inventory-api OOM killed (exit code 137) due to unconstrained in-process SKU cache added in inventory-1.10.0.\",\"report_markdown\":\"# Incident Report: inventory-api Memory Exhaustion & OOM Kills\\n\\n## Summary\\nAt 2026-08-30T03:12:00.000Z, `inventory-api` began paging due to container restarts and high error rates (22%). Investigation revealed that `inventory-api` containers were repeatedly exiting with code 137 (OOM killed) due to unconstrained memory growth following the deployment of version `inventory-1.10.0`.\\n\\n## Timeline\\n- **2026-08-30T01:37:00.000Z**: `inventory-1.10.0` deployed (\\\"in-process SKU cache for hot items\\\").\\n- **2026-08-30T02:42:42.000Z**: First OOM kill (code 137) observed in `inventory-api` logs as memory utilization reached 98.5%.\\n- **2026-08-30T03:12:00.000Z**: Alert fires for `inventory-api` pod restarts and error rate.\\n\\n## Root Cause\\n**Memory Leak / OOM (`memory_leak_oom`)**: The newly introduced in-process SKU cache in `inventory-1.10.0` lacks an item eviction policy or maximum capacity limit, causing unbounded memory consumption over time until the container hits its memory limit and is OOM-killed (exit code 137).\\n\\n## Evidence\\n- `recent_changes`: Deploy `inventory-1.10.0` added \\\"in-process SKU cache for hot items\\\".\\n- `query_logs` on `inventory-api`: Multiple log entries showing `container exited (code 137); restarting`.\\n- `get_metrics` (`mem_pct`): Steady climb in memory usage from ~50% up to 98.5% following the deploy.\\n\\n## Proposed Remediation\\n**Rollback deploy (`rollback_deploy`)** of `inventory-api` to version `inventory-3.8.1` (or the previous stable version `inventory-1.9.x` / prior deployment).\\n*Why it is safe*: Reverting the faulty binary immediately removes the unconstrained in-process cache, restoring stable memory utilization.\\n\\n## Follow-ups\\n1. Implement max size / LRU eviction policy for the in-process SKU cache before re-introducing it.\\n2. Add container memory alerts / metrics dashboards.\",\"root_cause\":\"memory_leak_oom\",\"service\":\"inventory-api\"}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPGdRt5QItuJFXe3rvtA9GDx6pO4CMLcw7Uy4YKEf4Y0kF3YyY43//c3SmzzmnsyyKC2Aks159BXC2PMBQoO95K5nje2pRioh8eRBa2BtDI8OSYzCDMVqc"
+}
+}
+}
+],
+"content": ""
+}
+}

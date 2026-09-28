@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_d141f833-2b49-4453-a7ba-42bf6703f360",
+"name": "run_probe",
+"arguments": {
+"kind": "clock",
+"target": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4200,
+"output_tokens": 81,
+"latency_ms": 898,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_d141f833-2b49-4453-a7ba-42bf6703f360",
+"function": {
+"arguments": "{\"kind\":\"clock\",\"target\":\"payments-api\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"reasoning": "Maybe clock skew after host reboot causing JWT validation failures. The auth-api config allows 30s skew. If payments-api node clock is off >30s, verification fails. Let's probe clock offset on payments-api node. Need target: maybe \"payments-api\". Use kind clock.",
+"content": ""
+}
+}

@@ -1,0 +1,50 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_2453382",
+"name": "submit_verdict",
+"arguments": {
+"evidence": [
+"get_alert: payments-api is down with charge_failed rate 100%",
+"recent_changes: Vault rotated PAYGATE_API_KEY v7 -> v8 at 2026-08-30T03:04:00.000Z, and old key was revoked at vendor",
+"query_logs: payments-api logs show paygate requests failing with status=401 invalid_api_key (key_version=v7)",
+"run_probe: probe to api.paygate.example shows vendor is healthy, noting key v7 revoked 8 min ago, v8 active",
+"get_config: payments-api config shows PAYGATE_API_KEY_VERSION: v7 (loaded at process start 3d ago)"
+],
+"target": "payments-api",
+"confidence": 1,
+"action": "restart_service",
+"summary": "payments-api is failing all charges with 401 Unauthorized because Vault rotated PAYGATE_API_KEY from v7 to v8 and revoked v7, but payments-api caches secrets at startup and is still using v7.",
+"report_markdown": "# Incident Report: payments-api Secret Rotation Failure\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, `payments-api` experienced a 100% charge failure rate, causing `api-gateway` to become degraded and triggering a P1 page. The root cause is a secret rotation (`PAYGATE_API_KEY v7 -> v8`) that occurred at 03:04 UTC where the old key was revoked at the vendor. Because `payments-api` caches secrets at process start time, it continued using the revoked key version `v7`, resulting in 401 Unauthorized responses from Paygate.\n\n## Timeline\n- **2026-08-30T03:01:00.000Z**: `payments-api` deployed version `payments-2.16.0` (retry jitter).\n- **2026-08-30T03:04:00.000Z**: Vault scheduled 90-day rotation: `PAYGATE_API_KEY` rotated from `v7` to `v8`, and `v7` was revoked at the vendor.\n- **2026-08-30T03:12:00.000Z**: `payments-api` alert fires due to 100% charge failures.\n\n## Root Cause\n`secret_rotation`: `payments-api` holds the API key in memory from process start time and did not pick up the new `v8` key after Vault rotation, resulting in authentication failures against Paygate.\n\n## Evidence\n- `get_alert`: `payments-api` service status is `down`, `charge_failed rate 100%`.\n- `recent_changes`: Vault 90-day rotation at 03:04:00 UTC moved `PAYGATE_API_KEY` from `v7` to `v8` and revoked `v7`.\n- `query_logs`: `payments-api` logs show continuous `401` errors with `body={\"error\":\"invalid_api_key\",\"key_version\":\"v7\"}`.\n- `run_probe`: Probe to `api.paygate.example` succeeded (200 OK) with the note: \"key v7 revoked 8 min ago, v8 active\".\n- `get_config`: `payments-api` config confirmed `PAYGATE_API_KEY_VERSION: v7 (loaded at process start 3d ago)`.\n\n## Proposed Remediation\nRestart `payments-api` (`restart_service`) to force it to reload the new secret (`v8`) from Vault upon startup. This is safe and standard practice for non-dynamic secret configuration.\n",
+"root_cause": "secret_rotation",
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4404,
+"output_tokens": 901,
+"latency_ms": 4037,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_2453382",
+"function": {
+"arguments": "{\"evidence\":[\"get_alert: payments-api is down with charge_failed rate 100%\",\"recent_changes: Vault rotated PAYGATE_API_KEY v7 -\\u003e v8 at 2026-08-30T03:04:00.000Z, and old key was revoked at vendor\",\"query_logs: payments-api logs show paygate requests failing with status=401 invalid_api_key (key_version=v7)\",\"run_probe: probe to api.paygate.example shows vendor is healthy, noting key v7 revoked 8 min ago, v8 active\",\"get_config: payments-api config shows PAYGATE_API_KEY_VERSION: v7 (loaded at process start 3d ago)\"],\"target\":\"payments-api\",\"confidence\":1,\"action\":\"restart_service\",\"summary\":\"payments-api is failing all charges with 401 Unauthorized because Vault rotated PAYGATE_API_KEY from v7 to v8 and revoked v7, but payments-api caches secrets at startup and is still using v7.\",\"report_markdown\":\"# Incident Report: payments-api Secret Rotation Failure\\n\\n## Summary\\nAt 2026-08-30T03:12:00.000Z, `payments-api` experienced a 100% charge failure rate, causing `api-gateway` to become degraded and triggering a P1 page. The root cause is a secret rotation (`PAYGATE_API_KEY v7 -\\u003e v8`) that occurred at 03:04 UTC where the old key was revoked at the vendor. Because `payments-api` caches secrets at process start time, it continued using the revoked key version `v7`, resulting in 401 Unauthorized responses from Paygate.\\n\\n## Timeline\\n- **2026-08-30T03:01:00.000Z**: `payments-api` deployed version `payments-2.16.0` (retry jitter).\\n- **2026-08-30T03:04:00.000Z**: Vault scheduled 90-day rotation: `PAYGATE_API_KEY` rotated from `v7` to `v8`, and `v7` was revoked at the vendor.\\n- **2026-08-30T03:12:00.000Z**: `payments-api` alert fires due to 100% charge failures.\\n\\n## Root Cause\\n`secret_rotation`: `payments-api` holds the API key in memory from process start time and did not pick up the new `v8` key after Vault rotation, resulting in authentication failures against Paygate.\\n\\n## Evidence\\n- `get_alert`: `payments-api` service status is `down`, `charge_failed rate 100%`.\\n- `recent_changes`: Vault 90-day rotation at 03:04:00 UTC moved `PAYGATE_API_KEY` from `v7` to `v8` and revoked `v7`.\\n- `query_logs`: `payments-api` logs show continuous `401` errors with `body={\\\"error\\\":\\\"invalid_api_key\\\",\\\"key_version\\\":\\\"v7\\\"}`.\\n- `run_probe`: Probe to `api.paygate.example` succeeded (200 OK) with the note: \\\"key v7 revoked 8 min ago, v8 active\\\".\\n- `get_config`: `payments-api` config confirmed `PAYGATE_API_KEY_VERSION: v7 (loaded at process start 3d ago)`.\\n\\n## Proposed Remediation\\nRestart `payments-api` (`restart_service`) to force it to reload the new secret (`v8`) from Vault upon startup. This is safe and standard practice for non-dynamic secret configuration.\\n\",\"root_cause\":\"secret_rotation\",\"service\":\"payments-api\"}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0T1NOUN5ZSngUb6WD+UDenQS/iMltsMbe4jpgRTVNuUMrJxk+eoKs4haOLzTuR2YZdemA3lwTpiLpX44V128T/k1rxhGDOgLNDrI5Lc/sycB3yHcaicPWJIqE="
+}
+}
+}
+],
+"content": ""
+}
+}

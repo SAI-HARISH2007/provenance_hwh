@@ -1,0 +1,54 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_2899048",
+"name": "run_probe",
+"arguments": {
+"kind": "clock",
+"target": "auth-api"
+}
+},
+{
+"id": "call_2899049",
+"name": "run_probe",
+"arguments": {
+"kind": "clock",
+"target": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4170,
+"output_tokens": 48,
+"latency_ms": 1061,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_2899048",
+"function": {
+"arguments": "{\"kind\":\"clock\",\"target\":\"auth-api\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0T7sx5i5IYh87+HNDWEyh62M8/XYjO4YKog7Tn+eLWAEDiyvBBiyVRqG+FaQrMelIJG1xJArIe/10yOvoiZjdAUKIYRisa2VxMLmASPFZdOfthZuwtxpTtgfM="
+}
+}
+},
+{
+"id": "call_2899049",
+"function": {
+"arguments": "{\"kind\":\"clock\",\"target\":\"payments-api\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

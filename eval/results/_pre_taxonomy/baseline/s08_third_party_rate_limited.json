@@ -1,0 +1,32 @@
+{
+  "case_id": "s08_third_party_rate_limited",
+  "verdict": {
+    "root_cause": "third_party_rate_limited",
+    "service": "worker",
+    "action": "rollback_deploy",
+    "target": "worker",
+    "confidence": 0.95,
+    "summary": "The worker service was deployed with a high-concurrency refund backfill job sharing the production PayGate API key, exhausting the API rate limits and causing 429 Too Many Requests errors in payments-api.",
+    "evidence": [
+      "2026-08-30T02:46:00.000Z [deploy] worker: worker-1.4.1: one-off refund backfill job (18k refunds) at concurrency 32 (priya)",
+      "backfill calls PayGate /refunds directly, sharing the production API key",
+      "ERROR payments-api: paygate 429 Too Many Requests retry-after=30 (limit 600/min for key pk_live_…c9)"
+    ],
+    "report_markdown": "# Incident Report: Payments API Rate Limited by Vendor\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, the `payments-api` service triggered an alert due to a 38% charge failure rate returning HTTP 429 errors from the vendor (PayGate). Investigation revealed that a concurrent background job in the `worker` service was exhausting the shared API rate limit.\n\n## Timeline\n- **00:12**: `payments-api` deployed version `payments-2.14.0` (retry idempotency keys).\n- **02:46**: `worker` deployed version `worker-1.4.1` with a high-concurrency (32) refund backfill job (18k refunds) calling PayGate directly using the shared production API key.\n- **02:47**: First rate limit (429 Too Many Requests) errors logged in `payments-api` due to API key saturation.\n- **03:12**: Alert fires: `charge_failed 38% (HTTP 429 from vendor)`.\n\n## Root Cause\nThe `worker` service deployment introduced a high-concurrency refund backfill job that saturated the shared PayGate API key rate limit (600 requests/min), starving legitimate transaction requests from `payments-api`.\n\n## Evidence\n- Recent changes log showing the worker backfill job deployment at 02:46.\n- Persistent `paygate 429 Too Many Requests` log entries matching the time of the worker deployment.\n- Error rate spike on `payments-api` reaching ~38%.\n\n## Remediation\n- Rollback or stop the offending background job/deployment on the `worker` service to immediately free up API rate limit quota.\n\n## Follow-ups\n- Ensure background jobs and backfill scripts utilize dedicated API keys or rate limiters.\n- Implement circuit breakers and better isolation for third-party vendor integrations."
+  },
+  "variant": "baseline",
+  "run_id": "20260830T025705Z_baseline-s08-third-party-rate-limited",
+  "trace": "traces/20260830T025705Z_baseline-s08-third-party-rate-limited.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "provider": "gemini",
+  "status": "success",
+  "llm_calls": 1,
+  "input_tokens": 4791,
+  "output_tokens": 698,
+  "would_be_cost_usd": 0.0,
+  "wall_s": 3.34,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

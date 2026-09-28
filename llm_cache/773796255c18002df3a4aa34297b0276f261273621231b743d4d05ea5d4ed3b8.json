@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_2463008",
+"name": "run_probe",
+"arguments": {
+"target": "http://inventory-api.fulfilment.svc:8080/health",
+"kind": "http"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4321,
+"output_tokens": 39,
+"latency_ms": 1285,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_2463008",
+"function": {
+"arguments": "{\"target\":\"http://inventory-api.fulfilment.svc:8080/health\",\"kind\":\"http\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TNe9ikaW8gmla2zSNx1B6Uo+EgLcxh0KYKrqpgEF/3Xvnz4WdIBov+9ATJgPaspPwdHjF7+H0NMNBy1QxD+HRduGlpC/vW60Yj3ERSrHNLmUvnHQKzvIoUmA="
+}
+}
+}
+],
+"content": ""
+}
+}

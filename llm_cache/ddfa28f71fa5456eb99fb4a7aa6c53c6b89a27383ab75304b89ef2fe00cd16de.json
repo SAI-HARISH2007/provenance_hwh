@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\n  \"approve\": true,\n  \"issues\": [],\n  \"suggested_checks\": [],\n  \"note\": \"Evidence is robust and directly supported by disk probe and postgres error logs showing disk exhaustion.\"\n}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 3724,
+"output_tokens": 53,
+"latency_ms": 1635,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\n  \"approve\": true,\n  \"issues\": [],\n  \"suggested_checks\": [],\n  \"note\": \"Evidence is robust and directly supported by disk probe and postgres error logs showing disk exhaustion.\"\n}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0To335ZKBz7zvcxyuxUsySHt0iQBNHSEeG+2dxWeSls0mhN/tWb8VxEXnikhH3rsUNuRShEFlnR8Opn/j+/UmwJgZYUwfHHpUTfH3ifQZnHixl0bD80T3ECMA="
+}
+}
+}
+}

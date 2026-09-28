@@ -1,0 +1,31 @@
+{
+  "case_id": "s02_bad_config_deploy",
+  "verdict": {
+    "root_cause": "bad_config_deploy",
+    "service": "payments-api",
+    "action": "rollback_deploy",
+    "target": "payments-api",
+    "confidence": 1.0,
+    "summary": "Recent deployment of payments-api migrated to incorrect PayGate v2 endpoints, resulting in 100% transaction failures.",
+    "evidence": [
+      "2026-08-30T03:03:00.000Z [deploy] payments-api: payments-2.15.0: migrate to PayGate v2 endpoints (dana) PAYGATE_URL: https://api.paygate.example -> https://api.paygate.example/v2/",
+      "ALERT: {'service': 'payments-api', 'severity': 'P1', 'message': 'charge_failed rate 100% for 4m', 'fired_at': '2026-08-30T03:12:00.000Z'}"
+    ],
+    "report_markdown": "# Incident Report: payments-api 100% Failure Rate\n\n## Summary\nAt 2026-08-30T03:12:00Z, an alert fired indicating a 100% failure rate for charges in `payments-api`. The incident was triggered by a recent deployment (`payments-2.15.0`) which introduced a misconfigured `PAYGATE_URL` pointing to an invalid `/v2/` endpoint.\n\n## Timeline\n- **2026-08-30T03:03:00.000Z**: `payments-api` deployed version `payments-2.15.0` updating `PAYGATE_URL` to include `/v2/`.\n- **2026-08-30T03:12:00.000Z**: `payments-api` alert fires (`charge_failed rate 100% for 4m`).\n\n## Root Cause\nA bad configuration/deploy in `payments-api` (`payments-2.15.0`) updated the `PAYGATE_URL` to an incorrect endpoint path (`https://api.paygate.example/v2/`), causing all downstream calls to fail.\n\n## Evidence\n- Recent changes log showing `payments-api` deploy at `03:03:00.000Z` migrating to PayGate v2 endpoints.\n- P1 Alert: `charge_failed rate 100% for 4m` starting shortly after the deployment.\n\n## Remediation\n- Roll back `payments-api` to the previous stable version or correct the `PAYGATE_URL` configuration.\n\n## Follow-ups\n- Verify PayGate v2 integration path requirements with the vendor before attempting future endpoint migrations.\n- Add integration tests verifying external payment gateway endpoints during deployment pipelines."
+  },
+  "variant": "baseline",
+  "run_id": "20260927T092359Z_baseline-s02-bad-config-deploy",
+  "trace": "traces/20260927T092359Z_baseline-s02-bad-config-deploy.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "provider": "gemini",
+  "status": "success",
+  "llm_calls": 1,
+  "input_tokens": 4310,
+  "output_tokens": 684,
+  "would_be_cost_usd": 0.0007,
+  "wall_s": 0.01,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

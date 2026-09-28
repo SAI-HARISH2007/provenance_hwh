@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_a5ae8305-8459-4535-918b-b46ed2921605",
+"name": "query_logs",
+"arguments": {
+"level": "INFO",
+"limit": 20,
+"pattern": "401",
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3844,
+"output_tokens": 56,
+"latency_ms": 914,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_a5ae8305-8459-4535-918b-b46ed2921605",
+"function": {
+"arguments": "{\"level\":\"INFO\",\"limit\":20,\"pattern\":\"401\",\"service\":\"payments-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Maybe the 401 is returned by payments-api itself due to auth failure. Let's query payments-api logs for \"401\".",
+"content": ""
+}
+}

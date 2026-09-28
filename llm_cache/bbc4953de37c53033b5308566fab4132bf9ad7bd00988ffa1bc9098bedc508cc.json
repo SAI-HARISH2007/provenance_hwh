@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_41792",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "http://auth-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4208,
+"output_tokens": 26,
+"latency_ms": 1494,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_41792",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"http://auth-api\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPXhhsYpb/r/3hqPyGTxK+1SqDJlkwfJNJ71AfMjf8XLDzQNpG1KFmXWKiYdhV6zQXU51zYiZTs9GbQ4usil41YqzgpGvSdkdwmoyyyb6QCEr636uV8+uG"
+}
+}
+}
+],
+"content": ""
+}
+}

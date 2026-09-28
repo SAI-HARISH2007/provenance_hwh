@@ -1,0 +1,48 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_3012500",
+"name": "submit_verdict",
+"arguments": {
+"evidence": [
+"orders-api logs show 'could not extend file' errors when inserting into postgres",
+"postgres disk probe shows /var/lib/postgresql is 100% used (200G/200G) with /var/lib/postgresql/log taking 96G and growing 1.1G/min",
+"postgres config change at 2026-08-30T01:02:00.000Z enabled log_min_duration_statement=0, causing massive log generation"
+],
+"report_markdown": "# Incident Report: orders-api Failure due to Disk Full on Postgres\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, `orders-api` fired a P1 alert with a 58% order creation failure rate. Investigation revealed that PostgreSQL ran out of disk space (`100% used`), causing database write errors (`could not extend file`) when `orders-api` attempted to insert records.\n\n## Timeline\n- **2026-08-30T01:02:00.000Z**: Config change enabled `log_min_duration_statement=0` on PostgreSQL for slow-query investigation, causing all SQL statements to be logged.\n- **2026-08-30T02:47:16.000Z**: First database insertion error (`could not extend file`) logged by `orders-api`.\n- **2026-08-30T02:52:00.000Z**: `inventory-api` deployed (unrelated to root cause).\n- **2026-08-30T03:12:00.000Z**: `orders-api` error rate spikes to ~60%, triggering the P1 page.\n\n## Root Cause\n`disk_full` caused by excessive logging. Enabling `log_min_duration_statement=0` filled the postgres disk (`/var/lib/postgresql` at 100% capacity with `/var/lib/postgresql/log` consuming 96GB and growing at 1.1GB/min).\n\n## Evidence\n1. **Query Logs**: `orders-api` showed repeating `ERROR orders-api: insert failed: could not extend file \"base/16384/2619\"` starting around 02:47 UTC.\n2. **Metrics**: `orders-api.error_rate_pct` jumped from ~0.4% to ~60% at 03:00 UTC.\n3. **Probe**: `run_probe` on `postgres` for disk confirmed `/var/lib/postgresql` is 100% used (200G/200G), with `/var/lib/postgresql/log` at 96GB.\n4. **Recent Changes**: PostgreSQL config change at 01:02 UTC set `log_min_duration_statement=0`.\n\n## Proposed Remediation\nFree disk space by truncating or rotating the excessive database logs and reverting the `log_min_duration_statement` setting on PostgreSQL.\n\n## Follow-ups\n- Implement disk space and log directory size monitoring and alerts.\n- Avoid setting `log_min_duration_statement=0` on high-throughput production databases without prior log rotation policies or short retention windows.",
+"action": "free_disk_space",
+"target": "postgres",
+"root_cause": "disk_full",
+"summary": "orders-api order creation failed due to postgres disk exhaustion caused by excessive logging (log_min_duration_statement=0) filling the disk with 96GB of logs.",
+"confidence": 1,
+"service": "postgres"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3935,
+"output_tokens": 851,
+"latency_ms": 3682,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_3012500",
+"function": {
+"arguments": "{\"evidence\":[\"orders-api logs show 'could not extend file' errors when inserting into postgres\",\"postgres disk probe shows /var/lib/postgresql is 100% used (200G/200G) with /var/lib/postgresql/log taking 96G and growing 1.1G/min\",\"postgres config change at 2026-08-30T01:02:00.000Z enabled log_min_duration_statement=0, causing massive log generation\"],\"report_markdown\":\"# Incident Report: orders-api Failure due to Disk Full on Postgres\\n\\n## Summary\\nAt 2026-08-30T03:12:00.000Z, `orders-api` fired a P1 alert with a 58% order creation failure rate. Investigation revealed that PostgreSQL ran out of disk space (`100% used`), causing database write errors (`could not extend file`) when `orders-api` attempted to insert records.\\n\\n## Timeline\\n- **2026-08-30T01:02:00.000Z**: Config change enabled `log_min_duration_statement=0` on PostgreSQL for slow-query investigation, causing all SQL statements to be logged.\\n- **2026-08-30T02:47:16.000Z**: First database insertion error (`could not extend file`) logged by `orders-api`.\\n- **2026-08-30T02:52:00.000Z**: `inventory-api` deployed (unrelated to root cause).\\n- **2026-08-30T03:12:00.000Z**: `orders-api` error rate spikes to ~60%, triggering the P1 page.\\n\\n## Root Cause\\n`disk_full` caused by excessive logging. Enabling `log_min_duration_statement=0` filled the postgres disk (`/var/lib/postgresql` at 100% capacity with `/var/lib/postgresql/log` consuming 96GB and growing at 1.1GB/min).\\n\\n## Evidence\\n1. **Query Logs**: `orders-api` showed repeating `ERROR orders-api: insert failed: could not extend file \\\"base/16384/2619\\\"` starting around 02:47 UTC.\\n2. **Metrics**: `orders-api.error_rate_pct` jumped from ~0.4% to ~60% at 03:00 UTC.\\n3. **Probe**: `run_probe` on `postgres` for disk confirmed `/var/lib/postgresql` is 100% used (200G/200G), with `/var/lib/postgresql/log` at 96GB.\\n4. **Recent Changes**: PostgreSQL config change at 01:02 UTC set `log_min_duration_statement=0`.\\n\\n## Proposed Remediation\\nFree disk space by truncating or rotating the excessive database logs and reverting the `log_min_duration_statement` setting on PostgreSQL.\\n\\n## Follow-ups\\n- Implement disk space and log directory size monitoring and alerts.\\n- Avoid setting `log_min_duration_statement=0` on high-throughput production databases without prior log rotation policies or short retention windows.\",\"action\":\"free_disk_space\",\"target\":\"postgres\",\"root_cause\":\"disk_full\",\"summary\":\"orders-api order creation failed due to postgres disk exhaustion caused by excessive logging (log_min_duration_statement=0) filling the disk with 96GB of logs.\",\"confidence\":1,\"service\":\"postgres\"}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TzhjKC+6hhq16cwgeWQPM/p0v2oz5Bo0GXf3RVz1bkHLk05dPXmqCWzNeHYIo11d+ewZi0r7fys+sc0bX/XOI1oW9ihiapQhm0OO5HDTSImhwRzdeQofvVhU="
+}
+}
+}
+],
+"content": ""
+}
+}

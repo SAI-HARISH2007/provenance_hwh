@@ -1,0 +1,48 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_2403240",
+"name": "submit_verdict",
+"arguments": {
+"action": "sync_clock",
+"target": "inventory-api",
+"service": "inventory-api",
+"root_cause": "clock_skew",
+"summary": "inventory-api throwing 401 / JWT validation errors due to -287.4s clock skew on node inv-5 where chronyd is inactive",
+"report_markdown": "# Incident Report: inventory-api JWT Verification Failures due to Clock Skew\n\n## Summary\nAt 2026-08-30T03:12:00Z, `api-gateway` alerted on a 401 rate of 6.8% specifically targeting `/v1/inventory/*`. Investigation revealed that `inventory-api` error rates jumped to ~70% due to JWT validation failures (`InvalidToken (claims check)`). The root cause is a significant clock skew (-287.4 seconds) on node `inv-5` where `inventory-api` pods were rescheduled during node maintenance, combined with `chronyd` being inactive.\n\n## Timeline\n- **2026-08-30T02:14:00Z**: `inventory-api` pods rescheduled from node `inv-2` to node `inv-5` during node maintenance.\n- **2026-08-30T02:31:00Z**: `auth-api` rotated its JWT signing key (`kid=2026-09b`).\n- **2026-08-30T02:54:52Z**: First `inventory-api` warning logs appear showing JWT verification failure (`InvalidToken (claims check)`) for incoming requests signed with `kid=2026-09b`.\n- **2026-08-30T03:12:00Z**: P2 Alert fires on `api-gateway` for 401 rate on `/v1/inventory/*`.\n\n## Root Cause\n`clock_skew`: The node hosting the `inventory-api` pods (`inv-5`) had its clock out of sync by -287.4 seconds, and time synchronization (`chronyd`) was inactive/disabled on that node. Because the clock was nearly 5 minutes in the past, newly issued JWTs from `auth-api` appeared to `inventory-api` to be issued in the future (violating `nbf`/`iat` claims checks).\n\n## Evidence\n- `get_alert`: `api-gateway` reported 401 rate 6.8% on `/v1/inventory/*`.\n- `get_metrics`: `inventory-api.error_rate_pct` jumped from ~0.4% to ~70% starting around 02:54 UTC.\n- `query_logs`: `inventory-api` logs showed continuous `jwt verification failed: InvalidToken (claims check)` errors for tokens with `kid=2026-09b`.\n- `run_probe (clock)`: Confirmed `inventory-api` (node `inv-5`) had an NTP offset of `-287.4s` with `chronyd` inactive.\n\n## Proposed Remediation\n`sync_clock` on node `inv-5` (or restart/enable chronyd and sync time). This is safe as it corrects the local node clock to match network time, allowing valid JWT claims validation to succeed.\n\n## Follow-ups\n1. Ensure NTP / `chronyd` is enabled by default on all Kubernetes worker nodes.\n2. Add monitoring/alerting for node clock skew across the cluster.",
+"confidence": 1,
+"evidence": [
+"inventory-api probe showed ntp offset -287.4s with chronyd inactive",
+"inventory-api logs showed jwt verification failed: InvalidToken (claims check) after auth-api key rotation at 02:31",
+"inventory-api error rate jumped to ~68-74% starting around 02:54 (coinciding with pod reschedule to node inv-5 at 02:14 plus token/cache expiration)"
+]
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 5915,
+"output_tokens": 908,
+"latency_ms": 3630,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_2403240",
+"function": {
+"arguments": "{\"action\":\"sync_clock\",\"target\":\"inventory-api\",\"service\":\"inventory-api\",\"root_cause\":\"clock_skew\",\"summary\":\"inventory-api throwing 401 / JWT validation errors due to -287.4s clock skew on node inv-5 where chronyd is inactive\",\"report_markdown\":\"# Incident Report: inventory-api JWT Verification Failures due to Clock Skew\\n\\n## Summary\\nAt 2026-08-30T03:12:00Z, `api-gateway` alerted on a 401 rate of 6.8% specifically targeting `/v1/inventory/*`. Investigation revealed that `inventory-api` error rates jumped to ~70% due to JWT validation failures (`InvalidToken (claims check)`). The root cause is a significant clock skew (-287.4 seconds) on node `inv-5` where `inventory-api` pods were rescheduled during node maintenance, combined with `chronyd` being inactive.\\n\\n## Timeline\\n- **2026-08-30T02:14:00Z**: `inventory-api` pods rescheduled from node `inv-2` to node `inv-5` during node maintenance.\\n- **2026-08-30T02:31:00Z**: `auth-api` rotated its JWT signing key (`kid=2026-09b`).\\n- **2026-08-30T02:54:52Z**: First `inventory-api` warning logs appear showing JWT verification failure (`InvalidToken (claims check)`) for incoming requests signed with `kid=2026-09b`.\\n- **2026-08-30T03:12:00Z**: P2 Alert fires on `api-gateway` for 401 rate on `/v1/inventory/*`.\\n\\n## Root Cause\\n`clock_skew`: The node hosting the `inventory-api` pods (`inv-5`) had its clock out of sync by -287.4 seconds, and time synchronization (`chronyd`) was inactive/disabled on that node. Because the clock was nearly 5 minutes in the past, newly issued JWTs from `auth-api` appeared to `inventory-api` to be issued in the future (violating `nbf`/`iat` claims checks).\\n\\n## Evidence\\n- `get_alert`: `api-gateway` reported 401 rate 6.8% on `/v1/inventory/*`.\\n- `get_metrics`: `inventory-api.error_rate_pct` jumped from ~0.4% to ~70% starting around 02:54 UTC.\\n- `query_logs`: `inventory-api` logs showed continuous `jwt verification failed: InvalidToken (claims check)` errors for tokens with `kid=2026-09b`.\\n- `run_probe (clock)`: Confirmed `inventory-api` (node `inv-5`) had an NTP offset of `-287.4s` with `chronyd` inactive.\\n\\n## Proposed Remediation\\n`sync_clock` on node `inv-5` (or restart/enable chronyd and sync time). This is safe as it corrects the local node clock to match network time, allowing valid JWT claims validation to succeed.\\n\\n## Follow-ups\\n1. Ensure NTP / `chronyd` is enabled by default on all Kubernetes worker nodes.\\n2. Add monitoring/alerting for node clock skew across the cluster.\",\"confidence\":1,\"evidence\":[\"inventory-api probe showed ntp offset -287.4s with chronyd inactive\",\"inventory-api logs showed jwt verification failed: InvalidToken (claims check) after auth-api key rotation at 02:31\",\"inventory-api error rate jumped to ~68-74% starting around 02:54 (coinciding with pod reschedule to node inv-5 at 02:14 plus token/cache expiration)\"]}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0T/PVGU7HHLF/AvMa/bm//Y1FO2cz3mj4zPZ9aLqA0b3SyQPvdkOvetiRT/B5ZG6coeQdy0A8BeClUtwwJVBHAfmYi1f8D6luPUrKwM0B3gH85BEhC8sx0x9s="
+}
+}
+}
+],
+"content": ""
+}
+}

@@ -1,0 +1,43 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "function-call-8270225830862119679",
+"name": "get_alert",
+"arguments": {}
+},
+{
+"id": "function-call-8270225830862121604",
+"name": "recent_changes",
+"arguments": {}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 1447,
+"output_tokens": 20,
+"latency_ms": 2028,
+"model": "gemini-2.5-flash",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "function-call-8270225830862119679",
+"function": {
+"arguments": "{}",
+"name": "get_alert"
+},
+"type": "function"
+},
+{
+"id": "function-call-8270225830862121604",
+"function": {
+"arguments": "{}",
+"name": "recent_changes"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

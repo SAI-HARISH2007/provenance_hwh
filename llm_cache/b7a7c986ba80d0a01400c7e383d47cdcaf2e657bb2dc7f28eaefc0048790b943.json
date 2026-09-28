@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_153d7750-f89a-43af-a217-d8fa94bcdbb1",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 20,
+"pattern": "orders",
+"service": "api-gateway"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2311,
+"output_tokens": 64,
+"latency_ms": 773,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_153d7750-f89a-43af-a217-d8fa94bcdbb1",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":20,\"pattern\":\"orders\",\"service\":\"api-gateway\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Maybe the failures are in api-gateway.Search logs for orders-api in api-gateway.",
+"content": ""
+}
+}

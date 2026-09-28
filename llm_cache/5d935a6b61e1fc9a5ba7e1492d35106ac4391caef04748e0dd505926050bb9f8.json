@@ -1,0 +1,50 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_791485",
+"name": "submit_verdict",
+"arguments": {
+"summary": "orders-api error rate spiked to 27% due to new_pricing_engine feature flag producing negative cart totals for percentage_stacked coupons.",
+"evidence": [
+"get_alert shows orders-api is degraded with order_create 27% errors (ValidationError)",
+"recent_changes shows feature flag new_pricing_engine was rolled out from 20% to 100% on 2026-08-30T02:53:00.000Z",
+"query_logs shows errors starting immediately after the feature flag rollout (02:54:32Z) with pricing_engine=new ValidationError: negative total for cart with coupon_type=percentage_stacked",
+"get_metrics shows error_rate_pct jumping from ~0.4% to ~27% right after 02:53:00Z",
+"run_probe confirmed tcp connectivity to orders-api service is open and responsive"
+],
+"action": "disable_feature_flag",
+"root_cause": "feature_flag_misconfig",
+"confidence": 1,
+"report_markdown": "# Incident Report: orders-api ValidationError Spike\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, `orders-api` began failing `order_create` requests with a 27% error rate due to `ValidationError`s. The root cause is the rollout of the `new_pricing_engine` feature flag to 100%, which incorrectly calculates totals for carts with `coupon_type=percentage_stacked`, resulting in a negative total and subsequent validation failure.\n\n## Timeline\n- **2026-08-30T02:53:00.000Z**: Feature flag `new_pricing_engine` scaled from 20% to 100% by sam.\n- **2026-08-30T02:54:32.000Z**: First `ValidationError` logged in `orders-api` (`negative total for cart with coupon_type=percentage_stacked`).\n- **2026-08-30T03:12:00.000Z**: P2 Alert fires indicating `orders-api` `order_create` has 27% errors.\n\n## Root Cause\nFeature flag misconfiguration / bug in `new_pricing_engine` pricing calculation logic when stacking percentage coupons, producing negative cart totals.\n\n## Evidence\n- `query_logs` shows continuous `ValidationError: negative total for cart with coupon_type=percentage_stacked` explicitly tagging `pricing_engine=new`.\n- `get_metrics` (`error_rate_pct`) shows error rate jumping from ~0.4% baseline to ~27% right at the 02:53 flag rollout.\n- `recent_changes` shows `new_pricing_engine` moved to 100% at 02:53.\n- `run_probe` confirmed tcp connectivity to `orders-api` is open and healthy.\n\n## Proposed Remediation\nDisable the faulty feature flag (`new_pricing_engine`) to revert pricing calculation to the stable engine. This is safe, immediate, and targets the exact mechanism causing the validation errors.\n\n## Follow-ups\n1. Fix the `new_pricing_engine` calculation logic for `percentage_stacked` coupons so totals cannot become negative.\n2. Add comprehensive unit test coverage for coupon stacking in the pricing engine.",
+"service": "orders-api",
+"target": "orders-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4855,
+"output_tokens": 804,
+"latency_ms": 2878,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_791485",
+"function": {
+"arguments": "{\"summary\":\"orders-api error rate spiked to 27% due to new_pricing_engine feature flag producing negative cart totals for percentage_stacked coupons.\",\"evidence\":[\"get_alert shows orders-api is degraded with order_create 27% errors (ValidationError)\",\"recent_changes shows feature flag new_pricing_engine was rolled out from 20% to 100% on 2026-08-30T02:53:00.000Z\",\"query_logs shows errors starting immediately after the feature flag rollout (02:54:32Z) with pricing_engine=new ValidationError: negative total for cart with coupon_type=percentage_stacked\",\"get_metrics shows error_rate_pct jumping from ~0.4% to ~27% right after 02:53:00Z\",\"run_probe confirmed tcp connectivity to orders-api service is open and responsive\"],\"action\":\"disable_feature_flag\",\"root_cause\":\"feature_flag_misconfig\",\"confidence\":1,\"report_markdown\":\"# Incident Report: orders-api ValidationError Spike\\n\\n## Summary\\nAt 2026-08-30T03:12:00.000Z, `orders-api` began failing `order_create` requests with a 27% error rate due to `ValidationError`s. The root cause is the rollout of the `new_pricing_engine` feature flag to 100%, which incorrectly calculates totals for carts with `coupon_type=percentage_stacked`, resulting in a negative total and subsequent validation failure.\\n\\n## Timeline\\n- **2026-08-30T02:53:00.000Z**: Feature flag `new_pricing_engine` scaled from 20% to 100% by sam.\\n- **2026-08-30T02:54:32.000Z**: First `ValidationError` logged in `orders-api` (`negative total for cart with coupon_type=percentage_stacked`).\\n- **2026-08-30T03:12:00.000Z**: P2 Alert fires indicating `orders-api` `order_create` has 27% errors.\\n\\n## Root Cause\\nFeature flag misconfiguration / bug in `new_pricing_engine` pricing calculation logic when stacking percentage coupons, producing negative cart totals.\\n\\n## Evidence\\n- `query_logs` shows continuous `ValidationError: negative total for cart with coupon_type=percentage_stacked` explicitly tagging `pricing_engine=new`.\\n- `get_metrics` (`error_rate_pct`) shows error rate jumping from ~0.4% baseline to ~27% right at the 02:53 flag rollout.\\n- `recent_changes` shows `new_pricing_engine` moved to 100% at 02:53.\\n- `run_probe` confirmed tcp connectivity to `orders-api` is open and healthy.\\n\\n## Proposed Remediation\\nDisable the faulty feature flag (`new_pricing_engine`) to revert pricing calculation to the stable engine. This is safe, immediate, and targets the exact mechanism causing the validation errors.\\n\\n## Follow-ups\\n1. Fix the `new_pricing_engine` calculation logic for `percentage_stacked` coupons so totals cannot become negative.\\n2. Add comprehensive unit test coverage for coupon stacking in the pricing engine.\",\"service\":\"orders-api\",\"target\":\"orders-api\"}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPQJaMG2HiQSQUjodXb8FOUDZT6wZXIAc93j9DhBoz1BjlDLyXX0dF4yMgaoeb3t6gZKJBjPtFZkNAj7NJ+brYDGBa+O0W5Wc66M/kq0Tb6UlLB5Jhic7M"
+}
+}
+}
+],
+"content": ""
+}
+}

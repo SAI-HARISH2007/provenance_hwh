@@ -1,0 +1,35 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_74f10c31-e432-4626-a29d-9543ecae4758",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"service": "auth-api",
+"target": "auth-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3235,
+"output_tokens": 62,
+"latency_ms": 650,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_74f10c31-e432-4626-a29d-9543ecae4758",
+"function": {
+"arguments": "{\"kind\":\"http\",\"service\":\"auth-api\",\"target\":\"auth-api\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"reasoning": "Health endpoint 503 maybe due to overload. But we need to verify JWKS fetch. Let's probe auth-api JWKS endpoint. Assume path /jwks.",
+"content": ""
+}
+}

@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_734778",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "api.paygate.example"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3988,
+"output_tokens": 27,
+"latency_ms": 1059,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_734778",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"api.paygate.example\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPMTVhy7apr2JJaxLbm32mB0MPg+pzg+4ujehW2MIwF52EViGycs09vF9d/1rTF0o4QwbCgARwGQGqZA9d0Taj2Ay8jLs0dX2oW1F/jp7Gg/CHLIgh5NrQ"
+}
+}
+}
+],
+"content": ""
+}
+}

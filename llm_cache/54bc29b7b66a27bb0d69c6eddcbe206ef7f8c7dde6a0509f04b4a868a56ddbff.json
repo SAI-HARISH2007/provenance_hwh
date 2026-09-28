@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Clock skew directly proven by probe; remediation safely restarts chronyd/syncs time.\"}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 1691,
+"output_tokens": 43,
+"latency_ms": 1108,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Clock skew directly proven by probe; remediation safely restarts chronyd/syncs time.\"}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPjp/SytiKe5ipk0sWFMc9jmfgJMOblq4IxiDbzJ9BCUL80T+T+Xk+V9d7NC/8CC48Pe9Z7nWPXwzl8Zqx2yKxYqkItK6YH4nH2PcMAO3JighLatde8HLF"
+}
+}
+}
+}

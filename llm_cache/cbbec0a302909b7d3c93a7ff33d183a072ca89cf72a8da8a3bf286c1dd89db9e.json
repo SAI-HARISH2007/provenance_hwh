@@ -1,0 +1,33 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_501cf269-c3fe-4abd-bd22-cccf28dad360",
+"name": "get_config",
+"arguments": {
+"service": "api-gateway"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2882,
+"output_tokens": 140,
+"latency_ms": 812,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_501cf269-c3fe-4abd-bd22-cccf28dad360",
+"function": {
+"arguments": "{\"service\":\"api-gateway\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"reasoning": "Error rate spiked around 02:30-03:00. That aligns with auth key rotation at 02:31. So likely token verification failing for new tokens, causing 401 errors. The gateway may be using cached JWKS that hasn't refreshed. Need to check JWKS fetch config. Maybe api-gateway config has JWKS cache TTL. Let's get config for auth-api? Probably not needed. Check api-gateway config for JWKS TTL.We can query config for api-gateway again maybe includes jwks_url.",
+"content": ""
+}
+}

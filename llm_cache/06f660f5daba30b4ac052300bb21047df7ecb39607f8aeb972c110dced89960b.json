@@ -1,0 +1,14 @@
+{
+"text": "```json\n{\n  \"root_cause\": \"bad_config_deploy\",\n  \"service\": \"worker\",\n  \"action\": \"rollback_deploy\",\n  \"target\": \"worker\",\n  \"confidence\": 1.0,\n  \"summary\": \"The worker service was deployed with an increased concurrency limit (from 8 to 64), causing it to exhaust the PostgreSQL database's connection limit (max_connections=100). This prevented the orders-api service from acquiring database connections, leading to connection pool timeouts and 5xx errors on the checkout endpoint.\",\n  \"evidence\": [\n    \"2026-08-30T02:34:00.000Z [deploy] worker",
+"tool_calls": [],
+"stop_reason": "length",
+"input_tokens": 21604,
+"output_tokens": 163,
+"latency_ms": 18829,
+"model": "gemini-3.5-flash",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"content": "```json\n{\n  \"root_cause\": \"bad_config_deploy\",\n  \"service\": \"worker\",\n  \"action\": \"rollback_deploy\",\n  \"target\": \"worker\",\n  \"confidence\": 1.0,\n  \"summary\": \"The worker service was deployed with an increased concurrency limit (from 8 to 64), causing it to exhaust the PostgreSQL database's connection limit (max_connections=100). This prevented the orders-api service from acquiring database connections, leading to connection pool timeouts and 5xx errors on the checkout endpoint.\",\n  \"evidence\": [\n    \"2026-08-30T02:34:00.000Z [deploy] worker"
+}
+}

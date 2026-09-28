@@ -1,0 +1,33 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_8c68e992-a1bc-46af-b2d7-b54b4cd5ea33",
+"name": "get_config",
+"arguments": {
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3008,
+"output_tokens": 115,
+"latency_ms": 796,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_8c68e992-a1bc-46af-b2d7-b54b4cd5ea33",
+"function": {
+"arguments": "{\"service\":\"payments-api\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"reasoning": "Logs show many 401 invalid_api_key errors with key_version v7. The rotation happened at 3:04, revoking v7. Payments-api still using v7, likely because it hasn't reloaded secret. The alert fired at 3:12, after many errors. So root cause is secret rotation not reloaded.\n\nWe need to verify that payments-api reads secret at process start and hasn't reloaded. Could check config for secret version. Let's get config.",
+"content": ""
+}
+}

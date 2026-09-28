@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_674550",
+"name": "run_probe",
+"arguments": {
+"kind": "dns",
+"target": "inventory-api.fulfilment.svc"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4409,
+"output_tokens": 30,
+"latency_ms": 3578,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_674550",
+"function": {
+"arguments": "{\"kind\":\"dns\",\"target\":\"inventory-api.fulfilment.svc\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPMewcABspi+TDpkawIsBCxofsBN0KLlBlLRjqbhX9Ch5D6Rz6tF9x4AmalsdYHy/Wucc6Ue5xbU+Cn7j0F2OBUTZ031h2Xg4Qy9msz2l7/Xkd4nlmzEMz"
+}
+}
+}
+],
+"content": ""
+}
+}

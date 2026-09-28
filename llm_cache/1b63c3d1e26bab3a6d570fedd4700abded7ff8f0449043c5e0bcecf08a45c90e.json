@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_862ccc38-80e3-4083-bffa-db75f724606b",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 20,
+"pattern": "JWT",
+"service": "api-gateway"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3775,
+"output_tokens": 53,
+"latency_ms": 830,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_862ccc38-80e3-4083-bffa-db75f724606b",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":20,\"pattern\":\"JWT\",\"service\":\"api-gateway\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Maybe the auth verification happens in api-gateway. Let's query api-gateway logs for JWT errors.",
+"content": ""
+}
+}

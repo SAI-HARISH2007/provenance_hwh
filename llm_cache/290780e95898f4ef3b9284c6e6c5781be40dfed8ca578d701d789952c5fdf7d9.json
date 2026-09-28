@@ -1,0 +1,70 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_604344",
+"name": "run_probe",
+"arguments": {
+"target": "payments-api",
+"kind": "clock"
+}
+},
+{
+"id": "call_604345",
+"name": "run_probe",
+"arguments": {
+"target": "auth-api",
+"kind": "clock"
+}
+},
+{
+"id": "call_604346",
+"name": "run_probe",
+"arguments": {
+"target": "postgres",
+"kind": "clock"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3772,
+"output_tokens": 70,
+"latency_ms": 1516,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_604344",
+"function": {
+"arguments": "{\"target\":\"payments-api\",\"kind\":\"clock\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0Tm2Pz5LAkhtNpvWwUVFtJlCZqWLxA2O32VGgZwSAjrH+OTvYevrYFVmkm2iBEHLTUhK/c86ROChksT6O9tUGZfC6dqHu2qk2dcSnvIYbmAjHXNxjf1NfnRbc="
+}
+}
+},
+{
+"id": "call_604345",
+"function": {
+"arguments": "{\"target\":\"auth-api\",\"kind\":\"clock\"}",
+"name": "run_probe"
+},
+"type": "function"
+},
+{
+"id": "call_604346",
+"function": {
+"arguments": "{\"target\":\"postgres\",\"kind\":\"clock\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

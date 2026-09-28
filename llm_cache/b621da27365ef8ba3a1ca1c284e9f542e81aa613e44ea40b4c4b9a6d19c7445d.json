@@ -1,0 +1,37 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_3095951",
+"name": "get_config",
+"arguments": {
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4076,
+"output_tokens": 18,
+"latency_ms": 1222,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_3095951",
+"function": {
+"arguments": "{\"service\":\"payments-api\"}",
+"name": "get_config"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0T3iDKlMHpna9JwoBw5d6D+M7UyAT69NGzkGll0ROSzXAav7qtZuRgs5aS1umXMSOnVJCLamtrEuCjvKt/68MdKk4IUj8FqQj5g70RSAYheTLuJq+srxpuOQs="
+}
+}
+}
+],
+"content": ""
+}
+}

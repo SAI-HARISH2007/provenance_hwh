@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\n  \"approve\": true,\n  \"issues\": [],\n  \"suggested_checks\": [],\n  \"note\": \"Root cause directly supported by logs, metrics, and external HTTP probe confirming third-party vendor outage. Action is safe and appropriate.\"\n}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 2966,
+"output_tokens": 62,
+"latency_ms": 2443,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\n  \"approve\": true,\n  \"issues\": [],\n  \"suggested_checks\": [],\n  \"note\": \"Root cause directly supported by logs, metrics, and external HTTP probe confirming third-party vendor outage. Action is safe and appropriate.\"\n}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPwBge1Zr0OP20Fs8w9cpFBd9fSY2Tib2hihXOJvU7cQtGjaK9n0SC59arkDgMacQoY6q/1xVbdOWKenfSioYEnF3A9OhuupUbWuEljC2o/vgUUXU+IvwS"
+}
+}
+}
+}

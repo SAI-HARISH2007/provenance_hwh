@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_4ca315d2-6c3e-4332-9f90-732f3ef75de2",
+"name": "get_metrics",
+"arguments": {
+"metric": "disk_pct",
+"service": "postgres"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2343,
+"output_tokens": 152,
+"latency_ms": 1300,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_4ca315d2-6c3e-4332-9f90-732f3ef75de2",
+"function": {
+"arguments": "{\"metric\":\"disk_pct\",\"service\":\"postgres\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"reasoning": "Disk is 100% used. So root cause is disk_full on postgres. Need to propose safe remediation: free_disk_space. Could be to clean old WAL files or fix archive to allow recycling. Freeing disk space is safe. Could also increase disk, but free is immediate.\n\nWe need to submit verdict with root_cause \"disk_full\", service where cause lives: postgres. Action: free_disk_space. Provide evidence: alert, recent_changes (maybe config change enabling archive_mode causing WAL accumulation), disk probe result. Also maybe metric of disk usage? Could query get_metrics for disk_pct. Let's do that to have metric evidence.",
+"content": ""
+}
+}

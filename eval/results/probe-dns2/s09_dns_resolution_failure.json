@@ -1,0 +1,57 @@
+{
+  "case_id": "s09_dns_resolution_failure",
+  "verdict": {
+    "root_cause": "bad_config_deploy",
+    "service": "orders-api",
+    "action": "update_config",
+    "target": "orders-api",
+    "confidence": 1.0,
+    "summary": "orders-api is failing to reach inventory-api because inventory-api was migrated to the fulfilment namespace and its old default namespace DNS name was retired.",
+    "evidence": [
+      "inventory-api was migrated to namespace 'fulfilment' and old DNS name retired (ops-bot)",
+      "orders-api logs show dial tcp inventory-api.default.svc:8080 i/o timeout",
+      "DNS probe for inventory-api.default.svc returns NXDOMAIN",
+      "DNS probe for inventory-api.fulfilment.svc resolves successfully to 10.0.91.14",
+      "HTTP probe to inventory-api.fulfilment.svc:8080/healthz returns 200 OK"
+    ],
+    "report_markdown": "# Incident Report: Orders-API Inventory Dependency Errors\n\n## Summary\nThe `orders-api` service experienced high error rates when communicating with the `inventory-api` dependency. The root cause is a bad configuration / infra change where `inventory-api` was migrated to a new Kubernetes namespace (`fulfilment`) and its old DNS name (`inventory-api.default.svc`) was retired, while `orders-api` was still configured to dial the old DNS name.\n\n## Timeline\n- **2026-08-30T02:46:00Z**: `orders-api` deployed version `orders-3.8.2` (inventory client timeout / retries).\n- **2026-08-30T02:48:00Z**: `inventory-api` migrated to namespace `fulfilment` by `ops-bot`; old DNS name retired.\n- **2026-08-30T02:49:34Z**: `orders-api` starts throwing I/O timeout errors dialing `inventory-api.default.svc:8080`.\n- **2026-08-30T03:12:00Z**: P1 alert fires for `orders-api` (`inventory dependency errors 47%`).\n\n## Root Cause\n`bad_config_deploy`: The infrastructure change migrated `inventory-api` to a new namespace without updating `orders-api`'s upstream endpoint configuration/DNS reference, leading to DNS resolution failure (`NXDOMAIN`) and TCP timeouts.\n\n## Proposed Remediation\nUpdate `orders-api` configuration to point to the new DNS name / service endpoint in the `fulfilment` namespace (`inventory-api.fulfilment.svc`).\n\n## Follow-ups\n- Establish service discovery linkage checks or automated integration tests for inter-service namespace migrations.\n- Ensure infrastructure migrations update dependent service configurations simultaneously.\n"
+  },
+  "variant": "v2_verify",
+  "run_id": "20260927T111413Z_v2-verify-s09-dns-resolution-failure",
+  "trace": "traces/20260927T111413Z_v2-verify-s09-dns-resolution-failure.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "status": "success",
+  "llm_calls": 8,
+  "input_tokens": 28645,
+  "output_tokens": 1995,
+  "wall_s": 163.1,
+  "probes_run": 3,
+  "verified": true,
+  "gate_rejections": 2,
+  "reviewer": null,
+  "reviewer_approved": null,
+  "approval": {
+    "decision": "approved",
+    "by": "eval-policy"
+  },
+  "actions_executed": [
+    [
+      "update_config",
+      "orders-api"
+    ]
+  ],
+  "harm_done": [],
+  "resolved": true,
+  "remediation_effect": {
+    "executed": true,
+    "resolved": true,
+    "harm": false,
+    "effect": "update_config on orders-api applied; error rate returning to baseline, healthz 200 across services within 90s"
+  },
+  "memory_hits": 0,
+  "memory_used": false,
+  "memory_rejections": 0,
+  "memory_checks": [],
+  "memory_cited": [],
+  "would_be_cost_usd": 0.00366
+}

@@ -1,0 +1,32 @@
+{
+  "case_id": "s08_third_party_rate_limited",
+  "verdict": {
+    "root_cause": "third_party_rate_limited",
+    "service": "worker",
+    "action": "no_action",
+    "target": "worker",
+    "confidence": 0.95,
+    "summary": "A high-concurrency refund backfill job in the worker service exhausted the third-party PayGate API rate limits using the shared production API key, causing 429 Too Many Requests responses for checkout operations in payments-api.",
+    "evidence": [
+      "2026-08-30T02:46:00.000Z [deploy] worker: worker-1.4.1: one-off refund backfill job (18k refunds) at concurrency 32 (priya) - backfill calls PayGate /refunds directly, sharing the production API key",
+      "2026-08-30T02:47:30.000Z ERROR payments-api: paygate 429 Too Many Requests retry-after=30 (limit 600/min for key pk_live_…c9)",
+      "payments-api.error_rate_pct jumped to ~38% starting around 02:50 UTC"
+    ],
+    "report_markdown": "# Incident Report: payments-api Rate Limited by Vendor\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, the `payments-api` service alerted on a 38% error rate due to HTTP 429 (Too Many Requests) from the third-party payment vendor (`PayGate`). This was triggered by a concurrent one-off refund backfill job running in the `worker` service that shared the primary production API key.\n\n## Timeline\n- **02:46:00 UTC**: One-off refund backfill job deployed on `worker` (concurrency 32, calling PayGate directly).\n- **02:47:30 UTC**: First `429 Too Many Requests` error logged by `payments-api`.\n- **02:50:00 UTC**: `payments-api.error_rate_pct` spikes from ~0.4% to ~38%.\n- **03:12:00 UTC**: P2 alert fired: `charge_failed 38% (HTTP 429 from vendor)`.\n\n## Root Cause\nThe `worker` service executed an 18k refund backfill at a concurrency of 32 using the shared production API key (`pk_live_...c9`). This consumed the vendor's per-minute rate limit (600 requests/min), starving legitimate customer checkout traffic in `payments-api`.\n\n## Evidence\n- Recent deployment log indicating the backfill job calling PayGate directly with the shared API key.\n- `payments-api` logs showing recurring `paygate 429 Too Many Requests retry-after=30 (limit 600/min for key pk_live_…c9)` errors.\n- Metric jump in `payments-api.error_rate_pct` to ~38% matching the start of the backfill.\n\n## Remediation\nAs an offline backfill job, rate-limiting or completion will naturally resolve the issue shortly. No direct service rollback or restart is required, but future background scripts must use dedicated API keys or rate limit themselves accordingly.\n\n## Follow-ups\n1. Ensure internal guidelines prohibit background backfills from utilizing primary production keys without dedicated rate-limiting.\n2. Implement separate API credentials or rate limiters for batch/worker jobs."
+  },
+  "variant": "baseline",
+  "run_id": "20260830T025806Z_baseline-s08-third-party-rate-limited",
+  "trace": "traces/20260830T025806Z_baseline-s08-third-party-rate-limited.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "provider": "gemini",
+  "status": "success",
+  "llm_calls": 1,
+  "input_tokens": 21354,
+  "output_tokens": 834,
+  "would_be_cost_usd": 0.0,
+  "wall_s": 4.08,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

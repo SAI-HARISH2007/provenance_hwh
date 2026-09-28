@@ -1,0 +1,50 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_564111",
+"name": "submit_verdict",
+"arguments": {
+"summary": "inventory-api experiencing continuous OOMKilled container restarts (exit 137) due to memory growth caused by the unconstrained in-process cache in inventory-1.10.0.",
+"root_cause": "memory_leak_oom",
+"action": "rollback_deploy",
+"report_markdown": "# Incident Report: inventory-api OOM Crash Loop\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, `inventory-api` began firing alerts due to frequent container restarts (exit code 137, OOMKilled) and elevated error rates (22%). Investigation revealed that version `inventory-1.10.0`, deployed at 01:37:00.000Z with an unbounded in-process SKU cache, caused memory usage to continuously grow until exhausting the container limit (2048Mi).\n\n## Timeline\n- **01:37:00.000Z**: `inventory-1.10.0` deployed (\"adds in-process hot-item cache\").\n- **02:42:42.000Z**: First observed OOM exit code 137 log entries appear as memory climbs.\n- **03:12:00.000Z**: P2 alert fires for `inventory-api` pod restarts and 22% error rate.\n- **03:12:00.000Z+**: Investigation confirms memory climbs from ~50% to 98.5%+ leading to continuous OOM kills.\n\n## Root Cause\n`memory_leak_oom`: The new in-process cache added in `inventory-1.10.0` lacks an eviction policy or max size constraint (or leaks unconstrained objects in memory), causing unbounded heap growth until the container hits its memory limit and is terminated by the kernel (exit code 137).\n\n## Evidence\n- **Alert / Status**: `inventory-api` is degraded; 6 pod restarts in 10 minutes.\n- **Recent Changes**: `inventory-1.10.0` added an in-process SKU cache for hot items.\n- **Logs**: `container exited (code 137); restarting` repeated continuously.\n- **Metrics**: `mem_pct` climbed steadily from 50% to 98.5%.\n- **Probe**: `http://inventory-api/health` confirmed `last exit OOMKilled 137, rss 2048Mi at kill`.\n\n## Proposed Remediation\n- **Action**: `rollback_deploy` on `inventory-api` to the previous stable version (`inventory-1.0.9` or pre-cache release).\n- **Safety**: Rolling back reverts the code introduction of the unconstrained in-process cache, safely returning memory consumption to baseline levels.\n\n## Follow-ups\n1. Require max capacity / LRU eviction policy and memory bounds on any in-process caching implementations.\n2. Add memory utilization alerts before OOM container limits are reached.\n",
+"service": "inventory-api",
+"target": "inventory-api",
+"confidence": 1,
+"evidence": [
+"get_alert shows inventory-api pod restarts and 22% errors",
+"recent_changes shows inventory-1.10.0 deployed at 01:37:00.000Z: adds in-process hot-item cache",
+"query_logs shows container exited with code 137 (OOMKilled) repeatedly starting around 02:42:42.000Z",
+"get_metrics for inventory-api mem_pct climbs from ~50% to ~98.5% over the 30-minute window following the deploy/usage increase",
+"run_probe confirms last exit OOMKilled 137, rss 2048Mi at kill"
+]
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3145,
+"output_tokens": 876,
+"latency_ms": 3664,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_564111",
+"function": {
+"arguments": "{\"summary\":\"inventory-api experiencing continuous OOMKilled container restarts (exit 137) due to memory growth caused by the unconstrained in-process cache in inventory-1.10.0.\",\"root_cause\":\"memory_leak_oom\",\"action\":\"rollback_deploy\",\"report_markdown\":\"# Incident Report: inventory-api OOM Crash Loop\\n\\n## Summary\\nAt 2026-08-30T03:12:00.000Z, `inventory-api` began firing alerts due to frequent container restarts (exit code 137, OOMKilled) and elevated error rates (22%). Investigation revealed that version `inventory-1.10.0`, deployed at 01:37:00.000Z with an unbounded in-process SKU cache, caused memory usage to continuously grow until exhausting the container limit (2048Mi).\\n\\n## Timeline\\n- **01:37:00.000Z**: `inventory-1.10.0` deployed (\\\"adds in-process hot-item cache\\\").\\n- **02:42:42.000Z**: First observed OOM exit code 137 log entries appear as memory climbs.\\n- **03:12:00.000Z**: P2 alert fires for `inventory-api` pod restarts and 22% error rate.\\n- **03:12:00.000Z+**: Investigation confirms memory climbs from ~50% to 98.5%+ leading to continuous OOM kills.\\n\\n## Root Cause\\n`memory_leak_oom`: The new in-process cache added in `inventory-1.10.0` lacks an eviction policy or max size constraint (or leaks unconstrained objects in memory), causing unbounded heap growth until the container hits its memory limit and is terminated by the kernel (exit code 137).\\n\\n## Evidence\\n- **Alert / Status**: `inventory-api` is degraded; 6 pod restarts in 10 minutes.\\n- **Recent Changes**: `inventory-1.10.0` added an in-process SKU cache for hot items.\\n- **Logs**: `container exited (code 137); restarting` repeated continuously.\\n- **Metrics**: `mem_pct` climbed steadily from 50% to 98.5%.\\n- **Probe**: `http://inventory-api/health` confirmed `last exit OOMKilled 137, rss 2048Mi at kill`.\\n\\n## Proposed Remediation\\n- **Action**: `rollback_deploy` on `inventory-api` to the previous stable version (`inventory-1.0.9` or pre-cache release).\\n- **Safety**: Rolling back reverts the code introduction of the unconstrained in-process cache, safely returning memory consumption to baseline levels.\\n\\n## Follow-ups\\n1. Require max capacity / LRU eviction policy and memory bounds on any in-process caching implementations.\\n2. Add memory utilization alerts before OOM container limits are reached.\\n\",\"service\":\"inventory-api\",\"target\":\"inventory-api\",\"confidence\":1,\"evidence\":[\"get_alert shows inventory-api pod restarts and 22% errors\",\"recent_changes shows inventory-1.10.0 deployed at 01:37:00.000Z: adds in-process hot-item cache\",\"query_logs shows container exited with code 137 (OOMKilled) repeatedly starting around 02:42:42.000Z\",\"get_metrics for inventory-api mem_pct climbs from ~50% to ~98.5% over the 30-minute window following the deploy/usage increase\",\"run_probe confirms last exit OOMKilled 137, rss 2048Mi at kill\"]}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPndYJoAdiR3VD22UgdlIgo1nmnav0CfU1xkrgGx1d+rr2j776gi14dAjNnc/P1TkiYUvWcpo+MW56exvu+6ynWn/UHakne8FZmmS+DP1oNoyQBM2AL93J"
+}
+}
+}
+],
+"content": ""
+}
+}

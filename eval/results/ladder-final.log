@@ -1,0 +1,99 @@
+##### baseline --scope alert --tag baseline  03:31:56
+s01_db_pool_exhausted            success  rc=db_connection_pool_exhausted action=increase_db_pool:postgres  4.99s tok=5339+742
+s02_bad_config_deploy            success  rc=bad_config_deploy            action=rollback_deploy:payments-api  3.73s tok=4310+684
+s03_tls_cert_expired             success  rc=tls_cert_expired             action=rotate_tls_cert:auth-api  2.81s tok=5055+528
+s04_disk_full                    success  rc=disk_full                    action=free_disk_space:postgres  3.08s tok=4391+599
+s05_third_party_outage           success  rc=third_party_outage           action=enable_circuit_breaker:payments-api  3.0s tok=4465+602
+s06_memory_leak_oom              success  rc=memory_leak_oom              action=rollback_deploy:inventory-api  3.79s tok=4251+757
+s07_cache_eviction_stampede      success  rc=cache_eviction_stampede      action=increase_cache_memory:redis  3.6s tok=4252+785
+s08_third_party_rate_limited     success  rc=third_party_rate_limited     action=update_config:worker  3.68s tok=4796+687
+s09_dns_resolution_failure       success  rc=bad_config_deploy            action=update_config:orders-api  3.05s tok=4447+759
+s10_migration_lock_contention    success  rc=migration_lock_contention    action=terminate_blocking_query:postgres  3.04s tok=4253+628
+s11_feature_flag_misconfig       success  rc=feature_flag_misconfig       action=disable_feature_flag:orders-api  3.77s tok=4474+628
+s12_clock_skew_hard              success  rc=bad_config_deploy            action=rollback_deploy:auth-api  3.31s tok=5273+634
+llm stats: {'calls': 12, 'cache_hits': 0, 'input_tokens': 55306, 'output_tokens': 8033, 'would_be_cost_usd': 0.00874, 'actual_cost_usd': 0.0}
+##### baseline --scope full --tag baseline-full  03:32:41
+s01_db_pool_exhausted            success  rc=db_connection_pool_exhausted action=increase_db_pool:orders-api  5.02s tok=21131+853
+s02_bad_config_deploy            success  rc=bad_config_deploy            action=update_config:payments-api  3.74s tok=20587+739
+s03_tls_cert_expired             success  rc=tls_cert_expired             action=rotate_tls_cert:auth-api  4.09s tok=19616+601
+s04_disk_full                    success  rc=disk_full                    action=free_disk_space:postgres  86.75s tok=21069+698
+s05_third_party_outage           success  rc=third_party_outage           action=enable_circuit_breaker:payments-api  3.7s tok=20666+637
+s06_memory_leak_oom              success  rc=memory_leak_oom              action=rollback_deploy:inventory-api  3.51s tok=19822+682
+s07_cache_eviction_stampede      success  rc=cache_eviction_stampede      action=rollback_deploy:orders-api  4.82s tok=20688+1033
+s08_third_party_rate_limited     success  rc=third_party_rate_limited     action=no_action:worker  3.62s tok=21359+745
+s09_dns_resolution_failure       success  rc=dns_resolution_failure       action=update_config:orders-api  9.86s tok=19347+747
+s10_migration_lock_contention    success  rc=migration_lock_contention    action=terminate_blocking_query:postgres  3.51s tok=20276+764
+s11_feature_flag_misconfig       success  rc=feature_flag_misconfig       action=disable_feature_flag:orders-api  3.22s tok=19020+678
+s12_clock_skew_hard              success  rc=bad_config_deploy            action=update_config:auth-api  3.86s tok=21981+728
+llm stats: {'calls': 12, 'cache_hits': 0, 'input_tokens': 245562, 'output_tokens': 8905, 'would_be_cost_usd': 0.02812, 'actual_cost_usd': 0.0}
+##### run --variant v1_tools --tag v1_tools-lite  03:35:00
+s01_db_pool_exhausted            success  rc=db_connection_pool_exhausted action=increase_db_pool:postgres       calls= 5 probes=1 verified=True rej=0 harm=False resolved=False 10.83s
+s02_bad_config_deploy            success  rc=bad_config_deploy            action=rollback_deploy:payments-api   calls= 7 probes=4 verified=True rej=0 harm=False resolved=True 11.16s
+s03_tls_cert_expired             success  rc=tls_cert_expired             action=rotate_tls_cert:auth-api       calls= 5 probes=3 verified=True rej=0 harm=False resolved=True 6.62s
+s04_disk_full                    success  rc=disk_full                    action=free_disk_space:postgres       calls= 4 probes=1 verified=True rej=0 harm=False resolved=True 45.75s
+s05_third_party_outage           success  rc=third_party_outage           action=enable_circuit_breaker:payments-api   calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 13.76s
+s06_memory_leak_oom              success  rc=memory_leak_oom              action=rollback_deploy:inventory-api  calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 7.91s
+s07_cache_eviction_stampede      success  rc=cache_eviction_stampede      action=increase_cache_memory:redis          calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 15.03s
+s08_third_party_rate_limited     success  rc=third_party_rate_limited     action=enable_circuit_breaker:payments-api   calls= 5 probes=1 verified=True rej=0 harm=False resolved=False 20.42s
+s09_dns_resolution_failure       success  rc=dns_resolution_failure       action=update_config:orders-api     calls= 4 probes=2 verified=True rej=0 harm=False resolved=True 5.59s
+s10_migration_lock_contention    success  rc=migration_lock_contention    action=terminate_blocking_query:postgres       calls= 4 probes=1 verified=True rej=0 harm=False resolved=True 6.89s
+s11_feature_flag_misconfig       success  rc=feature_flag_misconfig       action=disable_feature_flag:orders-api     calls= 3 probes=0 verified=False rej=0 harm=False resolved=False 4.36s
+s12_clock_skew_hard              success  rc=clock_skew                   action=sync_clock:payments-api   calls= 5 probes=2 verified=True rej=0 harm=False resolved=True 7.56s
+llm stats: {"calls": 57, "cache_hits": 11, "input_tokens": 162221, "output_tokens": 11573, "would_be_cost_usd": 0.02085, "actual_cost_usd": 0.0}
+##### run --variant v2_verify --tag v2_verify-lite  03:37:40
+s01_db_pool_exhausted            success  rc=db_connection_pool_exhausted action=increase_db_pool:postgres       calls= 5 probes=1 verified=True rej=0 harm=False resolved=False 0.3s
+s02_bad_config_deploy            success  rc=bad_config_deploy            action=rollback_deploy:payments-api   calls= 7 probes=4 verified=True rej=0 harm=False resolved=True 0.34s
+s03_tls_cert_expired             success  rc=tls_cert_expired             action=rotate_tls_cert:auth-api       calls= 5 probes=3 verified=True rej=0 harm=False resolved=True 0.46s
+s04_disk_full                    success  rc=disk_full                    action=free_disk_space:postgres       calls= 4 probes=1 verified=True rej=0 harm=False resolved=True 0.37s
+s05_third_party_outage           success  rc=third_party_outage           action=enable_circuit_breaker:payments-api   calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 0.38s
+s06_memory_leak_oom              success  rc=memory_leak_oom              action=rollback_deploy:inventory-api  calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 0.4s
+s07_cache_eviction_stampede      success  rc=cache_eviction_stampede      action=increase_cache_memory:redis          calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 0.35s
+s08_third_party_rate_limited     success  rc=third_party_rate_limited     action=enable_circuit_breaker:payments-api   calls= 5 probes=1 verified=True rej=0 harm=False resolved=False 0.45s
+s09_dns_resolution_failure       success  rc=dns_resolution_failure       action=update_config:orders-api     calls= 4 probes=2 verified=True rej=0 harm=False resolved=True 0.46s
+s10_migration_lock_contention    success  rc=migration_lock_contention    action=terminate_blocking_query:postgres       calls= 4 probes=1 verified=True rej=0 harm=False resolved=True 0.39s
+s11_feature_flag_misconfig       success  rc=feature_flag_misconfig       action=disable_feature_flag:orders-api     calls= 5 probes=1 verified=True rej=1 harm=False resolved=True 4.6s
+s12_clock_skew_hard              success  rc=clock_skew                   action=sync_clock:payments-api   calls= 5 probes=2 verified=True rej=0 harm=False resolved=True 0.38s
+llm stats: {"calls": 59, "cache_hits": 57, "input_tokens": 170958, "output_tokens": 12335, "would_be_cost_usd": 0.02203, "actual_cost_usd": 0.0}
+##### run --variant v3_runbook --tag v3_runbook-lite  03:37:53
+s01_db_pool_exhausted            success  rc=db_connection_pool_exhausted action=update_config:worker         calls= 6 probes=1 verified=True rej=0 harm=False resolved=True 0.45s
+s02_bad_config_deploy            success  rc=bad_config_deploy            action=update_config:payments-api   calls= 6 probes=4 verified=True rej=0 harm=False resolved=True 0.6s
+s03_tls_cert_expired             success  rc=tls_cert_expired             action=rotate_tls_cert:auth-api       calls= 4 probes=2 verified=True rej=0 harm=False resolved=True 0.36s
+s04_disk_full                    success  rc=disk_full                    action=free_disk_space:postgres       calls= 4 probes=1 verified=True rej=0 harm=False resolved=True 0.39s
+s05_third_party_outage           success  rc=third_party_outage           action=enable_circuit_breaker:payments-api   calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 0.26s
+s06_memory_leak_oom              success  rc=memory_leak_oom              action=rollback_deploy:inventory-api  calls= 6 probes=1 verified=True rej=0 harm=False resolved=True 0.37s
+s07_cache_eviction_stampede      success  rc=cache_eviction_stampede      action=increase_cache_memory:redis          calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 0.29s
+s08_third_party_rate_limited     success  rc=third_party_rate_limited     action=enable_circuit_breaker:worker         calls= 5 probes=1 verified=True rej=0 harm=False resolved=False 0.27s
+s09_dns_resolution_failure       success  rc=dns_resolution_failure       action=update_config:orders-api     calls= 4 probes=2 verified=True rej=0 harm=False resolved=True 0.27s
+s10_migration_lock_contention    success  rc=migration_lock_contention    action=terminate_blocking_query:postgres       calls= 4 probes=1 verified=True rej=0 harm=False resolved=True 0.43s
+s11_feature_flag_misconfig       success  rc=feature_flag_misconfig       action=disable_feature_flag:orders-api     calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 0.48s
+s12_clock_skew_hard              success  rc=clock_skew                   action=sync_clock:payments-api   calls= 4 probes=4 verified=True rej=0 harm=False resolved=True 0.38s
+llm stats: {"calls": 58, "cache_hits": 58, "input_tokens": 198283, "output_tokens": 10726, "would_be_cost_usd": 0.02412, "actual_cost_usd": 0.0}
+##### run --variant v4_reviewer --tag v4_reviewer-lite  03:38:01
+s01_db_pool_exhausted            success  rc=db_connection_pool_exhausted action=update_config:worker         calls= 7 probes=1 verified=True rej=0 harm=False resolved=True 0.51s
+s02_bad_config_deploy            success  rc=bad_config_deploy            action=update_config:payments-api   calls= 7 probes=4 verified=True rej=0 harm=False resolved=True 0.57s
+s03_tls_cert_expired             success  rc=tls_cert_expired             action=rotate_tls_cert:auth-api       calls= 5 probes=2 verified=True rej=0 harm=False resolved=True 0.38s
+s04_disk_full                    success  rc=disk_full                    action=free_disk_space:postgres       calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 0.43s
+s05_third_party_outage           success  rc=third_party_outage           action=enable_circuit_breaker:payments-api   calls= 6 probes=1 verified=True rej=0 harm=False resolved=True 0.43s
+s06_memory_leak_oom              success  rc=memory_leak_oom              action=rollback_deploy:inventory-api  calls= 7 probes=1 verified=True rej=0 harm=False resolved=True 0.38s
+s07_cache_eviction_stampede      success  rc=cache_eviction_stampede      action=increase_cache_memory:redis          calls= 6 probes=1 verified=True rej=0 harm=False resolved=True 0.46s
+s08_third_party_rate_limited     success  rc=third_party_rate_limited     action=update_config:worker         calls= 8 probes=1 verified=True rej=1 harm=False resolved=True 0.27s
+s09_dns_resolution_failure       success  rc=dns_resolution_failure       action=update_config:orders-api     calls= 5 probes=2 verified=True rej=0 harm=False resolved=True 0.31s
+s10_migration_lock_contention    success  rc=migration_lock_contention    action=terminate_blocking_query:postgres       calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 0.29s
+s11_feature_flag_misconfig       success  rc=feature_flag_misconfig       action=disable_feature_flag:orders-api     calls= 6 probes=1 verified=True rej=0 harm=False resolved=True 0.36s
+s12_clock_skew_hard              success  rc=clock_skew                   action=sync_clock:payments-api   calls= 5 probes=4 verified=True rej=0 harm=False resolved=True 0.29s
+llm stats: {"calls": 72, "cache_hits": 72, "input_tokens": 236623, "output_tokens": 12346, "would_be_cost_usd": 0.0286, "actual_cost_usd": 0.0}
+##### run --variant final --tag final  03:38:08
+s01_db_pool_exhausted            success  rc=db_connection_pool_exhausted action=update_config:worker         calls= 7 probes=1 verified=True rej=0 harm=False resolved=True 0.42s
+s02_bad_config_deploy            success  rc=bad_config_deploy            action=update_config:payments-api   calls= 7 probes=4 verified=True rej=0 harm=False resolved=True 0.38s
+s03_tls_cert_expired             success  rc=tls_cert_expired             action=rotate_tls_cert:auth-api       calls= 5 probes=2 verified=True rej=0 harm=False resolved=True 0.38s
+s04_disk_full                    success  rc=disk_full                    action=free_disk_space:postgres       calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 0.38s
+s05_third_party_outage           success  rc=third_party_outage           action=enable_circuit_breaker:payments-api   calls= 6 probes=1 verified=True rej=0 harm=False resolved=True 0.39s
+s06_memory_leak_oom              success  rc=memory_leak_oom              action=rollback_deploy:inventory-api  calls= 7 probes=1 verified=True rej=0 harm=False resolved=True 0.35s
+s07_cache_eviction_stampede      success  rc=cache_eviction_stampede      action=increase_cache_memory:redis          calls= 6 probes=1 verified=True rej=0 harm=False resolved=True 0.44s
+s08_third_party_rate_limited     success  rc=third_party_rate_limited     action=update_config:worker         calls= 8 probes=1 verified=True rej=1 harm=False resolved=True 0.45s
+s09_dns_resolution_failure       success  rc=dns_resolution_failure       action=update_config:orders-api     calls= 5 probes=2 verified=True rej=0 harm=False resolved=True 0.35s
+s10_migration_lock_contention    success  rc=migration_lock_contention    action=terminate_blocking_query:postgres       calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 0.41s
+s11_feature_flag_misconfig       success  rc=feature_flag_misconfig       action=disable_feature_flag:orders-api     calls= 6 probes=1 verified=True rej=0 harm=False resolved=True 0.33s
+s12_clock_skew_hard              success  rc=clock_skew                   action=sync_clock:payments-api   calls= 5 probes=4 verified=True rej=0 harm=False resolved=True 0.39s
+llm stats: {"calls": 72, "cache_hits": 72, "input_tokens": 236623, "output_tokens": 12346, "would_be_cost_usd": 0.0286, "actual_cost_usd": 0.0}
+##### DONE 03:38:16

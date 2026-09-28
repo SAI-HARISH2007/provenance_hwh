@@ -1,0 +1,35 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_22f23499-d30e-4220-80e1-7ad92dff4672",
+"name": "query_logs",
+"arguments": {
+"level": "INFO",
+"pattern": "unauthenticated",
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2476,
+"output_tokens": 38,
+"latency_ms": 642,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_22f23499-d30e-4220-80e1-7ad92dff4672",
+"function": {
+"arguments": "{\"level\":\"INFO\",\"pattern\":\"unauthenticated\",\"service\":\"inventory-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Check inventory-api logs for auth failures.",
+"content": ""
+}
+}

@@ -1,0 +1,37 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_390254",
+"name": "get_config",
+"arguments": {
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3595,
+"output_tokens": 18,
+"latency_ms": 1200,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_390254",
+"function": {
+"arguments": "{\"service\":\"inventory-api\"}",
+"name": "get_config"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPu8yJatZQhn4ZEZWL0rZ65TA3eAxUbxhAsyAP2hr41qor/rAhs7uCWyD1kAanF2cJMRD+RmrkE900mDyapouhlQ+kM0apTktVHQ7XTw5At3l2+oodWhsx"
+}
+}
+}
+],
+"content": ""
+}
+}

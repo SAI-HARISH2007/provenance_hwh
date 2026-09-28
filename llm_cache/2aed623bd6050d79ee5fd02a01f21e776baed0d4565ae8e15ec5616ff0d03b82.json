@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_9200ae6c-b886-472a-bfb2-28c2bc498890",
+"name": "get_metrics",
+"arguments": {
+"metric": "error_rate_pct",
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3002,
+"output_tokens": 67,
+"latency_ms": 683,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_9200ae6c-b886-472a-bfb2-28c2bc498890",
+"function": {
+"arguments": "{\"metric\":\"error_rate_pct\",\"service\":\"inventory-api\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"reasoning": "Latency stable ~120ms, not huge. Error rate spiked to ~60% after some point. Could be downstream inventory-api failures causing orders-api to return error. Let's check inventory-api error_rate_pct.",
+"content": ""
+}
+}

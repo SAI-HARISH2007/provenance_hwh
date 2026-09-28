@@ -1,0 +1,86 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_396638",
+"name": "query_logs",
+"arguments": {
+"service": "api-gateway",
+"level": "WARN"
+}
+},
+{
+"id": "call_396639",
+"name": "run_probe",
+"arguments": {
+"kind": "clock",
+"target": "api-gateway"
+}
+},
+{
+"id": "call_396640",
+"name": "run_probe",
+"arguments": {
+"kind": "clock",
+"target": "payments-api"
+}
+},
+{
+"id": "call_396641",
+"name": "run_probe",
+"arguments": {
+"target": "auth-api",
+"kind": "clock"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2817,
+"output_tokens": 96,
+"latency_ms": 1187,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_396638",
+"function": {
+"arguments": "{\"service\":\"api-gateway\",\"level\":\"WARN\"}",
+"name": "query_logs"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPoXoxw1fQFkM/TpXuacbIzSthRj6e+d9q+ZilPL6ntto9j6wLEunWEYglZjhEV/yVjOCXDM4cK3tTo6tWSEdkuamxM61DQu0l2aQF70trgRfKgxEkG4Qo"
+}
+}
+},
+{
+"id": "call_396639",
+"function": {
+"arguments": "{\"kind\":\"clock\",\"target\":\"api-gateway\"}",
+"name": "run_probe"
+},
+"type": "function"
+},
+{
+"id": "call_396640",
+"function": {
+"arguments": "{\"kind\":\"clock\",\"target\":\"payments-api\"}",
+"name": "run_probe"
+},
+"type": "function"
+},
+{
+"id": "call_396641",
+"function": {
+"arguments": "{\"target\":\"auth-api\",\"kind\":\"clock\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

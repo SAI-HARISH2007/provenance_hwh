@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_82c81b93-59ea-4c7f-a694-4a631dc0a2cc",
+"name": "get_metrics",
+"arguments": {
+"metric": "disk_pct",
+"service": "postgres"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4043,
+"output_tokens": 79,
+"latency_ms": 874,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_82c81b93-59ea-4c7f-a694-4a631dc0a2cc",
+"function": {
+"arguments": "{\"metric\":\"disk_pct\",\"service\":\"postgres\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"reasoning": "Many DB I/O errors. Could be due to postgres config change enabling log_min_duration_statement=0 causing heavy logging overhead leading to I/O errors? But postgres status healthy. However DB I/O errors could be due to disk full? Let's check disk usage metric for postgres.",
+"content": ""
+}
+}

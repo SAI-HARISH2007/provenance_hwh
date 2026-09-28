@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_0ac82d72-e0fe-4d0f-9a11-f71ded6a37e4",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 20,
+"pattern": "auth",
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3599,
+"output_tokens": 49,
+"latency_ms": 822,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_0ac82d72-e0fe-4d0f-9a11-f71ded6a37e4",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":20,\"pattern\":\"auth\",\"service\":\"payments-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "All 401 from payments-api upstream. Let's check payments-api logs for auth errors.",
+"content": ""
+}
+}

@@ -1,0 +1,33 @@
+{
+"text": "I apologize for the oversight. I need to run a `disk` probe specifically to confirm the `disk_full` root cause.",
+"tool_calls": [
+{
+"id": "function-call-8145009894099675487",
+"name": "run_probe",
+"arguments": {
+"target": "postgres",
+"kind": "disk"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 6304,
+"output_tokens": 47,
+"latency_ms": 1967,
+"model": "gemini-2.5-flash",
+"provider": "gemini",
+"raw_message": {
+"content": "I apologize for the oversight. I need to run a `disk` probe specifically to confirm the `disk_full` root cause.",
+"role": "assistant",
+"tool_calls": [
+{
+"id": "function-call-8145009894099675487",
+"function": {
+"arguments": "{\"target\":\"postgres\",\"kind\":\"disk\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+]
+}
+}

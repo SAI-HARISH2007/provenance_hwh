@@ -1,0 +1,51 @@
+{
+  "case_id": "s09_dns_resolution_failure",
+  "verdict": {
+    "root_cause": "dns_resolution_failure",
+    "service": "orders-api",
+    "action": "update_config",
+    "target": "orders-api",
+    "confidence": 1.0,
+    "summary": "orders-api is failing to reach inventory-api because inventory-api was migrated to namespace fulfilment and its old DNS name (inventory-api.default.svc) was retired.",
+    "evidence": [
+      "recent_changes showed inventory-api migrated namespace to 'fulfilment' (old DNS name retired) at 2026-08-30T02:48:00.000Z",
+      "orders-api logs show inventory client dial tcp inventory-api.default.svc:8080: i/o timeout",
+      "dns probe for inventory-api.default.svc returned NXDOMAIN",
+      "dns probe for inventory-api.fulfilment.svc resolved successfully to 10.0.91.14"
+    ],
+    "report_markdown": "# Incident Report: Orders-API Inventory Dependency Errors\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, a P1 alert fired for `orders-api` indicating 47% inventory dependency errors. Investigation revealed that `inventory-api` was recently migrated to a new namespace (`fulfilment`) and its old DNS name (`inventory-api.default.svc`) was retired, while `orders-api` was still configured to dial the old DNS endpoint.\n\n## Timeline\n- **02:46:00.000Z**: `orders-api` deployed version `orders-3.8.2` (timeout/retries adjustment).\n- **02:48:00.000Z**: `inventory-api` migrated to namespace `fulfilment` and old DNS name retired by `ops-bot`.\n- **02:49:34.000Z**: `orders-api` starts logging connection timeouts trying to reach `inventory-api.default.svc:8080`.\n- **03:12:00.000Z**: Alert fires for `orders-api` inventory dependency errors (47%).\n- **03:12:00+Z**: Greenlight investigates, identifies DNS failure, verifies via DNS probes.\n\n## Root Cause\n`dns_resolution_failure`: `inventory-api`'s DNS name changed during a namespace migration (`inventory-api.default.svc` -> `inventory-api.fulfilment.svc`), but `orders-api`'s configuration/environment still points to the retired DNS name, causing TCP dial timeouts.\n\n## Evidence\n- `recent_changes`: `inventory-api: migrate service to new namespace 'fulfilment' (old DNS name retired)`\n- `query_logs` on `orders-api`: `dial tcp inventory-api.default.svc:8080: i/o timeout`\n- `run_probe` (dns): `inventory-api.default.svc` -> `NXDOMAIN`\n- `run_probe` (dns): `inventory-api.fulfilment.svc` -> `10.0.91.14`\n\n## Proposed Remediation\nUpdate `orders-api` configuration/environment variables to point to the new inventory service endpoint (`inventory-api.fulfilment.svc`). This is safe because it corrects the upstream dependency address to match the new infrastructure topology.\n\n## Follow-ups\n- Ensure service migration procedures include updating dependent service references or using stable cross-namespace service discovery / external names.\n- Add integration tests verifying service-to-service connectivity after infrastructure migrations."
+  },
+  "variant": "v1_tools",
+  "run_id": "20260830T033715Z_v1-tools-s09-dns-resolution-failure",
+  "trace": "traces/20260830T033715Z_v1-tools-s09-dns-resolution-failure.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "status": "success",
+  "llm_calls": 4,
+  "input_tokens": 10530,
+  "output_tokens": 935,
+  "wall_s": 5.59,
+  "probes_run": 2,
+  "verified": true,
+  "gate_rejections": 0,
+  "reviewer": null,
+  "reviewer_approved": null,
+  "approval": {
+    "decision": "approved",
+    "by": "eval-policy"
+  },
+  "actions_executed": [
+    [
+      "update_config",
+      "orders-api"
+    ]
+  ],
+  "harm_done": [],
+  "resolved": true,
+  "remediation_effect": {
+    "executed": true,
+    "resolved": true,
+    "harm": false,
+    "effect": "update_config on orders-api applied; error rate returning to baseline, healthz 200 across services within 90s"
+  },
+  "would_be_cost_usd": 0.00143
+}

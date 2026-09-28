@@ -1,0 +1,33 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_bdb0316d-cd2c-4bef-80a5-722772b4f40b",
+"name": "get_config",
+"arguments": {
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3465,
+"output_tokens": 81,
+"latency_ms": 701,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_bdb0316d-cd2c-4bef-80a5-722772b4f40b",
+"function": {
+"arguments": "{\"service\":\"inventory-api\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"reasoning": "We see many JWT verification failures with kid=2026-09b (new key). So inventory-api cannot verify new key. That matches hypothesis. Need to verify that inventory-api's JWKS cache hasn't refreshed. Perhaps config for JWKS refresh interval is too long. Let's get config of inventory-api.",
+"content": ""
+}
+}

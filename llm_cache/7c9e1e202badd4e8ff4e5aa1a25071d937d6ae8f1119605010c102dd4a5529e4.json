@@ -1,0 +1,50 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_616272",
+"name": "submit_verdict",
+"arguments": {
+"service": "orders-api",
+"evidence": [
+"recent_changes shows orders-api deploy orders-3.8.1 at 2026-08-30T02:27:00.000Z adding ~1.5GB of new keys",
+"redis.used_memory_pct metric spiked to 102.7% starting right after the deploy at 02:27",
+"redis.evicted_keys_per_min metric jumped from 0 to ~48,000 evictions/min immediately after the deploy",
+"redis.hit_rate_pct crashed from ~100% down to ~31% simultaneously",
+"orders-api.latency_p95_ms jumped from ~120ms to ~4,000ms right after the deploy"
+],
+"summary": "orders-api p95 latency spiked to 4.1s due to a cache eviction stampede in Redis caused by the orders-3.8.1 deploy adding ~1.5GB of unconstrained bundle cache keys.",
+"confidence": 1,
+"root_cause": "cache_eviction_stampede",
+"target": "orders-api",
+"report_markdown": "# Incident Report: orders-api Latency Spike and Redis Exhaustion\n\n## Summary\nAt 2026-08-30T03:12:00Z, a P2 page fired for high p95 latency in `orders-api` (reaching 4.1s against an 800ms threshold). The root cause was a recent deploy (`orders-3.8.1`) that introduced product bundle caching, adding ~1.5GB of new keys to Redis. Because Redis was configured with a 2GB limit and `allkeys-lru` eviction, the new cache volume overwhelmed memory, causing continuous heavy key eviction (~48k evicted keys/min) and dropping the cache hit rate from ~100% to ~31%. This cache eviction stampede caused downstream database query amplification and latency spikes across `orders-api`.\n\n## Timeline\n- **02:27 UTC**: `orders-api` deployed version `orders-3.8.1` (cache product bundles, adding ~1.5GB of new keys).\n- **02:27 - 03:00 UTC**: Redis memory usage rapidly climbs from ~60% to 100%+, hitting the 2GB cap. Evictions spike to ~48,000 keys/min and hit rate drops from ~100% to ~31%.\n- **03:04 UTC**: `orders-api` p95 latency jumps from ~120ms to ~3,900ms.\n- **03:12 UTC**: P2 alert fires for `orders-api` p95 latency.\n- **03:12 UTC+**: Incident investigation confirms cache eviction stampede caused by `orders-3.8.1`.\n\n## Root Cause\n**Cache Eviction Stampede** triggered by a bad configuration / feature addition in `orders-3.8.1` (`cache_eviction_stampede`). The application cache footprint exceeded Redis capacity (`maxmemory 2gb`), leading to thrashing, low hit rates, and database load.\n\n## Evidence\n1. **Recent Changes**: `orders-api: orders-3.8.1: cache product bundles (adds ~1.5GB of new keys)` deployed at 02:27:00.000Z.\n2. **Redis Memory**: `redis.used_memory_pct` went from ~60% to 102.7% immediately following the deploy.\n3. **Redis Evictions**: `redis.evicted_keys_per_min` went from 0 to ~48,000/min.\n4. **Redis Hit Rate**: `redis.hit_rate_pct` collapsed from ~100% to ~31%.\n5. **Orders API Latency**: `orders-api.latency_p95_ms` spiked from 120ms to ~4,056ms right after the deploy.\n\n## Proposed Remediation\nRoll back the `orders-api` deployment to version `orders-3.8.1`'s predecessor (`orders-3.8.0`) to remove the excessive bundle caching keys and restore normal Redis hit rates and latency.\n\n## Follow-ups\n1. Review sizing requirements for product bundle caching before re-introducing.\n2. Adjust Redis memory limits or cache TTLs if large object caching is required.\n3. Add memory and hit rate alerts for Redis cache tiers.",
+"action": "rollback_deploy"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4122,
+"output_tokens": 1045,
+"latency_ms": 4129,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_616272",
+"function": {
+"arguments": "{\"service\":\"orders-api\",\"evidence\":[\"recent_changes shows orders-api deploy orders-3.8.1 at 2026-08-30T02:27:00.000Z adding ~1.5GB of new keys\",\"redis.used_memory_pct metric spiked to 102.7% starting right after the deploy at 02:27\",\"redis.evicted_keys_per_min metric jumped from 0 to ~48,000 evictions/min immediately after the deploy\",\"redis.hit_rate_pct crashed from ~100% down to ~31% simultaneously\",\"orders-api.latency_p95_ms jumped from ~120ms to ~4,000ms right after the deploy\"],\"summary\":\"orders-api p95 latency spiked to 4.1s due to a cache eviction stampede in Redis caused by the orders-3.8.1 deploy adding ~1.5GB of unconstrained bundle cache keys.\",\"confidence\":1,\"root_cause\":\"cache_eviction_stampede\",\"target\":\"orders-api\",\"report_markdown\":\"# Incident Report: orders-api Latency Spike and Redis Exhaustion\\n\\n## Summary\\nAt 2026-08-30T03:12:00Z, a P2 page fired for high p95 latency in `orders-api` (reaching 4.1s against an 800ms threshold). The root cause was a recent deploy (`orders-3.8.1`) that introduced product bundle caching, adding ~1.5GB of new keys to Redis. Because Redis was configured with a 2GB limit and `allkeys-lru` eviction, the new cache volume overwhelmed memory, causing continuous heavy key eviction (~48k evicted keys/min) and dropping the cache hit rate from ~100% to ~31%. This cache eviction stampede caused downstream database query amplification and latency spikes across `orders-api`.\\n\\n## Timeline\\n- **02:27 UTC**: `orders-api` deployed version `orders-3.8.1` (cache product bundles, adding ~1.5GB of new keys).\\n- **02:27 - 03:00 UTC**: Redis memory usage rapidly climbs from ~60% to 100%+, hitting the 2GB cap. Evictions spike to ~48,000 keys/min and hit rate drops from ~100% to ~31%.\\n- **03:04 UTC**: `orders-api` p95 latency jumps from ~120ms to ~3,900ms.\\n- **03:12 UTC**: P2 alert fires for `orders-api` p95 latency.\\n- **03:12 UTC+**: Incident investigation confirms cache eviction stampede caused by `orders-3.8.1`.\\n\\n## Root Cause\\n**Cache Eviction Stampede** triggered by a bad configuration / feature addition in `orders-3.8.1` (`cache_eviction_stampede`). The application cache footprint exceeded Redis capacity (`maxmemory 2gb`), leading to thrashing, low hit rates, and database load.\\n\\n## Evidence\\n1. **Recent Changes**: `orders-api: orders-3.8.1: cache product bundles (adds ~1.5GB of new keys)` deployed at 02:27:00.000Z.\\n2. **Redis Memory**: `redis.used_memory_pct` went from ~60% to 102.7% immediately following the deploy.\\n3. **Redis Evictions**: `redis.evicted_keys_per_min` went from 0 to ~48,000/min.\\n4. **Redis Hit Rate**: `redis.hit_rate_pct` collapsed from ~100% to ~31%.\\n5. **Orders API Latency**: `orders-api.latency_p95_ms` spiked from 120ms to ~4,056ms right after the deploy.\\n\\n## Proposed Remediation\\nRoll back the `orders-api` deployment to version `orders-3.8.1`'s predecessor (`orders-3.8.0`) to remove the excessive bundle caching keys and restore normal Redis hit rates and latency.\\n\\n## Follow-ups\\n1. Review sizing requirements for product bundle caching before re-introducing.\\n2. Adjust Redis memory limits or cache TTLs if large object caching is required.\\n3. Add memory and hit rate alerts for Redis cache tiers.\",\"action\":\"rollback_deploy\"}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPSoWyYwwEY69kHV/eDvc1rE/IZLg604pqsM7iePbzg6ghhzD98XTif+/9Z3xnU409LVYbQfPiaXmM5mipQ14jhKEdh+cfw+jAA0fCqQv2vb9R+D49M3tT"
+}
+}
+}
+],
+"content": ""
+}
+}

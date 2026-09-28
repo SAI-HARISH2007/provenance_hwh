@@ -1,0 +1,33 @@
+{
+  "case_id": "s03_tls_cert_expired",
+  "verdict": {
+    "root_cause": "tls_cert_expired",
+    "service": "auth-api",
+    "action": "rotate_tls_cert",
+    "target": "auth-api",
+    "confidence": 0.95,
+    "summary": "The auth-api service is down and reporting a high error rate, with api-gateway logs showing repeated TLS handshake errors when attempting to connect to auth-api, indicating an expired or invalid TLS certificate.",
+    "evidence": [
+      "auth-api: status: down",
+      "auth-api: error_rate_pct: now 98.046 (30m ago 0.391, max 103.807)",
+      "ERROR api-gateway: upstream auth-api: TLS handshake error; retrying upstream rid=8df0bbda",
+      "ALERT: 401/5xx rate 41% on all authenticated routes"
+    ],
+    "report_markdown": "## Incident Report: High 401/5xx Rate on Authenticated Routes\n\n### Summary\nAt 03:12:00Z, an alert fired indicating a 41% 401/5xx error rate on all authenticated routes via the `api-gateway`. Investigation revealed the `auth-api` service was down and experiencing a near 100% error rate. Logs from `api-gateway` showed persistent 'TLS handshake error' messages when attempting to connect to `auth-api`, strongly suggesting an expired or invalid TLS certificate on the authentication service.\n\n### Timeline\n* **2026-08-30T02:53:32.000Z**: First occurrence of `TLS handshake error` in `api-gateway` logs targeting `auth-api`.\n* **2026-08-30T03:12:00.000Z**: P1 alert fired for `api-gateway` due to high 401/5xx rate.\n* **2026-08-30T03:12:00.000Z (now)**: `auth-api` reported as 'down' with 98% error rate. `api-gateway` and `orders-api` are 'degraded' with high error rates.\n\n### Root Cause\nThe root cause is an expired TLS certificate on the `auth-api` service. This prevents `api-gateway` from establishing a secure connection, leading to TLS handshake failures and subsequent authentication errors (401/5xx) for all authenticated routes.\n\n### Evidence\n* The `auth-api` service is explicitly marked as `down` in the service status overview.\n* Metrics show `auth-api`'s `error_rate_pct` spiked to `98.046%` from a healthy state.\n* `api-gateway` logs are flooded with `ERROR api-gateway: upstream auth-api: TLS handshake error; retrying upstream` messages, directly pointing to a communication issue with `auth-api` at the TLS layer.\n* The alert message itself, '401/5xx rate 41% on all authenticated routes', aligns perfectly with an authentication service failure.\n\n### Remediation\n**Action:** `rotate_tls_cert`\n**Target:** `auth-api`\n\nRotate the TLS certificate for the `auth-api` service with a new, valid certificate. A restart of the `auth-api` service may be required after the certificate rotation to ensure the new certificate is loaded and used.\n\n### Follow-ups\n1. Verify the actual expiration date of the certificate on `auth-api` to confirm the root cause.\n2. Implement proactive monitoring and alerting for TLS certificate expiration dates across all services.\n3. Review and improve the certificate management process for `auth-api` to prevent future expirations."
+  },
+  "variant": "baseline",
+  "run_id": "20260830T032253Z_baseline-s03-tls-cert-expired",
+  "trace": "traces/20260830T032253Z_baseline-s03-tls-cert-expired.jsonl",
+  "model": "gemini-2.5-flash",
+  "provider": "gemini",
+  "status": "success",
+  "llm_calls": 1,
+  "input_tokens": 5055,
+  "output_tokens": 886,
+  "would_be_cost_usd": 0.00373,
+  "wall_s": 12.82,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

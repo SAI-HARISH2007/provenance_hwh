@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_6596cf8e-8b43-43af-9d58-b83541680ab7",
+"name": "query_logs",
+"arguments": {
+"level": "WARN",
+"limit": 20,
+"pattern": "order",
+"service": "orders-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2255,
+"output_tokens": 46,
+"latency_ms": 697,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_6596cf8e-8b43-43af-9d58-b83541680ab7",
+"function": {
+"arguments": "{\"level\":\"WARN\",\"limit\":20,\"pattern\":\"order\",\"service\":\"orders-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Maybe logs are INFO.Search for WARN.",
+"content": ""
+}
+}

@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_514362",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "http://orders-api:8080/health"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4050,
+"output_tokens": 33,
+"latency_ms": 1081,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_514362",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"http://orders-api:8080/health\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPVJxjxPUo1rfygJK7cDNCFJafZ4EVl8JmrRBwg7FjGXIYgFN63yD2gNPIYpEtXzQ/F8BvnAsHE5TUM0Sw5H+J88HWrmVF8vq5HP+KrHHThZw+OHO/QY0Q"
+}
+}
+}
+],
+"content": ""
+}
+}

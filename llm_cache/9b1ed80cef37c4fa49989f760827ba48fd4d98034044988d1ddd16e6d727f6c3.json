@@ -1,0 +1,45 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_12ffbfb6-78ed-443a-8dcb-e1bd5aec3b97",
+"name": "submit_verdict",
+"arguments": {
+"action": "restart_service",
+"confidence": 0.95,
+"evidence": [
+"alert: payments-api charge_failed 100% at 2026-08-30T03:12Z",
+"recent_changes: vault rotation at 2026-08-30T03:04Z revoking PAYGATE_API_KEY v7, requires reload",
+"query_logs: multiple ERROR lines from payments-api showing paygate request failed status=401 invalid_api_key v7 between 02:47 and 02:49",
+"get_config: payments-api config shows PAYGATE_API_KEY_VERSION: v7 (loaded at process start 3d ago)"
+],
+"report_markdown": "# Incident Report\n\n**Summary**: Payments API experienced a 100% charge failure rate and went down at 03:12 UTC.\n\n**Timeline**:\n- 01:12 UTC: Orders API feature flag change (unrelated).\n- 03:01 UTC: Deploy `payments-2.16.0` (adds retry jitter).\n- 03:04 UTC: Vault rotated `PAYGATE_API_KEY` from v7 to v8 and revoked v7.\n- 02:47‑02:49 UTC (pre‑alert): Payments API logged repeated `401 invalid_api_key` errors referencing v7.\n- 03:12 UTC: Alert fired – charge_failed rate 100% for 4 min; payments‑api status = down.\n\n**Root Cause**: `secret_rotation`. The vault rotation revoked the previously loaded API key version **v7**. Payments‑API reads the PayGate API key only at process start, so it continued using the revoked key, resulting in authentication failures to the vendor and downstream charge failures.\n\n**Evidence**:\n- Vault rotation entry (recent_changes) indicating required reload.\n- Payments‑API config still showing `PAYGATE_API_KEY_VERSION: v7` loaded 3 days ago.\n- Error logs with `invalid_api_key` responses from PayGate.\n- Alert confirming total charge failure.\n\n**Proposed Remediation** (safe): Restart the `payments-api` service so it reloads the secret and picks up the new API key version **v8**. Restarting a stateless API service is low‑risk and restores normal operation.\n\n**Follow‑ups**:\n- Implement automatic secret reload on rotation (e.g., watch vault events or use side‑car reloader).\n- Add a health check that validates external vendor authentication on startup.\n- Review deployment docs to ensure teams are aware of secret‑rotation requirements.\n\n---\n\n**Root Cause Label**: secret_rotation\n**Service (cause)**: payments-api\n**Action Target**: payments-api",
+"root_cause": "secret_rotation",
+"service": "payments-api",
+"summary": "Payments API used revoked PayGate API key after vault rotation, causing 401 errors and charge failures.",
+"target": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3221,
+"output_tokens": 858,
+"latency_ms": 2486,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_12ffbfb6-78ed-443a-8dcb-e1bd5aec3b97",
+"function": {
+"arguments": "{\"action\":\"restart_service\",\"confidence\":0.95,\"evidence\":[\"alert: payments-api charge_failed 100% at 2026-08-30T03:12Z\",\"recent_changes: vault rotation at 2026-08-30T03:04Z revoking PAYGATE_API_KEY v7, requires reload\",\"query_logs: multiple ERROR lines from payments-api showing paygate request failed status=401 invalid_api_key v7 between 02:47 and 02:49\",\"get_config: payments-api config shows PAYGATE_API_KEY_VERSION: v7 (loaded at process start 3d ago)\"],\"report_markdown\":\"# Incident Report\\n\\n**Summary**: Payments API experienced a 100% charge failure rate and went down at 03:12 UTC.\\n\\n**Timeline**:\\n- 01:12 UTC: Orders API feature flag change (unrelated).\\n- 03:01 UTC: Deploy `payments-2.16.0` (adds retry jitter).\\n- 03:04 UTC: Vault rotated `PAYGATE_API_KEY` from v7 to v8 and revoked v7.\\n- 02:47‑02:49 UTC (pre‑alert): Payments API logged repeated `401 invalid_api_key` errors referencing v7.\\n- 03:12 UTC: Alert fired – charge_failed rate 100% for 4 min; payments‑api status = down.\\n\\n**Root Cause**: `secret_rotation`. The vault rotation revoked the previously loaded API key version **v7**. Payments‑API reads the PayGate API key only at process start, so it continued using the revoked key, resulting in authentication failures to the vendor and downstream charge failures.\\n\\n**Evidence**:\\n- Vault rotation entry (recent_changes) indicating required reload.\\n- Payments‑API config still showing `PAYGATE_API_KEY_VERSION: v7` loaded 3 days ago.\\n- Error logs with `invalid_api_key` responses from PayGate.\\n- Alert confirming total charge failure.\\n\\n**Proposed Remediation** (safe): Restart the `payments-api` service so it reloads the secret and picks up the new API key version **v8**. Restarting a stateless API service is low‑risk and restores normal operation.\\n\\n**Follow‑ups**:\\n- Implement automatic secret reload on rotation (e.g., watch vault events or use side‑car reloader).\\n- Add a health check that validates external vendor authentication on startup.\\n- Review deployment docs to ensure teams are aware of secret‑rotation requirements.\\n\\n---\\n\\n**Root Cause Label**: secret_rotation\\n**Service (cause)**: payments-api\\n**Action Target**: payments-api\",\"root_cause\":\"secret_rotation\",\"service\":\"payments-api\",\"summary\":\"Payments API used revoked PayGate API key after vault rotation, causing 401 errors and charge failures.\",\"target\":\"payments-api\"}",
+"name": "submit_verdict"
+},
+"type": "function"
+}
+],
+"reasoning": "Config shows API key version v7 loaded at process start 3 days ago. So secret rotation not applied.\n\nThus root cause: secret_rotation (or maybe bad_config_deploy? but secret rotation is a change type). Root cause label list includes \"secret_rotation\". Yes.\n\nRemediation: need to reload secret for payments-api. Since service reads at process start, need to restart payments-api to pick up new key v8. That's safe? Restarting a stateless service is safe. So propose restart_service on payments-api.\n\nWe should verify that new key works. Could run a probe to vendor endpoint with new key? Not possible. But we can check that vault now has v8. Let's probe maybe \"vault\" secret? Not needed.\n\nWe have enough evidence.\n\nNow submit verdict with action restart_service, confidence high (0.95). Evidence list: alert, recent_changes (secret rotation), logs showing invalid_api_key, config showing v7 loaded. Provide report.\n\n",
+"content": ""
+}
+}

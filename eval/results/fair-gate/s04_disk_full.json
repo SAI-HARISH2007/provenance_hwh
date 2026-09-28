@@ -1,0 +1,69 @@
+{
+  "case_id": "s04_disk_full",
+  "verdict": {
+    "root_cause": "disk_full",
+    "service": "postgres",
+    "action": "free_disk_space",
+    "target": "postgres",
+    "confidence": 1.0,
+    "summary": "PostgreSQL disk is 100% full due to log_min_duration_statement=0 writing 96GB+ of query logs, causing order insertions to fail.",
+    "evidence": [
+      "postgres disk probe: /var/lib/postgresql 100% used (200G/200G), log=96G growing 1.1G/min",
+      "orders-api logs: insert failed: could not extend file base/16384/2619",
+      "recent_changes: postgres config enable log_min_duration_statement=0 for slow-query investigation"
+    ],
+    "report_markdown": "# Incident Report: orders-api Failures due to Disk Full on PostgreSQL\n\n## Summary\nAt 2026-08-30T03:12:00Z, `orders-api` fired a P1 alert for a 58% failure rate on order creation. Investigation revealed that PostgreSQL ran out of disk space (`100% used`) due to an excessively verbose query log configuration (`log_min_duration_statement=0`), which caused database write failures (`could not extend file`) across the database and crippled order creation.\n\n## Timeline\n- **01:02:00Z**: Config change applied to `postgres`: `log_min_duration_statement=0` enabled for slow-query investigation.\n- **02:47:16Z**: `orders-api` begins logging insert failures (`could not extend file`).\n- **02:52:00Z**: `inventory-api` deploy (`inventory-1.9.3`).\n- **03:12:00Z**: P1 alert fires for `orders-api` (`order_create failure rate 58%`).\n- **03:12:00Z (Investigation)**: Disk probe on PostgreSQL confirms `/var/lib/postgresql` is at 100% usage (200G/200G), with postgres logs taking up 96GB and growing at 1.1GB/min.\n\n## Root Cause\n`disk_full` (PostgreSQL disk exhaustion caused by a debug logging configuration change that logged every statement, filling the disk with logs and preventing database file extension).\n\n## Evidence\n- `recent_changes`: `postgres: enable log_min_duration_statement=0 for slow-query investigation`\n- `query_logs` (orders-api): Repeated `ERROR orders-api: insert failed: could not extend file \"base/16384/2619\"` starting around 02:47Z.\n- `run_probe` (disk, target=postgres): `/var/lib/postgresql: 100% used (200G/200G); /var/lib/postgresql/log = 96G, growing 1.1G/min`.\n\n## Proposed Remediation\n1. Free disk space on PostgreSQL by truncating or rotating/deleting excess logs in `/var/lib/postgresql/log` (or reverting the `log_min_duration_statement` configuration change).\n2. Safe because cleaning up bloated log files and reverting unnecessary verbose query logging restores normal disk capacity and allows PostgreSQL to extend data files normally.\n\n## Follow-ups\n- Revert `log_min_duration_statement` or raise the threshold to avoid flooding logs.\n- Add disk usage alerts for PostgreSQL at 80% and 90% thresholds.\n"
+  },
+  "variant": "mem_gate",
+  "run_id": "20260927T110855Z_mem-gate-s04-disk-full",
+  "trace": "traces/20260927T110855Z_mem-gate-s04-disk-full.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "status": "success",
+  "llm_calls": 4,
+  "input_tokens": 12147,
+  "output_tokens": 924,
+  "wall_s": 0.35,
+  "probes_run": 1,
+  "verified": true,
+  "gate_rejections": 0,
+  "reviewer": null,
+  "reviewer_approved": null,
+  "approval": {
+    "decision": "approved",
+    "by": "eval-policy"
+  },
+  "actions_executed": [
+    [
+      "free_disk_space",
+      "postgres"
+    ]
+  ],
+  "harm_done": [],
+  "resolved": true,
+  "remediation_effect": {
+    "executed": true,
+    "resolved": true,
+    "harm": false,
+    "effect": "free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across services within 90s"
+  },
+  "memory_hits": 0,
+  "memory_used": false,
+  "memory_rejections": 0,
+  "memory_checks": [],
+  "memory_cited": [],
+  "memory_retained": {
+    "incident": "s04_disk_full",
+    "when": "2026-07-06 02:10 UTC",
+    "tags": [
+      "incident:s04_disk_full",
+      "root_cause:disk_full",
+      "service:postgres",
+      "action:free_disk_space",
+      "verified:yes",
+      "resolved:yes",
+      "harm:no"
+    ],
+    "chars": 673
+  },
+  "would_be_cost_usd": 0.00158
+}

@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_de9d985c-cc4c-4cc5-b406-33f765979448",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 5,
+"pattern": "SQLSTATE 53100",
+"service": "orders-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2705,
+"output_tokens": 50,
+"latency_ms": 744,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_de9d985c-cc4c-4cc5-b406-33f765979448",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":5,\"pattern\":\"SQLSTATE 53100\",\"service\":\"orders-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Now we have evidence. Also maybe query logs for orders-api errors.",
+"content": ""
+}
+}

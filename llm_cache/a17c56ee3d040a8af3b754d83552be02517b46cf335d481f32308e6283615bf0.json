@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_615f126d-8792-4570-8859-520f45c56783",
+"name": "get_metrics",
+"arguments": {
+"metric": "latency_p95_ms",
+"service": "orders-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2729,
+"output_tokens": 50,
+"latency_ms": 678,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_615f126d-8792-4570-8859-520f45c56783",
+"function": {
+"arguments": "{\"metric\":\"latency_p95_ms\",\"service\":\"orders-api\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"reasoning": "Error rate spiked around 23 minutes ago (since alert at 03:12). Let's get latency.",
+"content": ""
+}
+}

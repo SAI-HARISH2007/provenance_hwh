@@ -1,0 +1,33 @@
+{
+  "case_id": "s05_third_party_outage",
+  "verdict": {
+    "root_cause": "third_party_outage",
+    "service": "payments-api",
+    "action": "enable_circuit_breaker",
+    "target": "payments-api",
+    "confidence": 0.98,
+    "summary": "The external payment gateway (paygate) is experiencing timeouts and returning 503 Service Unavailable errors, causing the payments-api service to hang, time out, and throw failures.",
+    "evidence": [
+      "payments-api: paygate request timeout after 8000ms url=https://api.paygate.example/charges",
+      "payments-api: paygate 503 Service Unavailable body='upstream maintenance'",
+      "payments-api.error_rate_pct jumped to ~60%+",
+      "api-gateway.latency_p95_ms spiked to >8000ms due to upstream timeout waiting on payments-api"
+    ],
+    "report_markdown": "### Incident Report: Payments API Degradation\n\n#### Summary\nAt 2026-08-30T03:12:00.000Z, an alert fired for `payments-api` indicating high latency (p95 > 8s) and a ~62% failure rate. This propagated through the `api-gateway`, causing checkout requests to time out.\n\n#### Timeline\n- **02:50:32Z**: First `paygate request timeout` logged by `payments-api`.\n- **02:52:03Z**: First `paygate 503 Service Unavailable body='upstream maintenance'` logged.\n- **03:12:00Z**: Alert triggered as failure rates sustained around 60%-64% with p95 latency exceeding 8 seconds.\n\n#### Root Cause\nThe third-party payment provider (`paygate`) is experiencing an outage / maintenance window (`upstream maintenance`), causing requests to time out at the configured 8-second limit.\n\n#### Evidence\n- Upstream HTTP 503 responses and timeouts from `https://api.paygate.example/charges`.\n- `payments-api.error_rate_pct` metrics surging from <1% to ~64%.\n- `api-gateway` showing downstream 504 Gateway Timeouts corresponding to upstream `payments-api` calls.\n\n#### Remediation\n1. Enable the circuit breaker on `payments-api` to fail fast instead of holding threads/connections and waiting for 8-second timeouts.\n2. Escalate to the vendor (`paygate`) regarding the ongoing maintenance/outage.\n\n#### Follow-ups\n- Configure automatic circuit breaking and fallback responses for third-party payment dependencies.\n- Review gateway timeout settings to prevent cascading thread exhaustion."
+  },
+  "variant": "baseline",
+  "run_id": "20260830T033422Z_baseline-s05-third-party-outage",
+  "trace": "traces/20260830T033422Z_baseline-s05-third-party-outage.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "provider": "gemini",
+  "status": "success",
+  "llm_calls": 1,
+  "input_tokens": 20666,
+  "output_tokens": 637,
+  "would_be_cost_usd": 0.00232,
+  "wall_s": 3.7,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

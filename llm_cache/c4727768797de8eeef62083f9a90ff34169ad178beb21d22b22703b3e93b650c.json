@@ -1,0 +1,55 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_1883314",
+"name": "get_metrics",
+"arguments": {
+"metric": "connections_used",
+"service": "postgres"
+}
+},
+{
+"id": "call_1883315",
+"name": "query_logs",
+"arguments": {
+"pattern": "53100",
+"level": "ERROR",
+"service": "orders-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2824,
+"output_tokens": 58,
+"latency_ms": 1150,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_1883314",
+"function": {
+"arguments": "{\"metric\":\"connections_used\",\"service\":\"postgres\"}",
+"name": "get_metrics"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0Tbfr8NLyI3agcNm5Wxk7r/rKPRICO3gFzsxF3ij32CQC5PRAPdhV1zuYr0vrm0hpiCJofgcUMxPHxSD2qASAg2v+Hp11jlbPSVzKD+39ZFpT7mwTiWdb2eZE="
+}
+}
+},
+{
+"id": "call_1883315",
+"function": {
+"arguments": "{\"pattern\":\"53100\",\"level\":\"ERROR\",\"service\":\"orders-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

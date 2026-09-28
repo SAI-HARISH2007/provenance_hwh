@@ -1,0 +1,48 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_2486950",
+"name": "submit_verdict",
+"arguments": {
+"action": "sync_clock",
+"summary": "inventory-api returning 401 errors on inventory routes due to -287.4s clock skew on node inv-5 after pod rescheduling",
+"service": "inventory-api",
+"target": "inventory-api",
+"confidence": 1,
+"evidence": [
+"inventory-api probe showed ntp offset -287.4s with chronyd inactive on node inv-5 after pod rescheduling at 02:14:00.000Z",
+"inventory-api logs showed 'jwt verification failed: InvalidToken (claims check)' starting right after pod rescheduling, rejecting new JWTs signed with kid=2026-09b because local time is ~4.8 minutes in the past",
+"auth-api probe showed 0.001s offset and auth-api is healthy"
+],
+"report_markdown": "# Incident Report: inventory-api JWT 401 Unauthorized Errors Due to Clock Skew\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, a P2 page fired for `api-gateway` due to a 6.8% 401 error rate on `/v1/inventory/*` routes, while all other services and routes remained healthy. Investigation revealed that `inventory-api` pods (rescheduled to node `inv-5` at 02:14 UTC during maintenance) suffer from severe clock skew (-287.4 seconds offset, with `chronyd` inactive). Because `inventory-api`'s local clock is ~4.8 minutes behind actual time, newly issued JWTs signed with key `kid=2026-09b` (rotated at 02:31 UTC) fail `nbf` (not before) / claims validation checks, causing widespread 401 Unauthorized responses.\n\n## Timeline\n- **2026-08-30T02:14:00.000Z**: `ops-bot` reschedules `inventory-api` pods from node `inv-2` to node `inv-5` (node drain for maintenance).\n- **2026-08-30T02:31:00.000Z**: `auth-api` rotates JWT signing key to `kid=2026-09b`.\n- **2026-08-30T02:54:52.000Z**: `inventory-api` begins logging `jwt verification failed: InvalidToken (claims check)` for tokens with `kid=2026-09b`.\n- **2026-08-30T03:12:00.000Z**: Alert fires on `api-gateway` for 401 rate on `/v1/inventory/*`.\n\n## Root Cause\n`clock_skew`: Node `inv-5` running `inventory-api` has a clock offset of -287.4 seconds and `chronyd` is inactive, causing validation failures for time-sensitive JWT claims.\n\n## Evidence\n- `get_alert`: `api-gateway` reporting 401 rate 6.8% on `/v1/inventory/*`.\n- `recent_changes`: `inventory-api` pods rescheduled to node `inv-5` at 02:14 UTC.\n- `query_logs`: `inventory-api` continuous `jwt verification failed: InvalidToken (claims check)` errors with `kid=2026-09b`.\n- `run_probe` (clock): `inventory-api (node inv-5) ntp offset -287.4s — chronyd inactive (unit disabled)`.\n\n## Proposed Remediation\nSync the system clock and enable/start `chronyd` on node `inv-5` hosting `inventory-api`, or restart the pods so they are scheduled on a node with correct time. Proposing `sync_clock` action on `inventory-api`.\n",
+"root_cause": "clock_skew"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4426,
+"output_tokens": 911,
+"latency_ms": 4179,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_2486950",
+"function": {
+"arguments": "{\"action\":\"sync_clock\",\"summary\":\"inventory-api returning 401 errors on inventory routes due to -287.4s clock skew on node inv-5 after pod rescheduling\",\"service\":\"inventory-api\",\"target\":\"inventory-api\",\"confidence\":1,\"evidence\":[\"inventory-api probe showed ntp offset -287.4s with chronyd inactive on node inv-5 after pod rescheduling at 02:14:00.000Z\",\"inventory-api logs showed 'jwt verification failed: InvalidToken (claims check)' starting right after pod rescheduling, rejecting new JWTs signed with kid=2026-09b because local time is ~4.8 minutes in the past\",\"auth-api probe showed 0.001s offset and auth-api is healthy\"],\"report_markdown\":\"# Incident Report: inventory-api JWT 401 Unauthorized Errors Due to Clock Skew\\n\\n## Summary\\nAt 2026-08-30T03:12:00.000Z, a P2 page fired for `api-gateway` due to a 6.8% 401 error rate on `/v1/inventory/*` routes, while all other services and routes remained healthy. Investigation revealed that `inventory-api` pods (rescheduled to node `inv-5` at 02:14 UTC during maintenance) suffer from severe clock skew (-287.4 seconds offset, with `chronyd` inactive). Because `inventory-api`'s local clock is ~4.8 minutes behind actual time, newly issued JWTs signed with key `kid=2026-09b` (rotated at 02:31 UTC) fail `nbf` (not before) / claims validation checks, causing widespread 401 Unauthorized responses.\\n\\n## Timeline\\n- **2026-08-30T02:14:00.000Z**: `ops-bot` reschedules `inventory-api` pods from node `inv-2` to node `inv-5` (node drain for maintenance).\\n- **2026-08-30T02:31:00.000Z**: `auth-api` rotates JWT signing key to `kid=2026-09b`.\\n- **2026-08-30T02:54:52.000Z**: `inventory-api` begins logging `jwt verification failed: InvalidToken (claims check)` for tokens with `kid=2026-09b`.\\n- **2026-08-30T03:12:00.000Z**: Alert fires on `api-gateway` for 401 rate on `/v1/inventory/*`.\\n\\n## Root Cause\\n`clock_skew`: Node `inv-5` running `inventory-api` has a clock offset of -287.4 seconds and `chronyd` is inactive, causing validation failures for time-sensitive JWT claims.\\n\\n## Evidence\\n- `get_alert`: `api-gateway` reporting 401 rate 6.8% on `/v1/inventory/*`.\\n- `recent_changes`: `inventory-api` pods rescheduled to node `inv-5` at 02:14 UTC.\\n- `query_logs`: `inventory-api` continuous `jwt verification failed: InvalidToken (claims check)` errors with `kid=2026-09b`.\\n- `run_probe` (clock): `inventory-api (node inv-5) ntp offset -287.4s — chronyd inactive (unit disabled)`.\\n\\n## Proposed Remediation\\nSync the system clock and enable/start `chronyd` on node `inv-5` hosting `inventory-api`, or restart the pods so they are scheduled on a node with correct time. Proposing `sync_clock` action on `inventory-api`.\\n\",\"root_cause\":\"clock_skew\"}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0Tm88h8xtLAX/BcLR931mWnMkjzdKNeZQ2E2W9YMD5P2yyYDzXV8oy99jfJjAT3dgrnzeVDM4U9IzMzKZ4FPN6q/n6qk06Dj8dlyBtJGzwgOoJdOZVSOpMYVM="
+}
+}
+}
+],
+"content": ""
+}
+}

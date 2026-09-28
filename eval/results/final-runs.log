@@ -1,0 +1,64 @@
+##### run --variant v4_reviewer --tag v4_reviewer-lite --model gemini-3.5-flash-lite  03:18:34
+s01_db_pool_exhausted            success  rc=db_connection_pool_exhausted action=update_config:worker         calls= 7 probes=1 verified=True rej=0 harm=False resolved=False 14.37s
+s02_bad_config_deploy            success  rc=bad_config_deploy            action=update_config:payments-api   calls= 7 probes=4 verified=True rej=0 harm=False resolved=False 12.07s
+s03_tls_cert_expired             success  rc=tls_cert_expired             action=rotate_tls_cert:auth-api       calls= 5 probes=2 verified=True rej=0 harm=False resolved=True 7.09s
+s04_disk_full                    success  rc=disk_full                    action=free_disk_space:postgres       calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 7.29s
+s05_third_party_outage           success  rc=third_party_outage           action=enable_circuit_breaker:payments-api   calls= 6 probes=1 verified=True rej=0 harm=False resolved=True 9.87s
+s06_memory_leak_oom              success  rc=memory_leak_oom              action=rollback_deploy:inventory-api  calls= 7 probes=1 verified=True rej=0 harm=False resolved=True 51.75s
+s07_cache_eviction_stampede      success  rc=cache_eviction_stampede      action=increase_cache_memory:redis          calls= 6 probes=1 verified=True rej=0 harm=False resolved=True 19.38s
+s08_third_party_rate_limited     success  rc=third_party_rate_limited     action=update_config:worker         calls= 8 probes=1 verified=True rej=1 harm=False resolved=False 18.95s
+s09_dns_resolution_failure       success  rc=dns_resolution_failure       action=update_config:orders-api     calls= 5 probes=2 verified=True rej=0 harm=False resolved=True 12.95s
+s10_migration_lock_contention    success  rc=migration_lock_contention    action=terminate_blocking_query:postgres       calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 9.48s
+s11_feature_flag_misconfig       success  rc=feature_flag_misconfig       action=disable_feature_flag:orders-api     calls= 6 probes=1 verified=True rej=0 harm=False resolved=True 9.43s
+s12_clock_skew_hard              success  rc=clock_skew                   action=sync_clock:payments-api   calls= 5 probes=4 verified=True rej=0 harm=False resolved=True 25.99s
+llm stats: {"calls": 72, "cache_hits": 11, "input_tokens": 236623, "output_tokens": 12346, "would_be_cost_usd": 0.0, "actual_cost_usd": 0.0}
+##### run --variant final --tag final-lite --model gemini-3.5-flash-lite  03:21:56
+s01_db_pool_exhausted            success  rc=db_connection_pool_exhausted action=update_config:worker         calls= 7 probes=1 verified=True rej=0 harm=False resolved=False 0.5s
+s02_bad_config_deploy            success  rc=bad_config_deploy            action=update_config:payments-api   calls= 7 probes=4 verified=True rej=0 harm=False resolved=False 0.29s
+s03_tls_cert_expired             success  rc=tls_cert_expired             action=rotate_tls_cert:auth-api       calls= 5 probes=2 verified=True rej=0 harm=False resolved=True 0.44s
+s04_disk_full                    success  rc=disk_full                    action=free_disk_space:postgres       calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 0.47s
+s05_third_party_outage           success  rc=third_party_outage           action=enable_circuit_breaker:payments-api   calls= 6 probes=1 verified=True rej=0 harm=False resolved=True 0.42s
+s06_memory_leak_oom              success  rc=memory_leak_oom              action=rollback_deploy:inventory-api  calls= 7 probes=1 verified=True rej=0 harm=False resolved=True 0.46s
+s07_cache_eviction_stampede      success  rc=cache_eviction_stampede      action=increase_cache_memory:redis          calls= 6 probes=1 verified=True rej=0 harm=False resolved=True 0.41s
+s08_third_party_rate_limited     success  rc=third_party_rate_limited     action=update_config:worker         calls= 8 probes=1 verified=True rej=1 harm=False resolved=False 0.56s
+s09_dns_resolution_failure       success  rc=dns_resolution_failure       action=update_config:orders-api     calls= 5 probes=2 verified=True rej=0 harm=False resolved=True 0.32s
+s10_migration_lock_contention    success  rc=migration_lock_contention    action=terminate_blocking_query:postgres       calls= 5 probes=1 verified=True rej=0 harm=False resolved=True 0.4s
+s11_feature_flag_misconfig       success  rc=feature_flag_misconfig       action=disable_feature_flag:orders-api     calls= 6 probes=1 verified=True rej=0 harm=False resolved=True 0.4s
+s12_clock_skew_hard              success  rc=clock_skew                   action=sync_clock:payments-api   calls= 5 probes=4 verified=True rej=0 harm=False resolved=True 0.42s
+llm stats: {"calls": 72, "cache_hits": 72, "input_tokens": 236623, "output_tokens": 12346, "would_be_cost_usd": 0.0, "actual_cost_usd": 0.0}
+##### baseline --scope alert --tag baseline --model gemini-2.5-flash  03:22:04
+s01_db_pool_exhausted            success  rc=db_connection_pool_exhausted action=rollback_deploy:worker  23.14s tok=5339+1374
+s02_bad_config_deploy            success  rc=bad_config_deploy            action=rollback_deploy:payments-api  23.56s tok=4310+1010
+s03_tls_cert_expired             success  rc=tls_cert_expired             action=rotate_tls_cert:auth-api  12.82s tok=5055+886
+s04_disk_full                    success  rc=disk_full                    action=free_disk_space:postgres  14.85s tok=4391+952
+s05_third_party_outage           success  rc=third_party_outage           action=escalate_to_vendor:payments-api  20.39s tok=4465+1099
+s06_memory_leak_oom              fail     rc=unknown                      action=no_action:  19.03s tok=4251+1116
+s07_cache_eviction_stampede      success  rc=cache_eviction_stampede      action=rollback_deploy:orders-api  19.62s tok=4252+1441
+s08_third_party_rate_limited     fail     rc=unknown                      action=no_action:  18.62s tok=4796+1182
+s09_dns_resolution_failure       success  rc=dns_resolution_failure       action=update_config:orders-api  20.26s tok=4447+1176
+s10_migration_lock_contention    success  rc=migration_lock_contention    action=rollback_deploy:orders-api  32.21s tok=4253+1477
+s11_feature_flag_misconfig       success  rc=feature_flag_misconfig       action=disable_feature_flag:orders-api  21.64s tok=4474+1145
+s12_clock_skew_hard              success  rc=bad_config_deploy            action=rollback_deploy:auth-api  30.45s tok=5273+1137
+llm stats: {'calls': 12, 'cache_hits': 0, 'input_tokens': 55306, 'output_tokens': 13995, 'would_be_cost_usd': 0.05158, 'actual_cost_usd': 0.0}
+##### baseline --scope full --tag baseline-full --model gemini-2.5-flash  03:26:24
+Traceback (most recent call last):
+    main()
+    meta = run_case(cid, llm, run_dir, Path("traces"), scope=a.scope)
+    resp = llm.chat(msgs, max_tokens=MAX_OUT)
+    raise DailyQuotaExhausted(
+    ...<2 lines>...
+    )
+greenlight.llm.DailyQuotaExhausted: gemini/gemini-2.5-flash: daily free-tier quota exhausted — switch model (LLM_MODEL=...) or wait for reset (midnight Pacific)
+s01_db_pool_exhausted            success  rc=db_connection_pool_exhausted action=rollback_deploy:worker  26.34s tok=21131+1339
+s02_bad_config_deploy            success  rc=bad_config_deploy            action=rollback_deploy:payments-api  21.85s tok=20587+1217
+s03_tls_cert_expired             fail     rc=unknown                      action=no_action:  22.01s tok=19616+996
+s04_disk_full                    success  rc=disk_full                    action=free_disk_space:postgres  47.04s tok=21069+1508
+s05_third_party_outage           success  rc=third_party_outage           action=enable_circuit_breaker:payments-api  25.31s tok=20666+1626
+##### run --variant final --tag final --model gemini-2.5-flash  03:28:50
+Traceback (most recent call last):
+    main()
+    out = inv.run(SCENARIOS[cid])
+    resp = self.llm.chat(msgs, tools=TOOLS, max_tokens=8192)
+    raise RuntimeError(f"LLM call failed after retries: {last_err}")
+RuntimeError: LLM call failed after retries: Error code: 413 - {'error': {'message': 'Request too large for model `openai/gpt-oss-120b` in organization `org_01kvnk0tj0e018n07tr2jv3qd7` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Requested 10112, please reduce your message size and try again. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
+##### DONE 03:28:54

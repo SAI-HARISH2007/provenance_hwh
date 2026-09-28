@@ -1,0 +1,33 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_403c9867-d6b6-4f8e-9cd9-c4cb1bc33470",
+"name": "get_config",
+"arguments": {
+"service": "api-gateway"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4462,
+"output_tokens": 46,
+"latency_ms": 726,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_403c9867-d6b6-4f8e-9cd9-c4cb1bc33470",
+"function": {
+"arguments": "{\"service\":\"api-gateway\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"reasoning": "No flag change logged. Maybe config flag exists in api-gateway config. Let's get full config again maybe includes feature flags.",
+"content": ""
+}
+}

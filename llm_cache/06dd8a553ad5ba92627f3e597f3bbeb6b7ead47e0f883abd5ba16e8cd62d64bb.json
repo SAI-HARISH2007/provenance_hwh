@@ -1,0 +1,49 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "function-call-8089707641185266896",
+"name": "query_logs",
+"arguments": {
+"pattern": "auth|jwt|token",
+"service": "payments-api",
+"level": "ERROR"
+}
+},
+{
+"id": "function-call-8089707641185263989",
+"name": "get_config",
+"arguments": {
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3652,
+"output_tokens": 48,
+"latency_ms": 3845,
+"model": "gemini-2.5-flash",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "function-call-8089707641185266896",
+"function": {
+"arguments": "{\"pattern\":\"auth|jwt|token\",\"service\":\"payments-api\",\"level\":\"ERROR\"}",
+"name": "query_logs"
+},
+"type": "function"
+},
+{
+"id": "function-call-8089707641185263989",
+"function": {
+"arguments": "{\"service\":\"payments-api\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

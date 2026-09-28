@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_669522",
+"name": "get_metrics",
+"arguments": {
+"service": "payments-api",
+"metric": "error_rate_pct"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2871,
+"output_tokens": 28,
+"latency_ms": 1901,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_669522",
+"function": {
+"arguments": "{\"service\":\"payments-api\",\"metric\":\"error_rate_pct\"}",
+"name": "get_metrics"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPYPm72gmAKGamoGZZGvOtgevzq6Jkjpng7Sggn+c3LDVxaKett27v6TEBe45bp1fdLoYIUdH2nFpzdDOJS4sRA2F0Pks/IYk4XFo828rEKXFTR8XmqTGk"
+}
+}
+}
+],
+"content": ""
+}
+}

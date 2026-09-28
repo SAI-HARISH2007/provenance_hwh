@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_a93fa4a4-6b8d-4070-9173-4d4cb4e00857",
+"name": "get_metrics",
+"arguments": {
+"metric": "error_rate_pct",
+"service": "orders-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2475,
+"output_tokens": 41,
+"latency_ms": 675,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_a93fa4a4-6b8d-4070-9173-4d4cb4e00857",
+"function": {
+"arguments": "{\"metric\":\"error_rate_pct\",\"service\":\"orders-api\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"reasoning": "Maybe metric is db_pool_used? Let's list available metrics for orders-api.",
+"content": ""
+}
+}

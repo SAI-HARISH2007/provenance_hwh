@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\n \"approve\": true,\n \"issues\": [],\n \"suggested_checks\": [],\n \"note\": \"All checks passed; root cause and remediation are strongly supported by direct disk and db probes.\"\n}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 3845,
+"output_tokens": 50,
+"latency_ms": 1881,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\n \"approve\": true,\n \"issues\": [],\n \"suggested_checks\": [],\n \"note\": \"All checks passed; root cause and remediation are strongly supported by direct disk and db probes.\"\n}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0T7U8q9X/+K5kZjjT1G38uOvSGWGPfUSrXHd1pxIyIDtZx8HGFdFb++lZ2r7jo3eSqv6MTU6v2NIT7AG7oesVsXm9FsGPX7KehD+LFt46ez+GV4AOEZx05Rz0="
+}
+}
+}
+}

@@ -1,0 +1,35 @@
+{
+  "case_id": "s01_db_pool_exhausted",
+  "verdict": {
+    "root_cause": "db_connection_pool_exhausted",
+    "service": "postgres",
+    "action": "rollback_deploy",
+    "target": "worker",
+    "confidence": 1.0,
+    "summary": "The recent worker deploy, which increased email job concurrency, exhausted the Postgres connection pool, causing orders-api requests to time out and api-gateway to return 5xx errors.",
+    "evidence": [
+      "ALERT: 5xx rate 12% on /v1/checkout",
+      "orders-api: error_rate_pct: now 31.185 (30m ago 0.397, max 32.467); latency_p95_ms: now 5191.84 (30m ago 117.548, max 5311.9)",
+      "postgres: connections_used: now 99.295 (30m ago 38.154, max 99.295); max_connections: now 100",
+      "RECENT CHANGES: 2026-08-30T02:34:00.000Z [deploy] worker: worker-1.4.0: raise email job concurrency 8→64 to clear backlog (priya)",
+      "LOGS: ERROR api-gateway: ... \"POST /v1/checkout HTTP/1.1\" 503 5012ms upstream=orders-api",
+      "CONFIG: api-gateway: {'upstream_timeout_ms': 5000}"
+    ],
+    "report_markdown": "## Incident Report: High 5xx Rate on /v1/checkout\n\n### Summary\nAt 03:12 UTC, an alert fired indicating a 12% 5xx error rate on the `/v1/checkout` endpoint of the `api-gateway` service. Investigation revealed that the `orders-api` service was experiencing high latency and error rates due to the `postgres` database connection pool being exhausted. This was triggered by a recent deploy to the `worker` service, which significantly increased its email job concurrency.\n\n### Timeline\n*   **2026-08-30T02:34:00Z**: `worker` service deployed, increasing email job concurrency from 8 to 64.\n*   **2026-08-30T02:52:48Z**: First `api-gateway` 503 errors observed for `/v1/checkout` requests, timing out after 5012ms while waiting for `orders-api`.\n*   **2026-08-30T03:07:00Z (approx)**: 5xx rate on `/v1/checkout` exceeds 2% threshold.\n*   **2026-08-30T03:12:00Z**: P1 alert fired for `api-gateway` 5xx rate.\n\n### Root Cause\nThe root cause is `db_connection_pool_exhausted` in the `postgres` database. The `worker` service's deploy at 02:34:00Z, which increased email job concurrency from 8 to 64, led to a surge in database connection requests. This exhausted the `postgres` connection pool (99.295 connections used out of 100 max), preventing the `orders-api` from acquiring necessary database connections. As a result, `orders-api` requests experienced severe latency (P95 5191.84ms) and high error rates (31.185%), causing `api-gateway` to time out (5012ms) and return 503 errors for `/v1/checkout` requests.\n\n### Evidence\n*   **Alert**: `api-gateway` reported a 12% 5xx rate on `/v1/checkout`.\n*   **Metrics - orders-api**: `error_rate_pct` jumped from 0.397% to 31.185%, and `latency_p95_ms` spiked from 117.548ms to 5191.84ms.\n*   **Metrics - postgres**: `connections_used` increased from 38.154 to 99.295, reaching the `max_connections` limit of 100.\n*   **Recent Changes**: A `worker` deploy at 02:34:00Z increased email job concurrency from 8 to 64.\n*   **Logs - api-gateway**: Showed frequent `503 5012ms upstream=orders-api` errors for `/v1/checkout` requests, indicating upstream timeouts.\n*   **Config - api-gateway**: `upstream_timeout_ms` is set to 5000ms, consistent with the 5012ms timeouts observed in logs.\n\n### Remediation\n**Action**: `rollback_deploy`\n**Target**: `worker`\n\nThe `worker` service deploy that increased email job concurrency should be immediately rolled back to restore the previous concurrency setting (8). This will reduce the load on the Postgres connection pool and allow `orders-api` to function correctly.\n\n### Follow-ups\n1.  **Post-mortem**: Conduct a post-mortem to understand why the `worker` deploy was not adequately tested for database connection impact.\n2.  **Resource Monitoring**: Implement more granular monitoring for database connection pool usage per service to identify resource contention earlier.\n3.  **Connection Pool Sizing**: Review and potentially adjust the `postgres` `max_connections` and individual service connection pool sizes, especially for `worker` and `orders-api`, to better handle peak loads.\n4.  **Circuit Breakers/Rate Limiting**: Evaluate implementing circuit breakers or rate limiting on the `worker` service's database interactions to prevent it from overwhelming shared resources."
+  },
+  "variant": "baseline",
+  "run_id": "20260830T032206Z_baseline-s01-db-pool-exhausted",
+  "trace": "traces/20260830T032206Z_baseline-s01-db-pool-exhausted.jsonl",
+  "model": "gemini-2.5-flash",
+  "provider": "gemini",
+  "status": "success",
+  "llm_calls": 1,
+  "input_tokens": 5339,
+  "output_tokens": 1374,
+  "would_be_cost_usd": 0.00504,
+  "wall_s": 23.14,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

@@ -1,0 +1,32 @@
+{
+  "case_id": "s02_bad_config_deploy",
+  "verdict": {
+    "root_cause": "bad_config_deploy",
+    "service": "payments-api",
+    "action": "rollback_deploy",
+    "target": "payments-api",
+    "confidence": 1.0,
+    "summary": "Recent deployment of payments-api configured an incorrect base URL pointing to nonexistent /v2/ endpoints, resulting in 100% 404 errors from the upstream PayGate service.",
+    "evidence": [
+      "2026-08-30T03:03:00.000Z [deploy] payments-api: payments-2.15.0: migrate to PayGate v2 endpoints (dana) PAYGATE_URL: https://api.paygate.example -> https://api.paygate.example/v2/",
+      "payments-api.error_rate_pct: ... 95.974 102.832 100.117 99.025",
+      "ERROR payments-api: paygate request failed: status=404"
+    ],
+    "report_markdown": "# Incident Report: payments-api Charge Failures\n\n## Summary\nAt 2026-08-30T03:12:00Z, an alert fired indicating a 100% failure rate for charges on the `payments-api` service. Investigation revealed that a recent deployment (`payments-2.15.0`) introduced a bad configuration pointing to non-existent `/v2/` endpoints on the PayGate upstream service, leading to continuous HTTP 404 errors.\n\n## Timeline\n- **03:03:00Z**: `payments-api` deployed version `payments-2.15.0` updating `PAYGATE_URL` to append `/v2/`.\n- **03:12:00Z**: Alert fires as `payments-api` experiences 100% charge failures.\n\n## Root Cause\nA bad configuration deploy (`bad_config_deploy`) updated `PAYGATE_URL` to an invalid path (`https://api.paygate.example/v2/`), causing all downstream payment gateway requests to return 404 Not Found.\n\n## Evidence\n- Change log shows `PAYGATE_URL` modified to `https://api.paygate.example/v2/` at 03:03:00Z.\n- Metrics show `payments-api.error_rate_pct` spiking to ~100% right after the deployment.\n- Logs continuously report `ERROR payments-api: paygate request failed: status=404`.\n\n## Remediation\n- Roll back `payments-api` to the previous stable deployment (`payments-2.14.x` or equivalent prior version) or fix the `PAYGATE_URL` configuration.\n\n## Follow-ups\n- Verify upstream API contract versioning before updating base URLs in future deployments.\n- Add integration tests verifying upstream connectivity during the deployment pipeline."
+  },
+  "variant": "baseline",
+  "run_id": "20260830T025736Z_baseline-s02-bad-config-deploy",
+  "trace": "traces/20260830T025736Z_baseline-s02-bad-config-deploy.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "provider": "gemini",
+  "status": "success",
+  "llm_calls": 1,
+  "input_tokens": 20582,
+  "output_tokens": 696,
+  "would_be_cost_usd": 0.0,
+  "wall_s": 5.77,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

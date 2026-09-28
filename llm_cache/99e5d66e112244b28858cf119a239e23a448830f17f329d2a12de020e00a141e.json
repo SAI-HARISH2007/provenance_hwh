@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_4de50ae7-aea5-42b0-a84d-8faae60f80f1",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "https://api.paygate.example/v2/health"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3829,
+"output_tokens": 53,
+"latency_ms": 1475,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_4de50ae7-aea5-42b0-a84d-8faae60f80f1",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"https://api.paygate.example/v2/health\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"reasoning": "Now we need to verify if PayGate endpoint is reachable. Use run_probe http to the URL.",
+"content": ""
+}
+}

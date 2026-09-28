@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Root cause directly supported by disk probe, postgres logs, and recent config change.\"}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 2922,
+"output_tokens": 42,
+"latency_ms": 1488,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Root cause directly supported by disk probe, postgres logs, and recent config change.\"}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TDqP8urzCkU0bGMqL5UmmhqucfIqNpZs/F64upWCcX/1rNMD0F6bSZmmkfxMkg2OcCAJ2bIm13ZeTMYV8g7O/v3nBfDPzZftIQ1F+zQK2Ko05FLk5sEYB6tc="
+}
+}
+}
+}

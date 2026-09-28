@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\n  \"approve\": true,\n  \"issues\": [],\n  \"suggested_checks\": [],\n  \"note\": \"Root cause directly proven by TLS cert probe, remediation is specific and safe.\"\n}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 1363,
+"output_tokens": 51,
+"latency_ms": 1339,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\n  \"approve\": true,\n  \"issues\": [],\n  \"suggested_checks\": [],\n  \"note\": \"Root cause directly proven by TLS cert probe, remediation is specific and safe.\"\n}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPKX2xAByEBAil747GEuWGWottKGeflYP389OlgnbeFFE6d+1hxdI+nq439kcEYAY4IycauF+BAurjh1xVUwoaDgW8Vye5Epz+1COEMGHvGA3sUQkP/JmQ"
+}
+}
+}
+}

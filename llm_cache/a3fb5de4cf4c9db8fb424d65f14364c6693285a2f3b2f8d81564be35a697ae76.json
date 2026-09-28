@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Root cause is well-supported by clock skew probe and matching InvalidIssuedAt JWT error logs.\"}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 2683,
+"output_tokens": 45,
+"latency_ms": 1143,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Root cause is well-supported by clock skew probe and matching InvalidIssuedAt JWT error logs.\"}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPoOJr8p1K3eikJGMa9wn6BGZaoVf644LSuNqsAzDKIfkhFzg62K/1z3B229iGS4yFWZ0voYrWYo3TGWwKws7SU9P6/ec0libT8BgxyMCtInVtpvZ3nwhG"
+}
+}
+}
+}

@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"All checks passed successfully.\"}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 2357,
+"output_tokens": 31,
+"latency_ms": 1500,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"All checks passed successfully.\"}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPdZYlazd/0r3ZJmuCv/XKVm545f+Zjw5rJmsWOUqnge948vOps2W2KahNDdU80UbjE+i3Q5XELjtcnsLzqRuqqibMoxTVw5PL/FtZAyJUVLgzm6VM4vUm"
+}
+}
+}
+}

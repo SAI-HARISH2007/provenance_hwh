@@ -1,0 +1,55 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_689470",
+"name": "query_logs",
+"arguments": {
+"service": "orders-api",
+"level": "ERROR",
+"pattern": "inventory"
+}
+},
+{
+"id": "call_689471",
+"name": "run_probe",
+"arguments": {
+"target": "inventory-api",
+"kind": "dns"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2709,
+"output_tokens": 54,
+"latency_ms": 1479,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_689470",
+"function": {
+"arguments": "{\"service\":\"orders-api\",\"level\":\"ERROR\",\"pattern\":\"inventory\"}",
+"name": "query_logs"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPuZ7xmfmtK9n0Q7at0lFWh/CIkNCEblxafRz7hstdYSiPqNWRunIj34QAWmDoUTq+yo228jpgcsMq3Pxql959Ed/9v0ItpN+tbhfF+7nQ5lzpuJTYT09e"
+}
+}
+},
+{
+"id": "call_689471",
+"function": {
+"arguments": "{\"target\":\"inventory-api\",\"kind\":\"dns\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

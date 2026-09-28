@@ -1,0 +1,48 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_2566979",
+"name": "submit_verdict",
+"arguments": {
+"root_cause": "clock_skew",
+"action": "sync_clock",
+"target": "inventory-api",
+"report_markdown": "# Incident Report: inventory-api 401 Authentication Failures Due to Clock Skew\n\n## Summary\nAt 2026-08-30T03:12:00Z, `api-gateway` raised a P2 alert for a 6.8% 401 error rate specifically on `/v1/inventory/*` routes, while `auth-api` and other services remained healthy. Investigation revealed that `inventory-api` pods (rescheduled during a node maintenance drain to node `inv-5` at 02:14 UTC) had an inactive NTP daemon (`chronyd` disabled) resulting in a clock offset of **-287.4 seconds** (~4.8 minutes slow). Because the clock was nearly 5 minutes behind, incoming JWT tokens issued by `auth-api` had `nbf` (not before) claims in the future relative to `inventory-api`'s local time, causing validation failure.\n\n## Timeline\n- **2026-08-30T02:14:00Z**: `inventory-api` pods rescheduled from node `inv-2` to `inv-5` due to node drain for maintenance. Node `inv-5` had chronyd disabled.\n- **2026-08-30T02:31:00Z**: `auth-api` rotated JWT signing key (`kid=2026-09b`).\n- **2026-08-30T02:54:52Z onwards**: `inventory-api` logs begin flooding with `jwt verification failed: InvalidToken (claims check)` as clients authenticated with new tokens whose `nbf`/`exp` claims fell outside `inventory-api`'s skewed clock window.\n- **2026-08-30T03:12:00Z**: `api-gateway` fires P2 alert for 401 rate on `/v1/inventory/*`.\n\n## Root Cause\n`clock_skew` on the host node (`inv-5`) running `inventory-api` pods. Chronyd was inactive on node `inv-5`, causing a clock offset of -287.4s which failed JWT time-window validation (`nbf`/`exp`).\n\n## Evidence\n- `inventory-api` clock probe: `ntp offset -287.4s — chronyd inactive (unit disabled)`\n- `auth-api` and `api-gateway` clock probes: NTP offset near 0.001s / 0.003s.\n- `inventory-api` logs: Continuous `jwt verification failed: InvalidToken (claims check) sub=... kid=2026-09b`.\n- `recent_changes`: Pods moved to `inv-5` at 02:14 UTC.\n\n## Proposed Remediation\nSync clock / enable and start `chronyd` on node `inv-5` hosting `inventory-api`, or restart/reschedule the pods to a node with active NTP.\n",
+"confidence": 1,
+"summary": "inventory-api pods running on node inv-5 suffered a -287.4s clock skew due to inactive chronyd after node rescheduling, causing JWT validation failures (InvalidToken claims check).",
+"service": "inventory-api",
+"evidence": [
+"inventory-api run_probe kind=clock shows ntp offset -287.4s with chronyd inactive",
+"inventory-api query_logs shows continuous jwt verification failed: InvalidToken (claims check) sub=* kid=2026-09b due to time skew rejecting tokens with nbf/exp claims",
+"recent_changes shows inventory-api pods rescheduled to inv-5 during node maintenance at 02:14:00.000Z where NTP/chronyd was not enabled/running"
+]
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4243,
+"output_tokens": 891,
+"latency_ms": 3945,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_2566979",
+"function": {
+"arguments": "{\"root_cause\":\"clock_skew\",\"action\":\"sync_clock\",\"target\":\"inventory-api\",\"report_markdown\":\"# Incident Report: inventory-api 401 Authentication Failures Due to Clock Skew\\n\\n## Summary\\nAt 2026-08-30T03:12:00Z, `api-gateway` raised a P2 alert for a 6.8% 401 error rate specifically on `/v1/inventory/*` routes, while `auth-api` and other services remained healthy. Investigation revealed that `inventory-api` pods (rescheduled during a node maintenance drain to node `inv-5` at 02:14 UTC) had an inactive NTP daemon (`chronyd` disabled) resulting in a clock offset of **-287.4 seconds** (~4.8 minutes slow). Because the clock was nearly 5 minutes behind, incoming JWT tokens issued by `auth-api` had `nbf` (not before) claims in the future relative to `inventory-api`'s local time, causing validation failure.\\n\\n## Timeline\\n- **2026-08-30T02:14:00Z**: `inventory-api` pods rescheduled from node `inv-2` to `inv-5` due to node drain for maintenance. Node `inv-5` had chronyd disabled.\\n- **2026-08-30T02:31:00Z**: `auth-api` rotated JWT signing key (`kid=2026-09b`).\\n- **2026-08-30T02:54:52Z onwards**: `inventory-api` logs begin flooding with `jwt verification failed: InvalidToken (claims check)` as clients authenticated with new tokens whose `nbf`/`exp` claims fell outside `inventory-api`'s skewed clock window.\\n- **2026-08-30T03:12:00Z**: `api-gateway` fires P2 alert for 401 rate on `/v1/inventory/*`.\\n\\n## Root Cause\\n`clock_skew` on the host node (`inv-5`) running `inventory-api` pods. Chronyd was inactive on node `inv-5`, causing a clock offset of -287.4s which failed JWT time-window validation (`nbf`/`exp`).\\n\\n## Evidence\\n- `inventory-api` clock probe: `ntp offset -287.4s — chronyd inactive (unit disabled)`\\n- `auth-api` and `api-gateway` clock probes: NTP offset near 0.001s / 0.003s.\\n- `inventory-api` logs: Continuous `jwt verification failed: InvalidToken (claims check) sub=... kid=2026-09b`.\\n- `recent_changes`: Pods moved to `inv-5` at 02:14 UTC.\\n\\n## Proposed Remediation\\nSync clock / enable and start `chronyd` on node `inv-5` hosting `inventory-api`, or restart/reschedule the pods to a node with active NTP.\\n\",\"confidence\":1,\"summary\":\"inventory-api pods running on node inv-5 suffered a -287.4s clock skew due to inactive chronyd after node rescheduling, causing JWT validation failures (InvalidToken claims check).\",\"service\":\"inventory-api\",\"evidence\":[\"inventory-api run_probe kind=clock shows ntp offset -287.4s with chronyd inactive\",\"inventory-api query_logs shows continuous jwt verification failed: InvalidToken (claims check) sub=* kid=2026-09b due to time skew rejecting tokens with nbf/exp claims\",\"recent_changes shows inventory-api pods rescheduled to inv-5 during node maintenance at 02:14:00.000Z where NTP/chronyd was not enabled/running\"]}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TENRslQhsmHPYCxStKvihxmxX5yzjl9gGGeoI52KIvEWHu4CbdrQLZiD2OmXA80hRpyfuFdCb1MkA/AlkQ6j6GYPpdZIXQueFxYuA9m8CMCTSJsqMgKMs5gM="
+}
+}
+}
+],
+"content": ""
+}
+}

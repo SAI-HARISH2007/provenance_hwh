@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_773c2dd6-487f-4c8d-b5fa-436a7becba43",
+"name": "get_metrics",
+"arguments": {
+"metric": "error_rate_pct",
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2596,
+"output_tokens": 90,
+"latency_ms": 840,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_773c2dd6-487f-4c8d-b5fa-436a7becba43",
+"function": {
+"arguments": "{\"metric\":\"error_rate_pct\",\"service\":\"inventory-api\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"reasoning": "Maybe the issue is that inventory-api pods were rescheduled to a new node; maybe network connectivity to auth-api? But auth-api healthy. Could be that inventory-api cannot reach auth-api for token verification (if it does verification itself). But inventory-api degraded status. Let's get metrics for inventory-api latency or error rate.",
+"content": ""
+}
+}

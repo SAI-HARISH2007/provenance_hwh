@@ -1,0 +1,32 @@
+{
+  "case_id": "s05_third_party_outage",
+  "verdict": {
+    "root_cause": "third_party_outage",
+    "service": "payments-api",
+    "action": "enable_circuit_breaker",
+    "target": "payments-api",
+    "confidence": 1.0,
+    "summary": "The third-party payment gateway (Paygate) is experiencing an outage with timeouts and 503 maintenance responses, causing payments-api to block and fail.",
+    "evidence": [
+      "payments-api.error_rate_pct jumped from ~0.4% to over 60%",
+      "ERROR payments-api: paygate request timeout after 8000ms url=https://api.paygate.example/charges",
+      "ERROR payments-api: paygate 503 Service Unavailable body='upstream maintenance'"
+    ],
+    "report_markdown": "# Incident Report: Payments API Degradation\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, the `payments-api` service triggered a P1 alert due to high latency (p95 > 8s) and an error rate spike exceeding 60%. Investigation revealed that the third-party payment gateway (`paygate`) is encountering timeouts and returning 503 Service Unavailable errors.\n\n## Timeline\n- **2026-08-30T02:50:32.000Z**: First `paygate` timeout logged in `payments-api`.\n- **2026-08-30T02:52:03.000Z**: First explicit `503 Service Unavailable` body='upstream maintenance' received from Paygate.\n- **2026-08-30T03:12:00.000Z**: `payments-api` error rate spikes to ~62% and latency p95 exceeds 8 seconds, triggering P1 alert.\n\n## Root Cause\nThird-party payment gateway outage/maintenance at `api.paygate.example`. Because the circuit breaker was disabled (`'CIRCUIT_BREAKER': 'off'`), `payments-api` exhausted threads/time waiting for 8000ms per request, impacting downstream checkout requests through the API gateway.\n\n## Evidence\n- `payments-api.error_rate_pct` increased from 0.4% to ~64%.\n- Log entries showing: `ERROR payments-api: paygate request timeout after 8000ms` and `ERROR payments-api: paygate 503 Service Unavailable body='upstream maintenance'`.\n\n## Remediation\nEnable the circuit breaker on `payments-api` to fail fast and prevent thread exhaustion while the third-party vendor resolves the outage.\n\n## Follow-ups\n1. Enable automated circuit breakers and fallback responses for external vendor integrations.\n2. Escalate to the Paygate vendor regarding the unannounced maintenance/outage."
+  },
+  "variant": "baseline",
+  "run_id": "20260830T025752Z_baseline-s05-third-party-outage",
+  "trace": "traces/20260830T025752Z_baseline-s05-third-party-outage.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "provider": "gemini",
+  "status": "success",
+  "llm_calls": 1,
+  "input_tokens": 20661,
+  "output_tokens": 679,
+  "would_be_cost_usd": 0.0,
+  "wall_s": 3.88,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

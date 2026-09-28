@@ -1,0 +1,33 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_95e85864-b5cc-41f2-ba6a-de4b19b699f0",
+"name": "get_config",
+"arguments": {
+"service": "auth-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4122,
+"output_tokens": 27,
+"latency_ms": 880,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_95e85864-b5cc-41f2-ba6a-de4b19b699f0",
+"function": {
+"arguments": "{\"service\":\"auth-api\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"reasoning": "Check auth-api config for JWT.",
+"content": ""
+}
+}

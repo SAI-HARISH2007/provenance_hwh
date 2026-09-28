@@ -1,0 +1,52 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_1158677",
+"name": "get_config",
+"arguments": {
+"service": "auth-api"
+}
+},
+{
+"id": "call_1158678",
+"name": "get_config",
+"arguments": {
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2358,
+"output_tokens": 36,
+"latency_ms": 1626,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_1158677",
+"function": {
+"arguments": "{\"service\":\"auth-api\"}",
+"name": "get_config"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TzbDQBIwZBbxs8AF9a4UNJj6xWWlTfJnd7Db7DeNONHk/NcpVcjtEbjmotBvxk07jKH+uOZXQpc1+aNpGQXqDIUICSekKxvb18fm3rFafFpWQ1pP66QOBMBs="
+}
+}
+},
+{
+"id": "call_1158678",
+"function": {
+"arguments": "{\"service\":\"payments-api\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

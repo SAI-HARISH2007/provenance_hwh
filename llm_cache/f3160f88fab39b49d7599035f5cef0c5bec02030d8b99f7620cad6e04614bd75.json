@@ -1,0 +1,50 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "function-call-17105560769839145712",
+"name": "query_logs",
+"arguments": {
+"service": "api-gateway",
+"level": "ERROR",
+"pattern": "401"
+}
+},
+{
+"id": "function-call-17105560769839148433",
+"name": "query_logs",
+"arguments": {
+"service": "auth-api",
+"level": "ERROR"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 1984,
+"output_tokens": 51,
+"latency_ms": 3500,
+"model": "gemini-2.5-flash",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "function-call-17105560769839145712",
+"function": {
+"arguments": "{\"service\":\"api-gateway\",\"level\":\"ERROR\",\"pattern\":\"401\"}",
+"name": "query_logs"
+},
+"type": "function"
+},
+{
+"id": "function-call-17105560769839148433",
+"function": {
+"arguments": "{\"service\":\"auth-api\",\"level\":\"ERROR\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

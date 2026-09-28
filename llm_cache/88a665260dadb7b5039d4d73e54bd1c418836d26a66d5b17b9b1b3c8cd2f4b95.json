@@ -1,0 +1,37 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_628626",
+"name": "get_config",
+"arguments": {
+"service": "api-gateway"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 5078,
+"output_tokens": 18,
+"latency_ms": 2015,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_628626",
+"function": {
+"arguments": "{\"service\":\"api-gateway\"}",
+"name": "get_config"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPYSOoavpgCJXQACiB+pOfHkAKkMNazmMzM5kg6oAKomAcYbUJl8rAOXJMTLO36qcQA2wFEbB5MfyuSSrnOR2BgT1KllmuS4gLirD6DrLGet8EJroXxp1l"
+}
+}
+}
+],
+"content": ""
+}
+}

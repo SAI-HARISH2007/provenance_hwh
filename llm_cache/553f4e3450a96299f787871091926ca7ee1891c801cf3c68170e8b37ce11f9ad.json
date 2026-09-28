@@ -1,0 +1,53 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_3219468",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"service": "payments-api"
+}
+},
+{
+"id": "call_3219469",
+"name": "get_config",
+"arguments": {
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2364,
+"output_tokens": 42,
+"latency_ms": 1247,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_3219468",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"service\":\"payments-api\"}",
+"name": "query_logs"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TFK2Pl0JgNj5q2+07hSrBxTWE5QBiU/hpkmKT+MvXAdxP/ZZvEnkiVtXftOHlCsN7qnnO83xmyKj7s6Lb8JPzprsphvybMTCCSgZhKREC84Lr9BvIjDAh/Bc="
+}
+}
+},
+{
+"id": "call_3219469",
+"function": {
+"arguments": "{\"service\":\"payments-api\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

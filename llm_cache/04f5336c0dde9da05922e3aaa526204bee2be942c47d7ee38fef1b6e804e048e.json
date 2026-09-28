@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_872432",
+"name": "get_metrics",
+"arguments": {
+"metric": "latency_p95_ms",
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3539,
+"output_tokens": 30,
+"latency_ms": 1812,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_872432",
+"function": {
+"arguments": "{\"metric\":\"latency_p95_ms\",\"service\":\"payments-api\"}",
+"name": "get_metrics"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIP4ifz3jMStCfgxVfpX5ulLzEM2Ai4x2xy4smtCrAglMvV1Jae4ff5NDo1/D7gIrXjjdZ6VbmVCA+La4J5y64BebewoOwWVAgkMifVq87aY/nOmkG47iH6"
+}
+}
+}
+],
+"content": ""
+}
+}

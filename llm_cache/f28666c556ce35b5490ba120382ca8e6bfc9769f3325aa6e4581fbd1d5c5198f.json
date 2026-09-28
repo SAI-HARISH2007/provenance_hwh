@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_0d2504ca-4e96-4b53-8150-7d233736aa6a",
+"name": "get_metrics",
+"arguments": {
+"metric": "error_rate_pct",
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3122,
+"output_tokens": 127,
+"latency_ms": 828,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_0d2504ca-4e96-4b53-8150-7d233736aa6a",
+"function": {
+"arguments": "{\"metric\":\"error_rate_pct\",\"service\":\"payments-api\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"reasoning": "Maybe logs only show error. Could also be that PayGate v2 endpoint requires different auth token not set. But 404 suggests path not found.\n\nCheck recent changes: deploy changed PAYGATE_URL from https://api.paygate.example to https://api.paygate.example/v2/. So maybe the old code expects base without trailing slash and adds path. So root cause: bad_config_deploy.\n\nWe should also verify that before deploy, payments-api was healthy. Check metrics for error_rate before and after.",
+"content": ""
+}
+}

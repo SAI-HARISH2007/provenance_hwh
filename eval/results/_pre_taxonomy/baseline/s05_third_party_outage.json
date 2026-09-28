@@ -1,0 +1,33 @@
+{
+  "case_id": "s05_third_party_outage",
+  "verdict": {
+    "root_cause": "third_party_outage",
+    "service": "payments-api",
+    "action": "enable_circuit_breaker",
+    "target": "payments-api",
+    "confidence": 1.0,
+    "summary": "The external payment gateway (Paygate) is experiencing an outage with timeouts and 503 errors, causing failures and high latency in the payments-api because the circuit breaker is disabled.",
+    "evidence": [
+      "paygate request timeout after 8000ms url=https://api.paygate.example/charges",
+      "paygate 503 Service Unavailable body='upstream maintenance'",
+      "payments-api error_rate_pct: now 64.516",
+      "payments-api: {'PAYGATE_URL': 'https://api.paygate.example', 'PAYGATE_TIMEOUT_MS': 8000, 'CIRCUIT_BREAKER': 'off', 'replicas': 3}"
+    ],
+    "report_markdown": "# Incident Report: Payments API Degradation\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, an alert fired for `payments-api` indicating high latency (p95 > 8s) and a failure rate of over 62%. Investigation revealed that the third-party payment gateway (`paygate`) is returning 503 errors and timing out, while the internal circuit breaker is turned off.\n\n## Timeline\n- **2026-08-30T02:50:32.000Z**: First Paygate timeout error logged in `payments-api`.\n- **2026-08-30T02:52:04.000Z**: Paygate returns first 503 Service Unavailable ('upstream maintenance').\n- **2026-08-30T03:12:00.000Z**: Alert fires as error rate reaches ~64.5% and latency p95 climbs above 8 seconds.\n\n## Root Cause\nThird-party payment gateway outage (`paygate`) compounded by an unmitigated client configuration where the circuit breaker is explicitly turned off (`'CIRCUIT_BREAKER': 'off'`).\n\n## Evidence\n- Logs show repeated `paygate request timeout after 8000ms` and `paygate 503 Service Unavailable body='upstream maintenance'`.  \n- `payments-api` error rate spiked to 64.5%.  \n- Config shows `CIRCUIT_BREAKER` set to `off`.\n\n## Remediation\n1. Enable the circuit breaker on `payments-api` to fast-fail requests and protect downstream callers.\n2. Escalate to the third-party vendor regarding the Paygate outage.\n\n## Follow-ups\n- Ensure circuit breakers default to `on` across all API integrations.\n- Implement automated fallback or graceful degradation when payment providers undergo maintenance."
+  },
+  "variant": "baseline",
+  "run_id": "20260830T025653Z_baseline-s05-third-party-outage",
+  "trace": "traces/20260830T025653Z_baseline-s05-third-party-outage.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "provider": "gemini",
+  "status": "success",
+  "llm_calls": 1,
+  "input_tokens": 4460,
+  "output_tokens": 700,
+  "would_be_cost_usd": 0.0,
+  "wall_s": 3.72,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

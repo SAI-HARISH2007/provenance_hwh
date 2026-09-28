@@ -1,0 +1,53 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_739880",
+"name": "get_config",
+"arguments": {
+"service": "redis"
+}
+},
+{
+"id": "call_739881",
+"name": "get_metrics",
+"arguments": {
+"metric": "cpu_pct",
+"service": "redis"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3451,
+"output_tokens": 40,
+"latency_ms": 1360,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_739880",
+"function": {
+"arguments": "{\"service\":\"redis\"}",
+"name": "get_config"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPyUrq6bbdT8FG1cB/HkVkYibQ28cVL/ki2PKIrTmkUAvAnH2+ljikLHsnhdrHYCM1mL7C0mS4d12a8bgRAMTsZthrE1Fp6CExu9bXKzVldVjmBH5WlrE8"
+}
+}
+},
+{
+"id": "call_739881",
+"function": {
+"arguments": "{\"metric\":\"cpu_pct\",\"service\":\"redis\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

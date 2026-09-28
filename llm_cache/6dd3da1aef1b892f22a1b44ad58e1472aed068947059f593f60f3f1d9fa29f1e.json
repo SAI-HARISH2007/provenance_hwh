@@ -1,0 +1,39 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_2663195",
+"name": "query_logs",
+"arguments": {
+"level": "WARN",
+"pattern": "cache",
+"service": "orders-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3189,
+"output_tokens": 30,
+"latency_ms": 1324,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_2663195",
+"function": {
+"arguments": "{\"level\":\"WARN\",\"pattern\":\"cache\",\"service\":\"orders-api\"}",
+"name": "query_logs"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0Tmdkeb0O2x1yCFyOQWoEF09w8nDgs7i2HIoJGfFT0mrN5urb0S9a0mjyhLWwKscC0isNQfv3n/gNeSdJrjhvv7zxw1qjPECR230AFxGmDMu7elzb4iR5VmY0="
+}
+}
+}
+],
+"content": ""
+}
+}

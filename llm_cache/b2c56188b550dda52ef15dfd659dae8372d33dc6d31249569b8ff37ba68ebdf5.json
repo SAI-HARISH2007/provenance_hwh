@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_3bb340ee-dd03-4808-bbc1-ccbd45698607",
+"name": "query_logs",
+"arguments": {
+"level": "INFO",
+"limit": 20,
+"pattern": "GET",
+"service": "payments-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3014,
+"output_tokens": 99,
+"latency_ms": 759,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_3bb340ee-dd03-4808-bbc1-ccbd45698607",
+"function": {
+"arguments": "{\"level\":\"INFO\",\"limit\":20,\"pattern\":\"GET\",\"service\":\"payments-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "The URL includes trailing slash. If code concatenates path like \"/charge\", resulting URL \"https://api.paygate.example/v2//charge\" which may cause 404. Could be misconfiguration: trailing slash causing double slash. Let's check logs for request URL.Search logs for \"GET\" maybe.",
+"content": ""
+}
+}

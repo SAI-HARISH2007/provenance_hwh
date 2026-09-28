@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\n \"approve\": true,\n \"issues\": [],\n \"suggested_checks\": [],\n \"note\": \"Root cause directly supported by disk and db probes showing 100% full postgres disk due to unarchived WAL segments.\"\n}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 2842,
+"output_tokens": 58,
+"latency_ms": 1459,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\n \"approve\": true,\n \"issues\": [],\n \"suggested_checks\": [],\n \"note\": \"Root cause directly supported by disk and db probes showing 100% full postgres disk due to unarchived WAL segments.\"\n}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TlBrsOt+vLMFcif49VOAKluMoEvwU27ttVr7wlPKtGmyFQMRuFeQeBacfZlJxERlTWoAZpkXWV8NiuQHEEM/yMjRWb4V0OghxJyJRJZ/LVbpQJhw9PAQmjAI="
+}
+}
+}
+}

@@ -1,0 +1,52 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_536888",
+"name": "get_config",
+"arguments": {
+"service": "orders-api"
+}
+},
+{
+"id": "call_536889",
+"name": "get_config",
+"arguments": {
+"service": "worker"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 6175,
+"output_tokens": 34,
+"latency_ms": 1673,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_536888",
+"function": {
+"arguments": "{\"service\":\"orders-api\"}",
+"name": "get_config"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPY4BYNvrlwAkwUTW9NrvoYEHZFd4cUm506ypi3hXeNwZJP27nyWH2VuIWE0gC9deztWtsjKwnwb6JIUflPxsHkgPPRe7zckYwt/FhAvhC0eWBxMX8PC4r"
+}
+}
+},
+{
+"id": "call_536889",
+"function": {
+"arguments": "{\"service\":\"worker\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

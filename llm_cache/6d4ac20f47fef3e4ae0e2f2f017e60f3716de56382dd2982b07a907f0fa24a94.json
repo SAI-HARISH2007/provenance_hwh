@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_46212",
+"name": "run_probe",
+"arguments": {
+"target": "auth-api",
+"kind": "cert"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2810,
+"output_tokens": 24,
+"latency_ms": 1078,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_46212",
+"function": {
+"arguments": "{\"target\":\"auth-api\",\"kind\":\"cert\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "El4KXAERTTIPY1S7pNxcj0qsOlaO91MTLFsxF/ZI1yCIlAH6QrhVb0tlYQFO/9mZ+t5fNQk0u7PFwHNwJbu5j74BaPjM55NT60jpabL2v2SdFECQ3jGZK8Gmh7qWxSKe"
+}
+}
+}
+],
+"content": ""
+}
+}

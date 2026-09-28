@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_e7040c8f-13ff-4612-8f58-bce8c805efdd",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 20,
+"pattern": "reservation",
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3283,
+"output_tokens": 58,
+"latency_ms": 621,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_e7040c8f-13ff-4612-8f58-bce8c805efdd",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":20,\"pattern\":\"reservation\",\"service\":\"inventory-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Inventory error rate also spiked similarly after ~22 minutes ago. So inventory-api likely cause. Let's check inventory-api logs for errors.",
+"content": ""
+}
+}

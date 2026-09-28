@@ -1,0 +1,60 @@
+{
+  "case_id": "s13_disk_full_wal",
+  "verdict": {
+    "root_cause": "disk_full",
+    "service": "postgres",
+    "action": "free_disk_space",
+    "target": "postgres",
+    "confidence": 1.0,
+    "summary": "PostgreSQL disk is 100% full due to un-recycled WAL files caused by failing WAL archival after S3 credential rotation.",
+    "evidence": [
+      "Alert: orders write errors 44% (SQLSTATE 53100) for 6m",
+      "Recent changes: 2026-08-29T03:52:00.000Z [config] postgres: archive_mode=on, archive_command=wal-g wal-push %p",
+      "Logs: batch insert failed: SQLSTATE 53100 disk_full",
+      "Probe disk postgres: /var/lib/postgresql: 100% used (200G/200G); /var/lib/postgresql/pg_wal = 138G, growing 0.9G/min (archive failing, segments not recycled)"
+    ],
+    "report_markdown": "# Incident Report: Postgres Disk Full due to WAL Archival Failure\n\n## Summary\nOn August 30, 2026, at 03:12 UTC, `orders-api` began failing to write orders (returning SQLSTATE 53100 `disk_full` errors). Investigation revealed that the PostgreSQL data volume was at 100% capacity due to WAL files filling up (`pg_wal` reached 138GB) because WAL archiving was failing (likely due to S3 credential rotation on August 29).\n\n## Timeline\n- **2026-08-29 03:52 UTC**: WAL archiving config enabled (`archive_mode=on`, `archive_command=wal-g wal-push %p`).\n- **2026-08-29 22:02 UTC**: S3 credentials rotated for wal-archive bucket.\n- **2026-08-30 02:47 UTC**: `orders-api: orders-3.9.0` deployed.\n- **2026-08-30 02:49 UTC**: First `SQLSTATE 53100 disk_full` errors logged in `orders-api`.\n- **2026-08-30 03:12 UTC**: P1 alert fired for `orders-api` write errors.\n\n## Root Cause\nPostgreSQL disk space was entirely exhausted (`disk_full`) because `pg_wal` grew to 138GB. Because WAL archiving (`wal-g wal-push`) has been failing since S3 credentials were rotated on Aug 29, PostgreSQL could not recycle old WAL segments, eventually filling the disk and halting writes with SQLSTATE 53100.\n\n## Evidence\n- `get_alert`: `orders write errors 44% (SQLSTATE 53100) for 6m`\n- `query_logs`: `orders-api` logging `batch insert failed: SQLSTATE 53100 disk_full`\n- `run_probe disk postgres`: `/var/lib/postgresql: 100% used (200G/200G); /var/lib/postgresql/pg_wal = 138G, growing 0.9G/min (archive failing, segments not recycled)`\n\n## Proposed Remediation\n1. Fix or update the S3 credentials / WAL archiver environment so `wal-g` can push WAL segments successfully.\n2. Free up disk space / clear processed WAL segments once archiving is restored (or safely truncate/clean WAL if archiving cannot be immediately resumed, though restoring archival auth is primary).\n3. Action proposed: `free_disk_space` (and fixing the wal-archive credentials out-of-band).\n\n## Follow-ups\n- Add alerting for WAL archival failures before `pg_wal` fills the root/data volume.\n- Automate S3 credential rotation sync for PostgreSQL WAL archiving."
+  },
+  "variant": "final",
+  "run_id": "20260927T103322Z_final-s13-disk-full-wal",
+  "trace": "traces/20260927T103322Z_final-s13-disk-full-wal.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "status": "success",
+  "llm_calls": 5,
+  "input_tokens": 16953,
+  "output_tokens": 1080,
+  "wall_s": 8.3,
+  "probes_run": 1,
+  "verified": true,
+  "gate_rejections": 0,
+  "reviewer": {
+    "approve": true,
+    "issues": [],
+    "suggested_checks": [],
+    "note": "Root cause is directly and conclusively proven by the probe on postgres showing 100% disk usage and pg_wal growth."
+  },
+  "reviewer_approved": true,
+  "approval": {
+    "decision": "approved",
+    "by": "eval-policy"
+  },
+  "actions_executed": [
+    [
+      "free_disk_space",
+      "postgres"
+    ]
+  ],
+  "harm_done": [],
+  "resolved": true,
+  "remediation_effect": {
+    "executed": true,
+    "resolved": true,
+    "harm": false,
+    "effect": "free_disk_space on postgres applied; error rate returning to baseline, healthz 200 across services within 90s"
+  },
+  "memory_hits": 0,
+  "memory_used": false,
+  "memory_rejections": 0,
+  "memory_checks": [],
+  "would_be_cost_usd": 0.00213
+}

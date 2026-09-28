@@ -1,0 +1,54 @@
+{
+  "case_id": "s02_bad_config_deploy",
+  "verdict": {
+    "root_cause": "bad_config_deploy",
+    "service": "payments-api",
+    "action": "update_config",
+    "target": "payments-api",
+    "confidence": 1.0,
+    "summary": "payments-api is failing all charges with 404 errors because PAYGATE_URL was incorrectly set to https://api.paygate.example/v2/ in a recent deploy.",
+    "evidence": [
+      "recent_changes shows deploy of payments-2.15.0 with change: PAYGATE_URL: https://api.paygate.example -> https://api.paygate.example/v2/",
+      "payments-api logs show 404 errors calling PayGate endpoints",
+      "run_probe shows vendor is healthy at https://api.paygate.example/v2/status but the base URL /v2/ causes 404 on API operations because the endpoint paths are appended to an incorrect base URL or the v2 path configuration is wrong"
+    ],
+    "report_markdown": "# Incident Report: payments-api Charge Failures\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, `payments-api` began failing 100% of charges (`charge_failed rate 100%`). Investigation revealed that a recent deploy (`payments-2.15.0`) at 03:03 UTC updated `PAYGATE_URL` to `https://api.paygate.example/v2/`, resulting in 404 Not Found errors when calling PayGate endpoints.\n\n## Timeline\n- **2026-08-30T03:03:00.000Z**: `payments-api` deployed version `payments-2.15.0`, migrating to PayGate v2 endpoints by changing `PAYGATE_URL` to `https://api.paygate.example/v2/`.\n- **2026-08-30T03:12:00.000Z**: Paging alert fires due to 100% charge failure rate over 4 minutes.\n- **Investigation**: Logs showed constant `404` responses from PayGate. Probing `https://api.paygate.example/v2/status` succeeded, but updating the base URL configuration to include `/v2/` broke the relative endpoint paths used by the API client.\n\n## Root Cause\nA bad configuration deploy (`bad_config_deploy`) where `PAYGATE_URL` was incorrectly configured with a trailing `/v2/` path, causing all downstream requests to hit non-existent URLs (404).\n\n## Proposed Remediation\nUpdate the configuration of `payments-api` to correct `PAYGATE_URL` back to `https://api.paygate.example` (or the correct base URL without the extra path component, letting the client append `/v2/...` correctly).\n\n## Follow-ups\n- Add integration tests verifying PayGate connectivity during deploys.\n- Ensure URL configuration changes validate endpoint existence during startup or via staging smoke tests."
+  },
+  "variant": "v4_reviewer",
+  "run_id": "20260830T031850Z_v4-reviewer-s02-bad-config-deploy",
+  "trace": "traces/20260830T031850Z_v4-reviewer-s02-bad-config-deploy.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "status": "success",
+  "llm_calls": 7,
+  "input_tokens": 24224,
+  "output_tokens": 928,
+  "wall_s": 12.07,
+  "probes_run": 4,
+  "verified": true,
+  "gate_rejections": 0,
+  "reviewer": {
+    "approve": true,
+    "issues": [],
+    "suggested_checks": [],
+    "note": "Verdict is well-supported by logs, recent changes, and config inspection."
+  },
+  "approval": {
+    "decision": "approved",
+    "by": "eval-policy"
+  },
+  "actions_executed": [
+    [
+      "update_config",
+      "payments-api"
+    ]
+  ],
+  "harm_done": [],
+  "resolved": false,
+  "remediation_effect": {
+    "executed": true,
+    "resolved": false,
+    "harm": false,
+    "effect": "update_config on payments-api applied; no change in symptoms after 3 minutes"
+  },
+  "would_be_cost_usd": 0.0
+}

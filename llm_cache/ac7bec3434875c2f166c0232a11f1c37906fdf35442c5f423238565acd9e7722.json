@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Root cause directly supported by logs, config, and recent changes; safe restart action.\"}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 5819,
+"output_tokens": 43,
+"latency_ms": 1385,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Root cause directly supported by logs, config, and recent changes; safe restart action.\"}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0T0FybqCwdnkOdb0xpw5dJK2io7+YIAKBDA8FUVHFhoqwuq/ciygdrsFdC0k1OLL1oBRYmbTgSWqhm4bl/dEbi2yj64O4jnQpZ/wx9uBs0g1QwL36gIAnrWto="
+}
+}
+}
+}

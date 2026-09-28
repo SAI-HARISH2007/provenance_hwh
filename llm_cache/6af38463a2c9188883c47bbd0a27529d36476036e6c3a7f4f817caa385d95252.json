@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_b99e5eda-f84e-4408-a272-cae5b2b33a58",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "inventory-api:/healthz"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4030,
+"output_tokens": 77,
+"latency_ms": 966,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_b99e5eda-f84e-4408-a272-cae5b2b33a58",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"inventory-api:/healthz\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"reasoning": "Probe shows JWKS includes new kid. So inventory-api failing to fetch. Could be network issue? But inventory-api pods moved to new node; maybe they cannot reach auth-api due to network policy. Let's probe from inventory-api to auth-api.",
+"content": ""
+}
+}

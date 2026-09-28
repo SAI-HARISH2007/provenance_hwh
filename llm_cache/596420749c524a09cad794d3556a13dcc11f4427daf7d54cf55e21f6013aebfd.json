@@ -1,0 +1,14 @@
+{
+"text": "OK",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 6,
+"output_tokens": 1,
+"latency_ms": 51362,
+"model": "gemini-3.7-flash",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"content": "OK"
+}
+}
