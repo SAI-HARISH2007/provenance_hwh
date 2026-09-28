@@ -31,6 +31,7 @@ ROOT_CAUSES: list[str] = [
     "feature_flag_misconfig",
     "clock_skew",
     "secret_rotation",
+    "poison_message",
 ]
 
 ACTIONS: list[str] = [

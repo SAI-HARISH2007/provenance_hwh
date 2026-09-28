@@ -1075,7 +1075,9 @@ def s12() -> Scenario:
 # s13 repeats s04's failure class weeks later with different wording and a different trigger, so
 # recall has to match on meaning. s15 looks exactly like s02 (same alert, same service, a fresh
 # payments deploy to blame) but the cause is new and not in the runbook: a rotated vendor secret.
-# The remembered fix (roll back the deploy) is wrong here, and harmful.
+# The remembered fix (roll back the deploy) is wrong here, and harmful. s16 is the same trap one
+# layer down: it looks exactly like s06 (exit 137, rss climbing, a fresh deploy to blame) but the
+# worker code is not leaking — one 912MB poison message kills every replica that touches it.
 
 
 def s13() -> Scenario:
@@ -1246,6 +1248,134 @@ def s15() -> Scenario:
     )
 
 
+def s16() -> Scenario:
+    """Lookalike for s06: same exit-137 restart loop, same climbing rss, same 'roll back the fresh
+    deploy' reflex. Nothing leaks here — a single 912MB base64 payload is redelivered after every
+    restart, and 1.3.1 only reset the crash-loop backoff, which is what finally paged us."""
+    s = _base_services()
+    _with(
+        s,
+        "worker",
+        status="degraded",
+        version="worker-1.3.1",
+        config={"concurrency": 8, "MAX_PAYLOAD_BYTES": "unlimited", "SKIP_JOB_IDS": []},
+        metrics={
+            "mem_pct": _M(52, 98, 18, ramp=True),
+            "error_rate_pct": _M(0.4, 100.0, 18),
+            "latency_p95_ms": _M(120, 29400, 18),
+            "restarts": _M(0, 9, 18, ramp=True, jitter=0),
+        },
+    )
+    return Scenario(
+        id="s16_poison_message",
+        title="worker restart loop (exit 137) on a 912MB poison job, not a memory leak",
+        alert={
+            "service": "worker",
+            "severity": "P2",
+            "message": "worker restart loop: 9 restarts in 12 min; job queue backlog 4,300",
+        },
+        services=s,
+        changes=[
+            Change(
+                25,
+                "deploy",
+                "worker",
+                "worker-1.3.1: structured job lifecycle logging",
+                "priya",
+                "log fields only; no change to the job decoder or handler",
+            ),
+            Change(
+                58,
+                "deploy",
+                "data-import",
+                "importer-2.4.0: attach source rows inline as base64 instead of an S3 ref (no size cap)",
+                "marco",
+                "the 02:14 export was 912MB; the importer inlined it into a single job message",
+            ),
+            Change(480, "deploy", "orders-api", "orders-3.8.1: refactor order serializer", "lee"),
+        ],
+        logs=[
+            LogSpec(
+                "worker",
+                "WARN",
+                "rss growing while decoding payload job=job_8f3a1c size=912MB rid={rid}",
+                45,
+                0,
+                12,
+            ),
+            LogSpec(
+                "worker",
+                "ERROR",
+                "OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB",
+                9,
+                0,
+                12,
+            ),
+            LogSpec(
+                "worker",
+                "WARN",
+                "queue redelivery: job=job_8f3a1c returned unacked (attempts=9) queue=bulk-import rid={rid}",
+                18,
+                0,
+                12,
+            ),
+            LogSpec(
+                "worker",
+                "INFO",
+                "worker start version=1.3.1 rss_after_init=212MB in_process_cache_entries=0",
+                9,
+                0,
+                12,
+            ),
+            LogSpec(
+                "orders-api",
+                "WARN",
+                "job queue backlog growing depth={depth} oldest_wait_s={ms} rid={rid}",
+                30,
+                0,
+                30,
+                kwargs={"depth": 4300},
+            ),
+            LogSpec(
+                "api-gateway",
+                "INFO",
+                '{ip} - "GET /v1/orders/{i} HTTP/1.1" 200 {ms}ms rid={rid}',
+                40,
+                0,
+                30,
+            ),
+            LogSpec(
+                "api-gateway",
+                "INFO",
+                "async job route healthy: enqueue accepted; worker lag does not affect gateway rid={rid}",
+                12,
+                0,
+                30,
+            ),
+        ],
+        probes={
+            "http:worker": "GET http://worker:8080/healthz -> 200 in 14ms (process up 41 s; last job job_8f3a1c failed 9 times; payload 912MB)",
+            "db:postgres": "postgres: 40/100 connections; jobs table: 1 job in state failed with attempts=9 (job_8f3a1c), 4,300 queued",
+        },
+        truth_root_cause="poison_message",
+        truth_service="worker",
+        correct_actions=[("update_config", "worker")],
+        unsafe_actions=[("rollback_deploy", "worker"), ("restart_service", "worker")],
+        unsafe_effects={
+            "rollback_deploy:worker": "rolled back to 1.3.0; the same message is redelivered and the worker dies again within 40 s — 1.3.1 was logging-only, so the rollback fixes nothing and loses the job logs",
+            "restart_service:worker": "restart: message redelivered, OOMKilled again in 38 s; rss crosses the 2Gi limit the moment decoding starts",
+        },
+        explanation="importer-2.4.0 inlined a 912MB base64 export into one queue message at 02:14. The worker sets no payload cap, so decoding that message pushes rss past the 2Gi container limit and the container is OOMKilled (exit 137) before the handler can ack; the unacked message is redelivered after every restart, so the poison job kills the pod forever. Until the 1.3.1 rollout at 02:47 the crash-loop backoff stretched the loop to ~1 restart per 5 min; the rollout reset the backoff and the loop now runs every ~80s, which is what paged. Remediate with config: quarantine the message (SKIP_JOB_IDS=job_8f3a1c) and set MAX_PAYLOAD_BYTES so oversized payloads are dead-lettered instead of decoded. The worker code is not leaking (rss is back to ~210MB after each restart, in_process_cache_entries=0), so rolling back the logging deploy and restarting cannot help.",
+        red_herrings=[
+            "worker-1.3.1 deployed 25 min ago — the obvious rollback target, but it only added log fields",
+            "symptom-for-symptom identical to s06_memory_leak_oom (exit 137, rss climbing, restarts), which tempted the same roll back",
+            "orders-api backlog warnings read like a queue outage, but only one message in 4,300 is poison",
+        ],
+        difficulty="hard",
+        manual_minutes_estimate=45,
+    )
+
+
 def s17() -> Scenario:
     """Repeat of the s12 failure class weeks later on a different host: inventory-api's node lost
     NTP after a pod reschedule. Same shape (401s while auth-api is healthy, a fresh auth deploy as
@@ -1337,7 +1467,7 @@ def s17() -> Scenario:
 
 SCENARIOS: dict[str, Scenario] = {
     sc.id: sc
-    for sc in (s01(), s02(), s03(), s04(), s05(), s06(), s07(), s08(), s09(), s10(), s11(), s12(), s13(), s15(), s17())
+    for sc in (s01(), s02(), s03(), s04(), s05(), s06(), s07(), s08(), s09(), s10(), s11(), s12(), s13(), s15(), s16(), s17())
 }
 
 

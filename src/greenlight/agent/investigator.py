@@ -73,6 +73,7 @@ VERIFYING_PROBES: dict[str, set[str]] = {
     "cache_eviction_stampede": {"db", "http"},
     "feature_flag_misconfig": {"http"},
     "secret_rotation": {"http"},
+    "poison_message": {"http", "db"},
 }
 BUDGET_WARNING_STEPS = 3
 
