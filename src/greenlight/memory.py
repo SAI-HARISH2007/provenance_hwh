@@ -94,6 +94,39 @@ class MemoryHit:
         src = self.incident_id or "unknown incident"
         return f"- [{src} · {self.when[:10] or 'undated'} · {flag}] {self.text}"
 
+    def age_days(self, now: datetime) -> float | None:
+        """How many days before `now` this hit happened, or None if `when` has no parsable date.
+
+        `when` is whatever the memory server returned: ISO 8601, sometimes with an offset,
+        sometimes empty or a bare date. A timestamp without an offset is read as UTC.
+        """
+        raw = self.when.strip()
+        if not raw:
+            return None
+        try:
+            when = datetime.fromisoformat(raw)
+        except ValueError:
+            return None
+        if when.tzinfo is None:
+            when = when.replace(tzinfo=UTC)
+        if now.tzinfo is None:
+            now = now.replace(tzinfo=UTC)
+        return (now - when).total_seconds() / 86400.0
+
+
+def filter_by_age(
+    hits: list[MemoryHit], max_age_days: int, now: datetime | None = None
+) -> list[MemoryHit]:
+    """Drop hits older than `max_age_days`; a non-positive limit keeps everything.
+
+    Hits whose date cannot be parsed are kept: an undated memory is a weak claim, not a
+    reason to hide it.
+    """
+    if max_age_days <= 0:
+        return list(hits)
+    ref = now if now is not None else datetime.now(UTC)
+    return [h for h in hits if (age := h.age_days(ref)) is None or age <= max_age_days]
+
 
 class HindsightMemory:
     """Thin wrapper around the Hindsight client that knows what an incident record looks like."""
@@ -109,6 +142,7 @@ class HindsightMemory:
         self.bank_id = bank_id
         self.min_score = float(os.environ.get("HINDSIGHT_MIN_SCORE", "0.3"))
         self.max_incidents = int(os.environ.get("HINDSIGHT_MAX_INCIDENTS", "3"))
+        self.max_age_days = int(os.environ.get("HINDSIGHT_MAX_AGE_DAYS", "0"))  # 0 = no age limit
         self.ordinal = 0  # how many incidents this bank has lived through (drives the dates)
         self.retained: list[dict[str, Any]] = []
 
@@ -177,7 +211,7 @@ class HindsightMemory:
                 )
             )
         hits.sort(key=lambda h: -h.score)
-        return [h for h in hits if h.score >= min_score]
+        return filter_by_age([h for h in hits if h.score >= min_score], self.max_age_days)
 
     def brief(
         self,

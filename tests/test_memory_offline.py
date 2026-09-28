@@ -6,14 +6,17 @@ only the vendor, is rejected by the provenance gate, probes the blamed service, 
 invalid_api_key, and submits the real cause. No network.
 """
 
+from datetime import UTC, datetime
 from pathlib import Path
 
 from test_agent_offline import FakeLLM, _tc
 
 from greenlight.agent import VARIANTS, Investigator
-from greenlight.memory import HindsightMemory, MemoryHit
+from greenlight.memory import HindsightMemory, MemoryHit, filter_by_age
 from greenlight.sim import SCENARIOS
 from greenlight.tracing import load_trace
+
+NOW = datetime(2026, 8, 10, 12, 0, tzinfo=UTC)
 
 S02_TAGS = [
     "incident:s02_bad_config_deploy",
@@ -133,3 +136,39 @@ def test_memory_variant_requires_memory():
 
     with pytest.raises(ValueError):
         Investigator(VARIANTS["final_memory"], FakeLLM([]), Path("/tmp"))
+
+
+def _hit(when: str) -> MemoryHit:
+    return MemoryHit(text=f"incident {when}", type="world", when=when, score=1.0)
+
+
+def test_age_days_reads_dated_undated_and_offset_hits():
+    # a plain ISO timestamp, and the same instant written without an offset
+    assert _hit("2026-08-01T12:00:00+00:00").age_days(NOW) == 9.0
+    assert _hit("2026-08-01T12:00:00").age_days(NOW) == 9.0
+
+    # a bare date is midnight, so it is a day and a half old at noon
+    assert _hit("2026-08-09").age_days(NOW) == 1.5
+
+    # +02:00 local time, resolved to the same instant before differencing
+    assert round(_hit("2026-08-09T13:30:00+02:00").age_days(NOW), 6) == 1.020833
+
+    # nothing to parse means no age, not an age of zero
+    assert _hit("").age_days(NOW) is None
+    assert _hit("   ").age_days(NOW) is None
+    assert _hit("sometime last tuesday").age_days(NOW) is None
+
+
+def test_filter_by_age_drops_stale_and_keeps_undated():
+    fresh = _hit("2026-08-08T12:00:00+00:00")
+    stale = _hit("2026-06-01T12:00:00+00:00")
+    undated = _hit("")
+    hits = [fresh, stale, undated]
+
+    kept = filter_by_age(hits, 30, NOW)
+    assert kept == [fresh, undated]
+    assert [h.text for h in kept] == [fresh.text, undated.text]
+
+    # a limit of 0 means no limit: even the stale hit survives, with or without an explicit now
+    assert filter_by_age(hits, 0, NOW) == hits
+    assert filter_by_age(hits, 0) == hits
