@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_e5407507-b2d0-44b4-b127-61412de8c5db",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 20,
+"pattern": "memory",
+"service": "worker"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2282,
+"output_tokens": 38,
+"latency_ms": 728,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_e5407507-b2d0-44b4-b127-61412de8c5db",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":20,\"pattern\":\"memory\",\"service\":\"worker\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Search for OOM or memory.",
+"content": ""
+}
+}

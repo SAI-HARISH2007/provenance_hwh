@@ -1,0 +1,33 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_cfdde140-fc8c-4aad-b82d-9f19a0bed886",
+"name": "get_config",
+"arguments": {
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2412,
+"output_tokens": 139,
+"latency_ms": 867,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_cfdde140-fc8c-4aad-b82d-9f19a0bed886",
+"function": {
+"arguments": "{\"service\":\"inventory-api\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"reasoning": "Memory usage spiked to ~98% just before restarts. So memory leak likely due to new in-process cache.\n\nCheck CPU maybe also high? but memory is key.\n\nThus root cause: memory leak leading to OOM kills, caused by recent deploy adding in-process SKU cache (bad_config_deploy or memory_leak_oom). The label list includes \"memory_leak_oom\". That fits.\n\nWe need to verify mechanism: maybe run probe to check container memory? Not needed; logs and metrics already show OOM. Could also check config for cache size. Let's get config.",
+"content": ""
+}
+}

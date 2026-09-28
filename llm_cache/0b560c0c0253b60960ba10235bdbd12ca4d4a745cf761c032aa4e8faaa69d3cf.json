@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_2a971e26-ddea-4dbb-ba9f-35a2b72c7f15",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 20,
+"pattern": "panic",
+"service": "worker"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2004,
+"output_tokens": 267,
+"latency_ms": 1143,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_2a971e26-ddea-4dbb-ba9f-35a2b72c7f15",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":20,\"pattern\":\"panic\",\"service\":\"worker\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "We have a worker service in restart loop, many restarts, backlog huge. Likely worker crashes due to something in job processing. Recent changes: orders-api deploy (serializer), data-import deploy (importer) that inlines large source rows into job messages (no size cap). Also worker deploy added structured logging but no decoder changes. The data-import change could cause huge job messages that worker cannot handle (maybe memory leak, OOM, or message size causing failure). Worker restarts many times, backlog grows.\n\nHypotheses:\n1. Worker crashes due to OOM from processing oversized job messages (memory_leak_oom). Evidence: logs show OOM or memory usage high; metrics show mem_pct spikes; maybe worker process restarts due to OOM kill.\n2. Worker crashes due to job decoder failure on unexpected large payload causing panic (poison_message). Evidence: logs show \"panic: message too large\" or similar.\n3. Worker restarts due to DB connection pool exhaustion (maybe many jobs cause many DB connections). But restarts loop suggests crash, not just pool exhaustion.\n\nWe need to query worker logs for errors.",
+"content": ""
+}
+}

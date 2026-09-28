@@ -1,1 +1,1 @@
-"""greenlight — micro1 Agentic Workflows Hackathon 2026."""
+"""greenlight core: simulator, investigator, gates, tracing. Provenance adds the memory layer."""

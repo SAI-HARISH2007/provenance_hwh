@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_f221fbc8-65ce-47ba-ba23-38f462b669b8",
+"name": "get_metrics",
+"arguments": {
+"metric": "restarts",
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3125,
+"output_tokens": 50,
+"latency_ms": 7444,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_f221fbc8-65ce-47ba-ba23-38f462b669b8",
+"function": {
+"arguments": "{\"metric\":\"restarts\",\"service\":\"inventory-api\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"reasoning": "Memory usage spiked to ~98% recently. That could cause OOM kills leading to restarts. Check restart metric.",
+"content": ""
+}
+}

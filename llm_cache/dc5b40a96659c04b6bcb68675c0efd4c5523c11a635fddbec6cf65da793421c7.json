@@ -1,0 +1,44 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_837d7c05-8b60-4ce3-9bde-ce90c81ff8ac",
+"name": "submit_verdict",
+"arguments": {
+"action": "rollback_deploy",
+"confidence": 0.96,
+"evidence": [
+"Alert shows worker restart loop with backlog",
+"Recent change: data-import deploy at 2026-08-30T02:14:00Z added inlining of source rows into a single job message, resulting in 912MB payload",
+"Worker logs contain multiple ERROR lines: 'OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB' between 03:00 and 03:11"
+],
+"report_markdown": "# Incident Report\n\n**Summary**\n- Worker service entered a restart loop (9 restarts in 12 min) and job queue backlog grew to 4,300 jobs.\n- Alert fired at 2026‑08‑30T03:12:00Z.\n\n**Timeline**\n- 2026‑08‑30T02:14:00Z – `data-import` service deployed `importer-2.4.0` which changed job payload handling to inline source rows as base64 with **no size cap** (912 MB payload created).\n- 2026‑08‑30T03:00:36Z – Worker logs first `OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB`.\n- 03:00‑03:12 – Repeated OOM kills cause worker to restart repeatedly, leading to backlog.\n\n**Root Cause**\n- The `data-import` change produced excessively large job messages (≈912 MB). The worker process attempts to decode these payloads, exhausting its memory and being killed by the OOM killer. This triggers the observed restart loop and backlog.\n\n**Evidence**\n1. **Alert** – worker in degraded state, restart loop, large backlog.\n2. **Recent Changes** – `data-import` deploy introduced unbounded inlining of rows, creating a 912 MB job payload.\n3. **Worker Logs** – multiple `ERROR` entries: `OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB`.\n\n**Proposed Remediation (Safe)**\n- **Rollback the `data-import` deployment** (`importer-2.4.0`) to the previous version that used S3 references for large payloads. This instantly stops creation of oversized job messages, allowing the worker to process remaining jobs without OOM.\n- After rollback, monitor the worker restarts and backlog; they should clear as workers resume normal operation.\n- Long‑term: add a payload size limit or revert to external storage for large data to prevent recurrence.\n\n**Follow‑ups**\n- Verify that the `data-import` service no longer emits >100 MB job messages.\n- Add a monitoring alert on worker memory usage and job payload size.\n- Consider implementing a feature flag to cap payload size before future releases.\n\n**Root Cause Label**: `memory_leak_oom`\n**Service where cause lives**: `data-import`\n**Target for action**: `data-import`",
+"root_cause": "memory_leak_oom",
+"service": "data-import",
+"summary": "Worker OOM due to oversized job payload from recent data-import change",
+"target": "data-import"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2784,
+"output_tokens": 1068,
+"latency_ms": 2863,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_837d7c05-8b60-4ce3-9bde-ce90c81ff8ac",
+"function": {
+"arguments": "{\"action\":\"rollback_deploy\",\"confidence\":0.96,\"evidence\":[\"Alert shows worker restart loop with backlog\",\"Recent change: data-import deploy at 2026-08-30T02:14:00Z added inlining of source rows into a single job message, resulting in 912MB payload\",\"Worker logs contain multiple ERROR lines: 'OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB' between 03:00 and 03:11\"],\"report_markdown\":\"# Incident Report\\n\\n**Summary**\\n- Worker service entered a restart loop (9 restarts in 12 min) and job queue backlog grew to 4,300 jobs.\\n- Alert fired at 2026‑08‑30T03:12:00Z.\\n\\n**Timeline**\\n- 2026‑08‑30T02:14:00Z – `data-import` service deployed `importer-2.4.0` which changed job payload handling to inline source rows as base64 with **no size cap** (912 MB payload created).\\n- 2026‑08‑30T03:00:36Z – Worker logs first `OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB`.\\n- 03:00‑03:12 – Repeated OOM kills cause worker to restart repeatedly, leading to backlog.\\n\\n**Root Cause**\\n- The `data-import` change produced excessively large job messages (≈912 MB). The worker process attempts to decode these payloads, exhausting its memory and being killed by the OOM killer. This triggers the observed restart loop and backlog.\\n\\n**Evidence**\\n1. **Alert** – worker in degraded state, restart loop, large backlog.\\n2. **Recent Changes** – `data-import` deploy introduced unbounded inlining of rows, creating a 912 MB job payload.\\n3. **Worker Logs** – multiple `ERROR` entries: `OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB`.\\n\\n**Proposed Remediation (Safe)**\\n- **Rollback the `data-import` deployment** (`importer-2.4.0`) to the previous version that used S3 references for large payloads. This instantly stops creation of oversized job messages, allowing the worker to process remaining jobs without OOM.\\n- After rollback, monitor the worker restarts and backlog; they should clear as workers resume normal operation.\\n- Long‑term: add a payload size limit or revert to external storage for large data to prevent recurrence.\\n\\n**Follow‑ups**\\n- Verify that the `data-import` service no longer emits \\u003e100 MB job messages.\\n- Add a monitoring alert on worker memory usage and job payload size.\\n- Consider implementing a feature flag to cap payload size before future releases.\\n\\n**Root Cause Label**: `memory_leak_oom`\\n**Service where cause lives**: `data-import`\\n**Target for action**: `data-import`\",\"root_cause\":\"memory_leak_oom\",\"service\":\"data-import\",\"summary\":\"Worker OOM due to oversized job payload from recent data-import change\",\"target\":\"data-import\"}",
+"name": "submit_verdict"
+},
+"type": "function"
+}
+],
+"reasoning": "Great. OOMKilled while decoding payload of size 912MB. This matches recent change: data-import importer inlined source rows into a single job message of 912MB. Worker cannot handle that, causing OOM and restarts. Root cause: memory_leak_oom? Actually OOM due to large payload, not leak. Root cause label likely \"memory_leak_oom\" but it's not a leak, it's OOM due to payload size. The label list includes \"memory_leak_oom\". That's the best fit.\n\nWe need to verify mechanism: maybe run a probe to check worker memory usage? Could run a probe of the worker process? Not available. Could run a probe of the job queue size? Not needed. We have logs confirming OOM. That's sufficient.\n\nNow propose remediation: The data-import change caused huge job messages; need to limit job payload size or revert that change. Safer: update config to enforce max job size, or disable the new import feature. Since we cannot change code, propose to rollback the data-import deploy (importer-2.4.0) which introduced the large payload. That will prevent new huge jobs. Also maybe add a size cap.\n\nRoot cause lives in data-import service (importer). So service: data-import.\n\nAction: rollback_deploy (safe). Provide confidence high.\n\nEvidence: logs showing OOMKilled, recent_changes showing data-import deploy at 02:14 with detail about inlining large rows, and the job size 912MB.\n\nLet's submit verdict.",
+"content": ""
+}
+}

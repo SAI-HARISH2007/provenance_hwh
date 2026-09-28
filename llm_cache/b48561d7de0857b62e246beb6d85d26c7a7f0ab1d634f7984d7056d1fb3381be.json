@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_c10ef5f8-b3df-4d94-8d04-72c7d2dfd09f",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 20,
+"pattern": "redis",
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2233,
+"output_tokens": 39,
+"latency_ms": 699,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_c10ef5f8-b3df-4d94-8d04-72c7d2dfd09f",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":20,\"pattern\":\"redis\",\"service\":\"inventory-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Search for \"connection\" errors.",
+"content": ""
+}
+}

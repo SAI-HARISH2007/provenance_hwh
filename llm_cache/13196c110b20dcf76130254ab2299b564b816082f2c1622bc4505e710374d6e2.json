@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_b4fb081c-1428-451f-a863-62313bcc5937",
+"name": "get_metrics",
+"arguments": {
+"metric": "mem_pct",
+"service": "worker"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2425,
+"output_tokens": 116,
+"latency_ms": 561,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_b4fb081c-1428-451f-a863-62313bcc5937",
+"function": {
+"arguments": "{\"metric\":\"mem_pct\",\"service\":\"worker\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"reasoning": "We see OOMKilled while decoding payload of size 912MB. That's huge. So cause is memory OOM due to large job payload introduced by data-import deploy at 02:14. The worker restarts because OOM kills. Root cause label: memory_leak_oom? Actually not leak but OOM due to payload size. The label list includes \"memory_leak_oom\". That fits.\n\nWe need to verify with metrics: memory usage.",
+"content": ""
+}
+}

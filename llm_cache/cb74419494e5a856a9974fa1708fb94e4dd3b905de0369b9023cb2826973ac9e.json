@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_a3e07baf-6623-4a91-b757-386dcaa6307f",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 20,
+"pattern": "oom",
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2172,
+"output_tokens": 45,
+"latency_ms": 715,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_a3e07baf-6623-4a91-b757-386dcaa6307f",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":20,\"pattern\":\"oom\",\"service\":\"inventory-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "No panic. Let's search for \"OOM\" or \"memory\".",
+"content": ""
+}
+}

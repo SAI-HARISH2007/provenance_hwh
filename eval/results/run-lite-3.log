@@ -1,4 +1,0 @@
-s01_db_pool_exhausted            success  rc=db_connection_pool_exhausted action=increase_db_pool:postgres       calls= 6 probes=1 verified=True rej=0 harm=False resolved=False 24.81s
-s02_bad_config_deploy            success  rc=bad_config_deploy            action=rollback_deploy:payments-api   calls= 5 probes=2 verified=True rej=0 harm=False resolved=True 8.07s
-s03_tls_cert_expired             success  rc=tls_cert_expired             action=rotate_tls_cert:auth-api       calls= 5 probes=3 verified=True rej=0 harm=False resolved=True 7.95s
-llm stats: {"calls": 16, "cache_hits": 2, "input_tokens": 48030, "output_tokens": 2614, "would_be_cost_usd": 0.0, "actual_cost_usd": 0.0}

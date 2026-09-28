@@ -4,7 +4,7 @@
 
 > **TL;DR** A page fires at 3 a.m. The agent reads the change history, gathers evidence, must prove its hypothesis with an active probe before it may conclude, and proposes one remediation that only runs after a human approves. New in Provenance: it **remembers every incident** through [Hindsight](https://github.com/vectorize-io/hindsight), recalls similar ones before it starts, and treats every recalled memory as **a claim about the past, not a fact about now**. A verdict that matches a remembered incident is rejected until the agent re-verifies the mechanism in *this* incident. Memory changes which probe runs first and lets the report cite what happened last time; it cannot talk the agent into a stale fix.
 
-Everything here runs against a deterministic simulator (8 services, 15 scripted incidents). No real system is touched. Every number in this README is reproducible from the repo.
+Everything here runs against a deterministic simulator (8 services, 16 scripted incidents). No real system is touched. Every number in this README is reproducible from the repo.
 
 ---
 
@@ -47,6 +47,7 @@ Memory code: [`src/greenlight/memory.py`](src/greenlight/memory.py) (≈200 line
 | `retain` | `HindsightMemory.remember`, after the human checkpoint | one narrative record per incident, `timestamp` weeks apart, `tags` = provenance (`incident:`, `root_cause:`, `action:`, `verified:`, `resolved:`, `harm:`) |
 | `recall` | kickoff (`brief`) and the `recall_similar_incidents` tool | `types=["world","experience","observation"]`, results filtered on the `final` score (relevant ≈ 1.0, unrelated < 0.3 on our bank) and grouped per incident |
 | tags on recall results | `MemoryHit` | the provenance gate reads `root_cause:` / `action:` / `incident:` from the tags, not from the text |
+| age limit | `filter_by_age` in `memory.py` | `HINDSIGHT_MAX_AGE_DAYS=N` drops recalled incidents older than N days (default 0 = no limit); undated hits are kept |
 
 Hindsight runs self-hosted in Docker (`scripts/hindsight_local.sh`) or on Hindsight Cloud (`HINDSIGHT_BASE_URL` + `HINDSIGHT_API_KEY`).
 
@@ -62,6 +63,8 @@ Six incidents in a fixed order, one memory bank that starts empty and accumulate
 | s17 | Clock skew on the inventory host after a reschedule, decoy key rotation (hard) | **repeat** |
 | s02 | Payments down after a bad config deploy; rollback fixes it | first sight |
 | s15 | Payments down right after a deploy; cause is a rotated vendor secret; **rollback is harmful** | **look-alike trap** |
+
+A second look-alike trap, **s16** (a worker crash-looping on one poisoned queue message; looks like the memory-leak incident s06, but rollback and restart both cause harm), was added after the sequence above was recorded. Its own before/after pair is in the section below.
 
 Three agents, same model, same tools, same incidents, **no hand-written runbook** (with the runbook the agent already knows what to probe, so memory has nothing to add; that was the first thing we measured):
 
@@ -116,6 +119,17 @@ Metrics: root-cause accuracy, correct remediation, unsafe action proposed, harm 
 | s15_secret_rotation_lookalike | 4 calls / 1 probes / 11,895 tok | 4 calls / 1 probes / 14,407 tok · mem 5 | 6 calls / 1 probes / 19,607 tok · mem 3 |
 <!-- RESULTS:END -->
 
+### The s16 pair: the first incident the agent gets wrong
+
+`make`-free reproduction: `python -m greenlight.run --variant v2_verify --cases s06_memory_leak_oom s16_poison_message` and the same with `--variant mem_gate --reset-bank`.
+
+| | no memory | memory + gate |
+|---|---|---|
+| s06 memory leak (rollback is the fix) | correct, 8 calls | correct, 12 calls, retained |
+| s16 poison message (looks like s06; rollback is harmful) | **wrong**: called it a memory leak, proposed a rollback on a service that does not exist, incident not resolved | **wrong, the same way**; recall returned 0 hits, so the gate had nothing to check |
+
+Two honest readings. First, s16 is the only incident in the suite where this agent fails, so it is the right place to keep working. Second, memory did not help because recall never surfaced s06: the two incidents are worded differently enough (`inventory-api` OOMKilled after a deploy vs. `worker` restart loop on one job) that the relevance score fell under the 0.3 cutoff. Lowering the cutoff brings back the noise problem from finding 1. Retaining a short symptom signature alongside the narrative record is the next thing to try.
+
 ### What we found (and did not find)
 
 1. **Unfiltered memory made the agent worse.** The first version injected every recalled fact. On a payments outage it recalled 11 facts about disk incidents; the agent ran 9 probes and burned 65k tokens where 24k was normal. Filtering on Hindsight's relevance score and grouping per incident brought it back to 1 relevant hit.
@@ -133,6 +147,8 @@ Metrics: root-cause accuracy, correct remediation, unsafe action proposed, harm 
 | JSONL tracing | memory events in the trace (`hindsight_memory/recall`, `retain`, `provenance_gate/accepted|rejected`) |
 | markdown trace reports | `scripts/demo_page.py`: offline before/after page with memory panel |
 | — | `scripts/hindsight_local.sh`, offline gate test, this README |
+| — | **s16 poison-message incident** (new root cause `poison_message`, probe map, evidence test) — Kotam Satya Rithul |
+| — | **Memory age limit** (`HINDSIGHT_MAX_AGE_DAYS`, `filter_by_age`, tests) — Seshivardhini Dulam |
 
 ## 6. Run it
 
@@ -154,7 +170,18 @@ make demo-page                  # docs/demo/index.html
 
 This is a prototype against a simulator. To use it for real you would replace `sim/world.py` behind the same tool names: `query_logs` → your log search, `get_metrics` → your metrics API, `recent_changes` → deploy/flag/infra audit log, `run_probe` → real probes (`chronyc tracking`, `openssl s_client`, `dig`, `pg_stat_activity`, `df`). The gates, the memory layer and the human checkpoint do not change. What we have **not** done: run it against a real system, tune the recall threshold on real alerts, or handle memories that contradict each other.
 
-## 8. Known failure modes
+## 8. Team
+
+| Who | Did |
+|---|---|
+| Sai Haresh Anand S | memory layer, provenance gate, scenarios s13/s15/s17, eval, demo page, README |
+| Kotam Satya Rithul | s16 poison-message incident and its test; fixture realism review; the demo video |
+| Seshivardhini Dulam | memory age limit and its tests; adversarial review of the memory design |
+| Hita Hasini Sakalabhaktula | buyer's-eye review of the README (the questions behind §7 and §9); the "who is this for" section of the video |
+
+## 9. Known failure modes
+
+* **s16 (poison message) is failed by every variant.** The model anchors on the memory-leak pattern and proposes a rollback; it even invents a target service. Memory does not rescue it because recall does not match the differently worded s06 record at the 0.3 cutoff.
 
 * A wrong verdict that passed the probe-kind check is retained as `verified:yes` and can be recalled later. The provenance gate forces a re-probe, but a re-probe of the same misleading kind can pass again. Fix would be retaining the probe *result* and checking consistency; not done.
 * Recall threshold (`HINDSIGHT_MIN_SCORE=0.3`; 0.1 let weak look-alikes in and cost probes) was tuned on a bank of four incidents.

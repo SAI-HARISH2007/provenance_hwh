@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_911642cc-a2b0-4f6a-832d-18630c1bc058",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "worker"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3715,
+"output_tokens": 108,
+"latency_ms": 10209,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_911642cc-a2b0-4f6a-832d-18630c1bc058",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"worker\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"reasoning": "We need to run a probe. The verification requires an http probe? It says a `memory_leak_oom` verdict must be confirmed by a `http` probe. Likely we need to probe the worker service health endpoint to see it's unhealthy? Or maybe check that the worker process is OOM? But we can run http probe to worker service. Let's try run_probe http target \"worker\".",
+"content": ""
+}
+}

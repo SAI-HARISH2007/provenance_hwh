@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_57725a42-68d5-486e-a192-4508cbbc664c",
+"name": "get_metrics",
+"arguments": {
+"metric": "mem_pct",
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2851,
+"output_tokens": 58,
+"latency_ms": 1616,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_57725a42-68d5-486e-a192-4508cbbc664c",
+"function": {
+"arguments": "{\"metric\":\"mem_pct\",\"service\":\"inventory-api\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"reasoning": "Only INFO logs, no errors. Maybe restarts are due to OOM kill not logged. Let's get metrics: connections_used for inventory-api? Or memory usage.",
+"content": ""
+}
+}

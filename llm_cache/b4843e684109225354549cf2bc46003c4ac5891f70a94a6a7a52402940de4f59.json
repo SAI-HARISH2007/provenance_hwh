@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_e809657f-2a46-4686-a5aa-4fe89b7daa78",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 20,
+"pattern": "",
+"service": "worker"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 1790,
+"output_tokens": 247,
+"latency_ms": 3201,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_e809657f-2a46-4686-a5aa-4fe89b7daa78",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":20,\"pattern\":\"\",\"service\":\"worker\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Alert: worker restart loop, many restarts, backlog huge. Likely worker process crashes due to something like memory leak, db pool exhaustion, or job payload too large causing OOM. Recent changes: data-import deploy at 02:14 introduced large job messages (inlined base64). Worker got new structured logging at 02:47 but no decoder changes. The large job messages could cause worker to OOM or crash when processing. The backlog suggests jobs not being processed. Hypotheses:\n\n1. Worker crashes due to memory OOM from processing huge job payloads (memory_leak_oom). Evidence: logs show OOM or memory usage spikes; metrics show mem_pct high.\n\n2. Worker restarts due to db connection pool exhaustion because many jobs cause many DB connections; but likely not.\n\n3. Worker fails due to job payload size causing decoder error (poison_message). Could be poison message causing crash loop.\n\nWe need to query worker logs for OOM or errors.",
+"content": ""
+}
+}

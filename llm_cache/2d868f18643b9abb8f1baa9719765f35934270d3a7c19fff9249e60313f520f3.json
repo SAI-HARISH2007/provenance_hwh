@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_b98e4b00-0f02-4de7-aa4c-3e8de0ef5011",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "worker"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3882,
+"output_tokens": 74,
+"latency_ms": 1217,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_b98e4b00-0f02-4de7-aa4c-3e8de0ef5011",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"worker\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"reasoning": "We need to run a probe to confirm memory leak OOM? The verification requires an http probe. Probably need to probe the worker service health endpoint to see memory usage? The probe kind http target maybe \"worker\". Let's run http probe to worker.",
+"content": ""
+}
+}

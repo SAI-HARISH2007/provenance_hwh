@@ -1,0 +1,36 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_0b0187dd-42b5-4dc7-b596-32dc319ab41d",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"limit": 20,
+"pattern": "job",
+"service": "worker"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2336,
+"output_tokens": 42,
+"latency_ms": 687,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_0b0187dd-42b5-4dc7-b596-32dc319ab41d",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"limit\":20,\"pattern\":\"job\",\"service\":\"worker\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Search for \"failed to decode\" or \"job\".",
+"content": ""
+}
+}

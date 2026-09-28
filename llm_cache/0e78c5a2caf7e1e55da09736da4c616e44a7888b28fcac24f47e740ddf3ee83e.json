@@ -1,0 +1,35 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_337791f0-420e-493a-abf8-0cee5f60cfc6",
+"name": "query_logs",
+"arguments": {
+"level": "INFO",
+"limit": 20,
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2341,
+"output_tokens": 39,
+"latency_ms": 1344,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_337791f0-420e-493a-abf8-0cee5f60cfc6",
+"function": {
+"arguments": "{\"level\":\"INFO\",\"limit\":20,\"service\":\"inventory-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"reasoning": "Maybe logs are INFO level. Let's get recent INFO logs.",
+"content": ""
+}
+}

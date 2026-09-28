@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_a7c13896-e33c-43c7-84a4-2dcb15d21486",
+"name": "get_metrics",
+"arguments": {
+"metric": "mem_pct",
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2145,
+"output_tokens": 51,
+"latency_ms": 631,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_a7c13896-e33c-43c7-84a4-2dcb15d21486",
+"function": {
+"arguments": "{\"metric\":\"mem_pct\",\"service\":\"inventory-api\"}",
+"name": "get_metrics"
+},
+"type": "function"
+}
+],
+"reasoning": "Code 137 = SIGKILL, often OOM kill. So memory pressure.\n\nLet's get memory usage metric for inventory-api.",
+"content": ""
+}
+}

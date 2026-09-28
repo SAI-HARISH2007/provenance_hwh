@@ -1,0 +1,45 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_502285d4-bf3b-4224-bb44-f93faaf1920a",
+"name": "submit_verdict",
+"arguments": {
+"action": "rollback_deploy",
+"confidence": 0.95,
+"evidence": [
+"recent_changes shows deploy inventory-api 1.10.0 at 2026-08-30T01:37 adding in-process SKU cache",
+"get_metrics mem_pct for inventory-api shows spike to 98.5% in last minutes",
+"get_metrics restarts for inventory-api shows 6 restarts in last 30 minutes, increasing after memory spike",
+"run_probe http inventory-api returned 502 with OOMKilled exit 137"
+],
+"report_markdown": "# Incident Report\n\n**Summary**: Inventory API experienced rapid pod restarts (6 in 10 min) and a 22 % error rate, degrading the service.\n\n**Timeline**:\n- **01:37** – Deploy `inventory-1.10.0` introduced an in‑process hot‑item SKU cache.\n- **02:45‑03:10** – Memory usage (`mem_pct`) climbed from ~50 % to >98 %.\n- **02:45‑03:12** – Pod restarts metric rose from 0 to 6, matching the memory spike.\n- **03:12** – Alert fired (pod restarts, errors).\n\n**Root Cause**: `memory_leak_oom` in `inventory-api`. The newly added cache consumes unbounded memory, causing the container to be OOM‑killed (exit 137) and restarted.\n\n**Evidence**:\n- Recent change adding cache (see `recent_changes`).\n- Memory usage chart shows spike to 98 % (`get_metrics mem_pct`).\n- Restart count correlates with memory spike (`get_metrics restarts`).\n- HTTP health probe reports `502` with OOMKilled exit code 137 (`run_probe`).\n\n**Proposed Remediation** (safe): Roll back `inventory-api` to the previous stable version (e.g., `inventory-1.9.x`) that does not contain the unbounded cache. This removes the memory pressure without altering resource limits or affecting dependent services.\n\n**Why Safe**: Rolling back a stateless API is a standard, low‑risk mitigation. It restores known‑good memory behavior, stops OOM kills, and does not impact data stores.\n\n**Follow‑ups**:\n- Conduct load testing of the cache implementation to determine safe size limits.\n- Add configuration to cap cache memory or implement eviction.\n- Monitor memory usage after rollback to confirm stability.\n\n---\n",
+"root_cause": "memory_leak_oom",
+"service": "inventory-api",
+"summary": "Inventory API OOM caused by recent cache addition",
+"target": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4517,
+"output_tokens": 598,
+"latency_ms": 2717,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_502285d4-bf3b-4224-bb44-f93faaf1920a",
+"function": {
+"arguments": "{\"action\":\"rollback_deploy\",\"confidence\":0.95,\"evidence\":[\"recent_changes shows deploy inventory-api 1.10.0 at 2026-08-30T01:37 adding in-process SKU cache\",\"get_metrics mem_pct for inventory-api shows spike to 98.5% in last minutes\",\"get_metrics restarts for inventory-api shows 6 restarts in last 30 minutes, increasing after memory spike\",\"run_probe http inventory-api returned 502 with OOMKilled exit 137\"],\"report_markdown\":\"# Incident Report\\n\\n**Summary**: Inventory API experienced rapid pod restarts (6 in 10 min) and a 22 % error rate, degrading the service.\\n\\n**Timeline**:\\n- **01:37** – Deploy `inventory-1.10.0` introduced an in‑process hot‑item SKU cache.\\n- **02:45‑03:10** – Memory usage (`mem_pct`) climbed from ~50 % to \\u003e98 %.\\n- **02:45‑03:12** – Pod restarts metric rose from 0 to 6, matching the memory spike.\\n- **03:12** – Alert fired (pod restarts, errors).\\n\\n**Root Cause**: `memory_leak_oom` in `inventory-api`. The newly added cache consumes unbounded memory, causing the container to be OOM‑killed (exit 137) and restarted.\\n\\n**Evidence**:\\n- Recent change adding cache (see `recent_changes`).\\n- Memory usage chart shows spike to 98 % (`get_metrics mem_pct`).\\n- Restart count correlates with memory spike (`get_metrics restarts`).\\n- HTTP health probe reports `502` with OOMKilled exit code 137 (`run_probe`).\\n\\n**Proposed Remediation** (safe): Roll back `inventory-api` to the previous stable version (e.g., `inventory-1.9.x`) that does not contain the unbounded cache. This removes the memory pressure without altering resource limits or affecting dependent services.\\n\\n**Why Safe**: Rolling back a stateless API is a standard, low‑risk mitigation. It restores known‑good memory behavior, stops OOM kills, and does not impact data stores.\\n\\n**Follow‑ups**:\\n- Conduct load testing of the cache implementation to determine safe size limits.\\n- Add configuration to cap cache memory or implement eviction.\\n- Monitor memory usage after rollback to confirm stability.\\n\\n---\\n\",\"root_cause\":\"memory_leak_oom\",\"service\":\"inventory-api\",\"summary\":\"Inventory API OOM caused by recent cache addition\",\"target\":\"inventory-api\"}",
+"name": "submit_verdict"
+},
+"type": "function"
+}
+],
+"reasoning": "Probe shows OOMKilled exit code 137, confirming OOM. Good. Now submit verdict.",
+"content": ""
+}
+}

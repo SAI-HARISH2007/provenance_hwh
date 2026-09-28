@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_07791209-6b72-492b-8343-a958517293d3",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 4345,
+"output_tokens": 127,
+"latency_ms": 1170,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_07791209-6b72-492b-8343-a958517293d3",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"inventory-api\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"reasoning": "We need to run a probe to confirm. For memory leak OOM, maybe we can probe the pod's health endpoint to see OOM? Or run a probe of the pod's process? The allowed probe kinds: http, tcp, dns, db, disk, cert, clock. To verify OOM, we could check disk? Not relevant. Maybe check health endpoint returns 500? But OOM may cause crash loop, health endpoint may be down. Let's run http probe to inventory-api service.",
+"content": ""
+}
+}

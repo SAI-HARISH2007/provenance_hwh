@@ -1,7 +1,7 @@
 [project]
 name = "greenlight"
 version = "0.1.0"
-description = "micro1 Agentic Workflows Hackathon 2026 — agentic workflow with traced, sandboxed, verified execution"
+description = "Provenance: an on-call incident agent with Hindsight memory and a provenance gate (built on greenlight)"
 requires-python = ">=3.13"
 dependencies = [
     "hindsight-client>=0.10.1",

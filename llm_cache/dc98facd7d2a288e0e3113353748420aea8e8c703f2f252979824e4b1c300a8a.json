@@ -1,0 +1,34 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_9016c8b1-0011-4917-b152-bb1f5afac620",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "inventory-api:8080/health"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3357,
+"output_tokens": 85,
+"latency_ms": 1135,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_9016c8b1-0011-4917-b152-bb1f5afac620",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"inventory-api:8080/health\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"reasoning": "We need to run a probe. For memory leak OOM, maybe we can probe the pod's health endpoint? The run_probe supports http target. We need a target string; likely service name with port? Use \"inventory-api:8080/health\". Let's try.",
+"content": ""
+}
+}

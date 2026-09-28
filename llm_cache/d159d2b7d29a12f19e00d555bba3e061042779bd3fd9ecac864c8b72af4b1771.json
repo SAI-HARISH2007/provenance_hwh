@@ -1,0 +1,33 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "fc_cbcd6e58-884f-4324-8af6-774cf89170a0",
+"name": "get_config",
+"arguments": {
+"service": "inventory-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3337,
+"output_tokens": 58,
+"latency_ms": 1158,
+"model": "openai/gpt-oss-120b",
+"provider": "groq",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "fc_cbcd6e58-884f-4324-8af6-774cf89170a0",
+"function": {
+"arguments": "{\"service\":\"inventory-api\"}",
+"name": "get_config"
+},
+"type": "function"
+}
+],
+"reasoning": "Restarts increased steadily, aligning with memory usage spike. Likely OOM due to new in-process cache causing memory leak or high usage. Check config for cache size? Let's get config.",
+"content": ""
+}
+}
