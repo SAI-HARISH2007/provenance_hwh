@@ -79,5 +79,11 @@ def git_sha() -> str:
 def write_case_result(run_dir: Path, case_id: str, verdict: Verdict, meta: dict[str, Any]) -> None:
     run_dir.mkdir(parents=True, exist_ok=True)
     payload = {"case_id": case_id, "verdict": asdict(verdict), **meta}
-    (run_dir / f"{case_id}.json").write_text(json.dumps(payload, indent=2, ensure_ascii=False))
-    (run_dir / f"{case_id}.report.md").write_text(verdict.report_markdown or "(no report)")
+    # explicit utf-8: these files are read back by the scorer and can carry non-ASCII evidence,
+    # and the platform default encoding is not utf-8 everywhere (Windows cp1252)
+    (run_dir / f"{case_id}.json").write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    (run_dir / f"{case_id}.report.md").write_text(
+        verdict.report_markdown or "(no report)", encoding="utf-8"
+    )

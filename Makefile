@@ -2,16 +2,34 @@
 #   export UV_PROJECT_ENVIRONMENT=$HOME/.venvs/micro1 UV_CACHE_DIR=$HOME/.cache/uv
 MODEL ?= gemini-3.5-flash-lite
 CASES ?=
-.PHONY: setup test lint baseline agent ablation eval eval-replay traces demo clean memory-seq memory-eval demo-page
+COMPOSE ?= docker compose
+.PHONY: setup test coverage lint hindsight hindsight-stop baseline agent ablation eval eval-replay traces demo clean memory-seq memory-eval demo-page
 
-setup:            ## clean-env install (Python 3.13 + uv)
-	uv sync
+setup:            ## clean-env install (Python 3.13 + uv), pinned by uv.lock
+	uv sync --frozen
 
 test:             ## offline tests: simulator, tracing, LLM cache, agent loop with a fake LLM
-	uv run pytest
+	uv run pytest -q
+
+coverage:         ## offline tests + the coverage gate CI enforces (>= 60%)
+	uv run pytest --cov=greenlight --cov-report=term-missing --cov-fail-under=60
 
 lint:
-	uv run ruff check src tests scripts
+	uv run ruff check .
+
+hindsight:        ## start (or restart) self-hosted Hindsight in Docker, then wait for /health
+	$(COMPOSE) up -d hindsight
+	@printf "waiting for http://localhost:8888/health "
+	@for i in $$(seq 1 60); do \
+	  if curl -sf http://localhost:8888/health >/dev/null 2>&1; then \
+	    echo " Hindsight is up (API :8888, control plane :9999)"; exit 0; \
+	  fi; \
+	  printf "."; sleep 3; \
+	done; \
+	echo; echo "Hindsight did not become healthy: $(COMPOSE) logs hindsight"; exit 1
+
+hindsight-stop:
+	$(COMPOSE) down
 
 baseline:         ## simple baseline: one prompt with the evidence dump (needs GEMINI_API_KEY unless cached)
 	uv run python -m greenlight.baseline --model $(MODEL) --tag baseline $(if $(CASES),--cases $(CASES),)

@@ -34,6 +34,13 @@ Expected output: the comparison table in `eval/results/comparison.md` (also repr
 README), per-case JSON + incident reports under `eval/results/{baseline,final}/`, and fresh
 trajectories under `traces/`.
 
+> **This currently fails**, with `replay-only mode: no cached response for key …`. The cache is
+> content-addressed by exact prompt bytes and the taxonomy plus the s13/s15/s16/s17 scenarios changed
+> after the last recording, so every key misses. Refresh it once with a key (`make baseline &&
+> make agent`, then commit `llm_cache/`) and this step works again. To re-score the committed results
+> with no model calls at all, skip the replay and run
+> `uv run python -m greenlight.eval --runs baseline final` — that only reads `eval/results/`.
+
 ## 4. Re-run live (needs GEMINI_API_KEY; ≈2 min baseline, ≈10 min agent; $0, ~85 requests)
 ```bash
 cp .env.example .env && edit .env          # GEMINI_API_KEY=...

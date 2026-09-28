@@ -37,7 +37,7 @@ alert ─►│ get_alert · recent_changes · query_logs  │          │ reme
 * **Retain at close.** After the human checkpoint, the incident is written back to Hindsight as one record: alert, verdict, the probes and what they returned, whether it was verified, whether the remediation resolved it or caused harm. Failed or harmful remediations are retained as negative evidence. **Nothing unverified is stored as fact:** the `verified:no` tag travels with the memory and is shown on recall.
 * **Synthetic dates weeks apart**, so "recall an incident from six weeks ago" is literally what happens.
 
-Memory code: [`src/greenlight/memory.py`](src/greenlight/memory.py) (≈200 lines).
+Memory code: [`src/greenlight/memory.py`](src/greenlight/memory.py), ~330 lines including the docstrings.
 
 ## 3. How Hindsight is used
 
@@ -49,7 +49,25 @@ Memory code: [`src/greenlight/memory.py`](src/greenlight/memory.py) (≈200 line
 | tags on recall results | `MemoryHit` | the provenance gate reads `root_cause:` / `action:` / `incident:` from the tags, not from the text |
 | age limit | `filter_by_age` in `memory.py` | `HINDSIGHT_MAX_AGE_DAYS=N` drops recalled incidents older than N days (default 0 = no limit); undated hits are kept |
 
-Hindsight runs self-hosted in Docker (`scripts/hindsight_local.sh`) or on Hindsight Cloud (`HINDSIGHT_BASE_URL` + `HINDSIGHT_API_KEY`).
+Hindsight runs self-hosted in Docker or on Hindsight Cloud.
+
+**Self-hosted, one command.** [`docker-compose.yml`](docker-compose.yml) is the same container the
+shell script starts, with the volume and ports already set:
+
+```bash
+cp .env.example .env        # put GEMINI_API_KEY in it (docker compose reads .env for you)
+make hindsight              # docker compose up -d hindsight, then wait for /health
+```
+
+or, without make: `docker compose up -d hindsight` and wait for `curl -sf http://localhost:8888/health`
+to answer. `scripts/hindsight_local.sh [gemini|groq]` does the same thing and is what you want if
+Groq should do the extraction (it needs Groq's own provider/base-url handling — see the comments in
+the compose file). Hindsight is on `:8888` (the API `HINDSIGHT_BASE_URL` points at) and `:9999`
+(control plane). It is only needed for the memory runs; the offline tests and `make eval-replay`
+never touch it.
+
+**Hindsight Cloud** needs no Docker at all: set `HINDSIGHT_BASE_URL` + `HINDSIGHT_API_KEY` in `.env`
+and skip the rest.
 
 ## 4. Evaluation
 
@@ -152,17 +170,59 @@ Two honest readings. First, s16 is the only incident in the suite where this age
 
 ## 6. Run it
 
+From a fresh clone (Python ≥ 3.13 and [uv](https://docs.astral.sh/uv/); every dependency version is
+pinned in `uv.lock`, which CI verifies is in sync before installing it):
+
 ```bash
-uv sync
-cp .env.example .env            # add GEMINI_API_KEY (runtime model) and GROQ_API_KEY
-scripts/hindsight_local.sh      # self-hosted Hindsight in Docker (or set HINDSIGHT_BASE_URL/API_KEY for Cloud)
-make test                       # 18 offline tests, no network
-make memory-seq                 # the 6-incident sequence × 3 agents (live model calls, free tier)
-make memory-eval                # comparison table
-make demo-page                  # docs/demo/index.html
+git clone <this repo> greenlight && cd greenlight
+
+uv sync --frozen            # installs the project + dev group exactly as uv.lock pins them
+uv run pytest -q            # the test suite: 51 offline tests, no network, no API key
+uv run ruff check .         # lint (what CI runs)
 ```
 
-`make eval-replay` reproduces greenlight's original ladder with zero API calls from the committed `llm_cache/`.
+`make setup` / `make test` / `make lint` are the same three commands. Every push runs
+`uv lock --check`, `uv sync --locked`, `ruff` and `pytest` on GitHub Actions
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)),
+plus a coverage gate that fails below 60%:
+
+```bash
+uv run pytest --cov=greenlight --cov-fail-under=60
+```
+
+Now the parts that need a model and a memory server:
+
+```bash
+cp .env.example .env       # add GEMINI_API_KEY (runtime model) and GROQ_API_KEY
+make hindsight             # self-hosted Hindsight in Docker (§3), or set HINDSIGHT_BASE_URL/API_KEY
+make memory-seq            # the 6-incident sequence × 3 agents (live model calls, free tier)
+make memory-eval           # comparison table
+make demo-page             # docs/demo/index.html
+```
+
+`make eval-replay` is meant to reproduce greenlight's original ladder with **zero API calls** — it
+replays the committed `llm_cache/` and needs neither a key nor a running Hindsight, so it is the
+fastest way to see this work end to end:
+
+```bash
+cp .env.example .env && make eval-replay
+```
+
+> **Known gap (found 28 Sep 2026, not yet re-recorded).** `llm_cache/` is content-addressed by
+> *model + exact prompt bytes*, and the taxonomy and the s13/s15/s16/s17 scenarios changed after the
+> last recording. All 16 baseline cache keys now miss, so `make eval-replay` currently stops with
+> `replay-only mode: no cached response for key …` before it produces a table. It is a stale cache,
+> not a setup problem — `GEMINI_API_KEY` is not needed *once the cache is current*. To refresh it,
+> run `make baseline && make agent` once with a key and commit the new `llm_cache/`; after that
+> `make eval-replay` is self-contained again. The recorded numbers in §4 are in `eval/results/`
+> regardless, and `uv run python -m greenlight.eval --runs baseline final` re-scores them with no
+> model calls at all.
+
+**Configuration.** Every variable the code reads is in [`.env.example`](.env.example) with a one-line
+comment: the two model keys and `LLM_PROVIDER`/`LLM_MODEL`, the `HINDSIGHT_*` knobs
+(`BASE_URL`, `API_KEY`, `LLM_MODEL`, `MAX_AGE_DAYS`, `MIN_SCORE`, `MAX_INCIDENTS`), and the three
+reproducibility knobs (`DOTENV_PATH`, `LLM_CACHE_DIR`, `LLM_REPLAY_ONLY`). The defaults are what
+produced the numbers in §4.
 
 **Models.** Runtime model is Gemini `gemini-3.5-flash-lite` (free tier). Hindsight's fact extraction uses a *different* Gemini model (`gemini-3.1-flash-lite`) so the two do not share a per-model free-tier quota; prompt caching is disabled because the free tier has no cached-content quota. Groq's free tier (8k tokens/min) is too small for the investigator and ran out inside Hindsight after three retains.
 

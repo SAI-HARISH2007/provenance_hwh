@@ -7,11 +7,13 @@ Read this before touching the code. Keep it short; the README is the public stor
 - `src/greenlight/agent/investigator.py` — `VariantConfig.memory` / `.provenance`; kickoff injection; `recall_similar_incidents` dispatch; `_provenance_gate`; retain after the checkpoint; `memory_*` fields in `meta`.
 - `src/greenlight/sim/scenarios.py` — s13, s15, s16, s17 at the bottom (memory scenarios). s16 = poison message (Satya). New root cause `secret_rotation` in `sim/world.py` and `VERIFYING_PROBES`.
 - `src/greenlight/eval.py` — keeps run order (file mtime); memory columns; per-case cost table.
-- `scripts/demo_page.py` — offline HTML demo from results + traces. `scripts/hindsight_local.sh` — Docker server.
-- `tests/test_memory_offline.py` — the gate, scripted, no network.
+- `scripts/demo_page.py` — offline HTML demo from results + traces. `scripts/hindsight_local.sh` — Docker server. `docker-compose.yml` — the same container as a compose service (`make hindsight`).
+- `tests/test_memory_offline.py` — the gate, scripted, no network. `tests/test_memory.py` — memory primitives, no server (a `FakeClient` stands in for `hindsight_client.Hindsight`). `tests/test_eval.py` — the scorer against a tmp results dir.
+- `.github/workflows/ci.yml` — on every push and PR: `uv lock --check`, `uv sync --locked`, `ruff check .`, `pytest`, `pytest --cov=greenlight --cov-fail-under=60`. `--locked` (not `--frozen`) so a pyproject change without a matching lockfile fails loudly.
 
 ## Running
-- `.env` needs `GEMINI_API_KEY`, `GROQ_API_KEY`, `HINDSIGHT_BASE_URL` (default localhost:8888).
+- `uv sync --frozen` then `uv run pytest -q` is the whole fresh-clone path; no key, no Hindsight, no network. `make` targets are thin wrappers over those.
+- `.env` needs `GEMINI_API_KEY`, `GROQ_API_KEY`, `HINDSIGHT_BASE_URL` (default localhost:8888). Every other knob the code reads is in `.env.example`.
 - Hindsight extraction model must differ from the runtime model (separate free-tier quotas). Prompt caching off.
 - `make memory-seq` runs the ordered sequence; `--reset-bank` matters, the bank accumulates.
 - Bank names: `provenance-<tag>`; use a fresh one per experiment.
@@ -22,3 +24,4 @@ Read this before touching the code. Keep it short; the README is the public stor
 - If recall returns 0 hits for every case, check `error` events with `where=memory` in the trace; memory failures never abort a run.
 - Identical prompts hit the LLM disk cache, so two memory variants with 0 hits produce identical runs (cache_hits ≈ calls). Not a bug, but it hides a memory outage.
 - Trace JSON must never be sliced mid-string (`hits_to_json` caps hits, not characters).
+- `llm_cache/` is content-addressed by *model + exact prompt bytes*, so editing a prompt, the root-cause taxonomy or a scenario silently invalidates every entry that used it. All 16 baseline keys currently miss; `make eval-replay` needs a re-record with a key. Re-score committed results instead with `uv run python -m greenlight.eval --runs baseline final` (no model calls).

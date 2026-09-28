@@ -1,0 +1,39 @@
+# Self-hosted Hindsight, the long-term memory server Provenance talks to.
+#
+#   cp .env.example .env        # put GEMINI_API_KEY in it
+#   docker compose up -d hindsight
+#   curl -sf http://localhost:8888/health
+#
+# `docker compose` reads .env from this directory for the ${...} substitutions below, so the key
+# you added above is picked up without exporting anything. To use Groq for extraction instead,
+# set HINDSIGHT_LLM_PROVIDER=groq and uncomment the two openai/base-url lines.
+#
+# The same thing via the shell script (Groq needs its own provider/base-url handling):
+#   scripts/hindsight_local.sh [gemini|groq]
+#
+# Hindsight Cloud needs none of this: set HINDSIGHT_BASE_URL + HINDSIGHT_API_KEY and skip Docker.
+
+services:
+  hindsight:
+    image: ghcr.io/vectorize-io/hindsight:latest
+    container_name: hindsight
+    restart: unless-stopped
+    ports:
+      - "8888:8888" # API the hindsight-client uses (HINDSIGHT_BASE_URL)
+      - "9999:9999" # control plane / UI
+    environment:
+      # extraction LLM. Groq goes through the generic OpenAI-compatible provider: the native
+      # "groq" provider requests a paid service tier that free accounts do not have.
+      HINDSIGHT_API_LLM_PROVIDER: ${HINDSIGHT_LLM_PROVIDER:-gemini}
+      HINDSIGHT_API_LLM_API_KEY: ${HINDSIGHT_LLM_API_KEY:-${GEMINI_API_KEY:-}}
+      HINDSIGHT_API_LLM_MODEL: ${HINDSIGHT_LLM_MODEL:-gemini-3.1-flash-lite}
+      # HINDSIGHT_API_LLM_PROVIDER: openai
+      # HINDSIGHT_API_LLM_BASE_URL: https://api.groq.com/openai/v1
+      HINDSIGHT_API_EMBEDDINGS_PROVIDER: local
+      # the free tier has no cached-content quota
+      HINDSIGHT_API_LLM_PROMPT_CACHE_ENABLED: "false"
+    volumes:
+      - hindsight-data:/home/hindsight/.pg0
+
+volumes:
+  hindsight-data:

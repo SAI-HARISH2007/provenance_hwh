@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from typing import Any
 
 from .common import RESULTS_DIR
@@ -54,7 +55,11 @@ def score_case(sc_id: str, payload: dict[str, Any]) -> dict[str, Any]:
 def summarize(run: str) -> dict[str, Any]:
     run_dir = RESULTS_DIR / run
     files = sorted(run_dir.glob("s*.json"), key=lambda p: p.stat().st_mtime)  # keep run order
-    rows = [score_case(p.stem, json.loads(p.read_text())) for p in files if p.stem in SCENARIOS]
+    rows = [
+        score_case(p.stem, json.loads(p.read_text(encoding="utf-8")))
+        for p in files
+        if p.stem in SCENARIOS
+    ]
     n = len(rows) or 1
     summ = {
         "run": run,
@@ -80,7 +85,7 @@ def summarize(run: str) -> dict[str, Any]:
         "memory_cited_cases": sum(1 for r in rows if r["memory_cited"]),
         "cases": rows,
     }
-    (run_dir / "summary.json").write_text(json.dumps(summ, indent=2))
+    (run_dir / "summary.json").write_text(json.dumps(summ, indent=2), encoding="utf-8")
     return summ
 
 
@@ -152,12 +157,15 @@ def comparison_md(summaries: list[dict[str, Any]]) -> str:
 
 
 def main() -> None:
+    # the table contains ✓/✗; a console that cannot encode them should degrade, not crash
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(errors="replace")
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", nargs="+", required=True)
     a = ap.parse_args()
     summaries = [summarize(r) for r in a.runs]
     md = comparison_md(summaries)
-    (RESULTS_DIR / "comparison.md").write_text(md)
+    (RESULTS_DIR / "comparison.md").write_text(md, encoding="utf-8")
     print(md)
     for s in summaries:
         wrong = [c["case"] for c in s["cases"] if not c["rc_correct"]]

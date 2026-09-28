@@ -55,6 +55,14 @@ def _with_retries(fn, attempts: int = 4, first_wait: float = 2.0):
             wait *= 2
 
 
+def _env_int(name: str, default: int) -> int:
+    """Read an int knob from the environment, falling back to `default` on junk."""
+    try:
+        return int(os.environ.get(name, default))
+    except (TypeError, ValueError):
+        return default
+
+
 def incident_time(ordinal: int) -> datetime:
     return EPOCH + timedelta(days=9 * ordinal, hours=(ordinal * 7) % 24)
 
@@ -141,8 +149,8 @@ class HindsightMemory:
         )
         self.bank_id = bank_id
         self.min_score = float(os.environ.get("HINDSIGHT_MIN_SCORE", "0.3"))
-        self.max_incidents = int(os.environ.get("HINDSIGHT_MAX_INCIDENTS", "3"))
-        self.max_age_days = int(os.environ.get("HINDSIGHT_MAX_AGE_DAYS", "0"))  # 0 = no age limit
+        self.max_incidents = _env_int("HINDSIGHT_MAX_INCIDENTS", 3)
+        self.max_age_days = _env_int("HINDSIGHT_MAX_AGE_DAYS", 0)  # 0 = no age limit
         self.ordinal = 0  # how many incidents this bank has lived through (drives the dates)
         self.retained: list[dict[str, Any]] = []
 
@@ -256,7 +264,13 @@ class HindsightMemory:
         return [(k, sorted(v, key=lambda h: -h.score)) for k, v in ordered]
 
     @staticmethod
-    def format_hits(hits: list[MemoryHit], limit: int = 3, facts_per_incident: int = 3) -> str:
+    def format_hits(hits: list[MemoryHit], limit: int | None = None, facts_per_incident: int = 3) -> str:
+        """Render recalled hits for the kickoff message, strongest incident first.
+
+        `limit` defaults to HINDSIGHT_MAX_INCIDENTS: unfiltered recall is what made finding 1
+        worse, so the number of past incidents the agent ever sees is a knob, not a constant.
+        """
+        limit = _env_int("HINDSIGHT_MAX_INCIDENTS", 3) if limit is None else limit
         if not hits:
             return (
                 "# Recalled incidents (Hindsight memory)\n(no similar incident in memory — this is "

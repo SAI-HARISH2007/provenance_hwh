@@ -5,6 +5,10 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
 traces/**/artifacts/
 eval/results/tmp/
 sandbox_work/

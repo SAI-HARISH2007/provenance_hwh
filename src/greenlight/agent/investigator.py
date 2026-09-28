@@ -79,12 +79,12 @@ BUDGET_WARNING_STEPS = 3
 
 
 def _system_prompt(cfg: VariantConfig) -> str:
-    txt = (PROMPTS / "agent_system.md").read_text()
+    txt = (PROMPTS / "agent_system.md").read_text(encoding="utf-8")
     txt = txt.replace("{{ROOT_CAUSES}}", json.dumps(ROOT_CAUSES)).replace(
         "{{ACTIONS}}", json.dumps(ACTIONS)
     )
     rb = (
-        ("\n\n# Team runbook (memory from past incidents)\n" + RUNBOOK.read_text())
+        ("\n\n# Team runbook (memory from past incidents)\n" + RUNBOOK.read_text(encoding="utf-8"))
         if cfg.runbook
         else ""
     )
@@ -512,7 +512,7 @@ class Investigator:
         ), sources
 
     def _review(self, v: Verdict, tool_log: list[str], tw: TraceWriter) -> dict[str, Any]:
-        sys_p = (PROMPTS / "reviewer_system.md").read_text()
+        sys_p = (PROMPTS / "reviewer_system.md").read_text(encoding="utf-8")
         transcript = "\n\n".join(tool_log)[-24000:]
         user = f"INVESTIGATION TRANSCRIPT:\n{transcript}\n\nPROPOSED VERDICT:\n{json.dumps(asdict(v), indent=1)[:6000]}"
         tw.instruction(role="system", name="reviewer_system.md", content=sys_p)

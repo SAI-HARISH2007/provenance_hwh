@@ -29,7 +29,7 @@ MAX_OUT = 16384  # Gemini 3.x emits visible reasoning before the JSON; 4096 trun
 
 def system_prompt() -> str:
     return (
-        PROMPT_PATH.read_text()
+        PROMPT_PATH.read_text(encoding="utf-8")
         .replace("{{ROOT_CAUSES}}", json.dumps(ROOT_CAUSES))
         .replace("{{ACTIONS}}", json.dumps(ACTIONS))
     )
@@ -116,7 +116,7 @@ def main() -> None:
     llm = LLM(model=a.model, use_cache=not a.no_cache)
     for cid in a.cases:
         meta = run_case(cid, llm, run_dir, Path("traces"), scope=a.scope)
-        v = json.loads((run_dir / f"{cid}.json").read_text())["verdict"]
+        v = json.loads((run_dir / f"{cid}.json").read_text(encoding="utf-8"))["verdict"]
         print(
             f"{cid:32s} {meta['status']:8s} rc={v['root_cause']:28s} action={v['action']}:{v['target']}  "
             f"{meta['wall_s']}s tok={meta['input_tokens']}+{meta['output_tokens']}"
