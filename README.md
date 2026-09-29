@@ -1,5 +1,7 @@
 # Provenance — an on-call agent whose memory has to prove itself
 
+[![CI](https://github.com/SAI-HARISH2007/provenance_hwh/actions/workflows/ci.yml/badge.svg)](https://github.com/SAI-HARISH2007/provenance_hwh/actions/workflows/ci.yml) [![Console](https://img.shields.io/badge/console-live-38bdf8)](https://sai-harish2007.github.io/provenance_hwh/console/) [![Video](https://img.shields.io/badge/video-2%C2%BD%20min-ff5c5c)](https://youtu.be/Ct8z2-jrW4g)
+
 *Built over a weekend on top of [greenlight](https://github.com/SAI-HARISH2007/greenlight), an earlier incident-investigation agent by the same author. Everything about memory in this repo is new; the simulator, the investigator loop and the verification gate are inherited and disclosed in [What existed / what is new](#5-what-existed--what-is-new). The original greenlight README is kept at [`docs/README_greenlight_original.md`](docs/README_greenlight_original.md).*
 
 **In sixty seconds:** [console](https://sai-harish2007.github.io/provenance_hwh/console/) (incident queue, memory bank, analytics; every number from real runs) · [comparison page](https://sai-harish2007.github.io/provenance_hwh/demo/) (each incident with and without memory, memory panel and gate decisions) · [video, 2½ min](https://youtu.be/Ct8z2-jrW4g) · [results](#4-evaluation) · [how Hindsight is used](#3-how-hindsight-is-used) · [what we found, including what did not work](#what-we-found-and-did-not-find)
