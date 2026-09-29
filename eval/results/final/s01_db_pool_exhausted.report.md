@@ -1,28 +1,29 @@
-# Incident Report: orders-api DB Connection Pool Exhaustion
+# Incident Report: PostgreSQL Connection Pool Exhaustion Caused by Worker Concurrency Increase
 
 ## Summary
-At 2026-08-30T03:12:00Z, the `api-gateway` fired a P1 alert due to high 5xx error rates (12%) on `/v1/checkout`. Investigation revealed that `orders-api` was timing out trying to acquire database connections from its pool. The root cause is the recent deployment of `worker-1.4.0` at 02:34 UTC, which increased email job concurrency from 8 to 64. Each worker concurrent job holds database connections, completely exhausting the PostgreSQL connection pool (100/100 connections used, with 61 held by the worker user).
+On 2026-08-30 at 03:12 UTC, `api-gateway` triggered a P1 alert due to a 12% 5xx error rate on `/v1/checkout`. The root cause was PostgreSQL connection pool exhaustion (`db_connection_pool_exhausted`), caused by a recent configuration change/deploy on the `worker` service (`worker-1.4.0`) that raised its email job concurrency from 8 to 64. This consumed nearly all available database connections, starving `orders-api` of connection pool slots and causing checkout failures.
 
 ## Timeline
-- **2026-08-30T02:34:00Z**: `worker` deployed (`worker-1.4.0`), raising email job concurrency from 8 to 64.
-- **2026-08-30T02:34:00Z - 03:00:00Z**: PostgreSQL `connections_used` metric steadily climbs from ~38 to 99/100.
-- **2026-08-30T02:53:52Z**: `orders-api` logs first `db error: timeout acquiring connection from pool after 5000ms`.
-- **2026-08-30T03:12:00Z**: `api-gateway` alerts on high 5xx rate on `/v1/checkout`.
+- **02:34 UTC**: Worker concurrency raised from 8 to 64 (`worker-1.4.0` deployment by Priya).
+- **02:35 - 03:00 UTC**: PostgreSQL connections steadily climbed from ~38 to 100.
+- **02:49 UTC**: `orders-api` began logging connection timeout errors (`timeout acquiring connection from pool after 5000ms`).
+- **03:12 UTC**: `api-gateway` P1 alert fires (`5xx rate 12% on /v1/checkout`).
 
 ## Root Cause
-`db_connection_pool_exhausted`: The worker concurrency increase to 64 caused the background workers to consume nearly all available database connections, starving `orders-api` of connections and causing checkout requests to fail.
+- **Service**: `worker`
+- **Root Cause Category**: `db_connection_pool_exhausted`
+- **Mechanism**: Raising the worker job concurrency from 8 to 64 caused the worker service to open far more concurrent database connections (consuming 61 out of 100 total connections), exhausting the PostgreSQL connection pool limit and leaving insufficient connections for `orders-api` to process incoming checkout requests.
 
 ## Evidence
-1. **Recent Changes**: `worker-1.4.0` deployed at 02:34:00Z with `concurrency: 8 -> 64`.
-2. **Metrics**: PostgreSQL `connections_used` spiked synchronously following the worker deploy.
-3. **Probe**: `run_probe db postgres` confirmed 100/100 connections in use, with 61 held by `user=worker`.
-4. **Logs**: `orders-api` logs show repeated `db error: timeout acquiring connection from pool after 5000ms`.
+- `recent_changes`: At `02:34:00.000Z`, `worker` was deployed with concurrency raised `8 -> 64`.
+- `get_metrics` (`postgres.connections_used`): Showed a direct climb starting right after the deploy, reaching the max limit (`99.295`).
+- `run_probe` (`db` / `postgres`): Confirmed `100/100 connections in use; 61 from user=worker, 34 from user=orders, 5 superuser reserved`.
+- `query_logs` (`orders-api`): Showed persistent `db error: timeout acquiring connection from pool after 5000ms`.
 
 ## Proposed Remediation
-Update the `worker` configuration to lower concurrency back to 8 (or an appropriate safer limit like 16) to free up database connections for `orders-api`.
-- Target: `worker`
-- Action: `update_config` (setting concurrency back to 8)
+- **Action**: `update_config` (on `worker` to lower concurrency back to 8, or scale/cap its DB pool). Specifically, lowering `concurrency` back down to 8 (or an appropriate safe value like 16) restores normal connection usage.
+- **Why it is safe**: Reverting the concurrency change directly addresses the resource consumer without restarting stateful services or rolling back unrelated code.
 
 ## Follow-ups
-1. Implement per-service connection pool limits / budgeting in PostgreSQL.
-2. Review sizing guidelines before scaling background job worker concurrency in the future.
+- Implement per-service connection pool limits / max connection settings in PostgreSQL (e.g. via `SET ROLE` or connection pooling / pgBouncer) to prevent background workers from starving critical user-facing APIs.
+- Evaluate worker database access patterns and query efficiency.

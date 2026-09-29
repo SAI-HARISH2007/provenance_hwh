@@ -1,24 +1,24 @@
-# Incident Report: inventory-api Memory Leak and Out-Of-Memory Restarts
+# Incident Report: inventory-api Memory Exhaustion and Pod Restarts
 
 ## Summary
-At 2026-08-30T03:12:00.000Z, the `inventory-api` service experienced severe instability with a 22% error rate and 6 pod restarts within 10 minutes due to memory exhaustion. The root cause was traced to the recently deployed in-process hot-item cache (`inventory-1.10.0`), which lacks size bounding and eviction policies, causing an uncontrolled memory leak and extreme GC pressure.
+At 2026-08-30T03:12:00.000Z, the `inventory-api` service was reported degraded with high error rates (21.8%) and repeated container restarts (6 restarts in 10 minutes). The root cause was traced back to the recent deployment introducing an unbounded in-process hot-item cache (`inventory-1.10.0`), resulting in severe memory pressure and OOM kills.
 
 ## Timeline
-- **2026-08-30T01:37:00Z**: `inventory-1.10.0` deployed, introducing the in-process SKU cache.
-- **2026-08-30T02:49:52Z**: First `gc pressure: heap ... rss growing` warnings appear in logs.
-- **2026-08-30T03:12:00Z**: Alert triggered for `inventory-api` pod restarts (6 in 10m) and elevated error rate (22%).
+- **2026-08-30T01:37:00.000Z**: `inventory-1.10.0` deployed with in-process SKU cache for hot items.
+- **2026-08-30T02:49:52.000Z**: First GC pressure and high heap warnings begin appearing in logs.
+- **2026-08-30T03:12:00.000Z**: Alert fires for `inventory-api` pod restarts and 22% error rate.
 
 ## Root Cause
-Unbounded in-process caching introduced in version `inventory-1.10.0` without TTL or maximum capacity enforcement, leading to OOM-killer pod terminations under memory pressure.
+Unbounded in-process cache implementation in version `inventory-1.10.0` causing a memory leak / OOM condition.
 
 ## Evidence
-- Recent deployment log: `[deploy] inventory-api: inventory-1.10.0: in-process SKU cache for hot items`
-- Metric spikes: `inventory-api` memory utilization reached 98.5% with 6 pod restarts.
-- Log warnings showing rampant heap growth prior to restarts: `WARN inventory-api: gc pressure: heap 99945MB rss growing`
+- Recent change log: `inventory-api: inventory-1.10.0: in-process SKU cache for hot items`
+- Metric: `inventory-api` memory usage reached 98.5% (`mem_pct: now 95.097`) with 6 pod restarts.
+- Log warnings: Frequent `gc pressure: heap ...MB rss growing` messages preceding container terminations.
 
 ## Remediation
-- Roll back `inventory-api` to the previous stable version (`inventory-1.9.x` or remove the unbonded in-process cache implementation).
+- Roll back `inventory-api` from version `inventory-1.10.0` to the previous stable version.
 
 ## Follow-ups
-1. Implement strict LRU eviction and maximum size/item limits for any in-memory caches.
-2. Add integration and load tests covering memory stability before releasing caching updates.
+1. Review the in-process cache implementation for proper eviction policies (e.g., LRU, size limits, or max items).
+2. Add memory utilization alerts for pre-OOM thresholds.

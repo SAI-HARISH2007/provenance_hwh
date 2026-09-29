@@ -1,22 +1,24 @@
-# Incident Report: payments-api 100% Failure Rate
+# Incident Report: Payments API Outage
 
 ## Summary
-At 2026-08-30T03:12:00Z, an alert fired indicating a 100% failure rate for charges in `payments-api`. The incident was triggered by a recent deployment (`payments-2.15.0`) which introduced a misconfigured `PAYGATE_URL` pointing to an invalid `/v2/` endpoint.
+At 03:12 UTC, the `payments-api` service triggered a P1 alert indicating a 100% charge failure rate. Investigation revealed that a recent deployment (`payments-2.15.0`) incorrectly updated the `PAYGATE_URL` configuration to point to a non-existent endpoint path (`/v2/`), resulting in 404 errors on all outgoing payment requests.
 
 ## Timeline
-- **2026-08-30T03:03:00.000Z**: `payments-api` deployed version `payments-2.15.0` updating `PAYGATE_URL` to include `/v2/`.
-- **2026-08-30T03:12:00.000Z**: `payments-api` alert fires (`charge_failed rate 100% for 4m`).
+- **03:03 UTC**: Deployment `payments-2.15.0` applied to `payments-api`, changing `PAYGATE_URL` to include `/v2/`.
+- **03:12 UTC**: `payments-api` charge failure rate hits 100%; P1 alert fires.
+- **03:12 UTC**: Incident response initiated.
 
 ## Root Cause
-A bad configuration/deploy in `payments-api` (`payments-2.15.0`) updated the `PAYGATE_URL` to an incorrect endpoint path (`https://api.paygate.example/v2/`), causing all downstream calls to fail.
+A bad configuration/endpoint change in deploy `payments-2.15.0` targeted an invalid PayGate URL (`https://api.paygate.example/v2/`).
 
 ## Evidence
-- Recent changes log showing `payments-api` deploy at `03:03:00.000Z` migrating to PayGate v2 endpoints.
-- P1 Alert: `charge_failed rate 100% for 4m` starting shortly after the deployment.
+- Deployment log: `PAYGATE_URL: https://api.paygate.example -> https://api.paygate.example/v2/`
+- Application logs showing persistent 404 errors: `ERROR payments-api: paygate request failed: status=404`
+- Alert: `charge_failed rate 100% for 4m`
 
 ## Remediation
-- Roll back `payments-api` to the previous stable version or correct the `PAYGATE_URL` configuration.
+1. Rollback the `payments-api` service deployment to the previous stable version (or revert the `PAYGATE_URL` config change).
 
 ## Follow-ups
-- Verify PayGate v2 integration path requirements with the vendor before attempting future endpoint migrations.
-- Add integration tests verifying external payment gateway endpoints during deployment pipelines.
+- Verify PayGate v2 API path requirements and ensure integration tests validate upstream URL correctness pre-deploy.
+- Add smoke tests checking upstream reachability during deployment pipelines.

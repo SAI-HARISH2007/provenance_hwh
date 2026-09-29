@@ -1,24 +1,20 @@
-# Incident Report: payments-api degradation due to external paygate outage
+# Incident Report: Payments-API Outage due to Paygate Third-Party Outage
 
 ## Summary
-At 2026-08-30T03:12:00.000Z, `payments-api` fired a P1 alert (`charge p95 > 8s and 62% failures`). Investigation revealed that the third-party payment gateway (`api.paygate.example`) is experiencing an outage / upstream maintenance, returning 503 errors and timing out requests. Because the circuit breaker was disabled (`off`), `payments-api` continued calling the failing vendor, causing high latency (p95 > 8s) and request failures across gateway and payment services.
+At 2026-08-30T03:12:00Z, a page fired for `payments-api` indicating charge p95 latency > 8s and 62% failure rate. Investigation revealed that the third-party payment gateway (`api.paygate.example`) is experiencing an outage and returning 503 Service Unavailable / timing out.
 
 ## Timeline
-- **02:52Z**: `payments-api` logs begin showing 503 errors and request timeouts (8000ms) from `api.paygate.example`.
-- **02:55Z**: Vendor status page confirms: `Degraded performance — investigating`.
-- **03:12Z**: P1 Alert fires (`payments-api` charge p95 > 8s and 62% failures).
+- **2026-08-29T23:12:00Z**: `payments-api` deployed version `payments-2.14.0` (retry idempotency keys).
+- **2026-08-30T02:52:00Z**: `payments-api` begins seeing 503 errors and request timeouts from `paygate`.
+- **2026-08-30T03:12:00Z**: Alert fires (`payments-api` charge p95 > 8s and 62% failures).
 
 ## Root Cause
-`third_party_outage` — The third-party payment gateway (`api.paygate.example`) is experiencing degraded performance / maintenance, and `payments-api` lacks an active circuit breaker to fail fast.
+Third-party outage (`third_party_outage`). The external payment gateway `api.paygate.example` is down/degraded, causing all downstream payment requests to time out and fail.
 
 ## Evidence
-- `query_logs`: Frequent `503 Service Unavailable` and `request timeout after 8000ms url=https://api.paygate.example/charges` entries.
-- `run_probe` (`http`, `https://api.paygate.example`): Returned `503` in 8001ms with vendor status page `Degraded performance — investigating`.
-- `get_config` (`payments-api`): Confirmed `"CIRCUIT_BREAKER": "off"`.
+1. `payments-api` logs show repeated errors: `paygate 503 Service Unavailable body='upstream maintenance'` and `paygate request timeout after 8000ms url=https://api.paygate.example/charges`.
+2. `payments-api` metrics show `error_rate_pct` jumping from ~0.4% to ~64.5% and `latency_p95_ms` jumping from ~120ms to ~8170ms at 02:52Z.
+3. `run_probe` on `https://api.paygate.example` confirmed HTTP 503 in 8001ms with vendor status page reporting "Degraded performance — investigating".
 
 ## Proposed Remediation
-Enable the circuit breaker on `payments-api` (`enable_circuit_breaker`) to allow failing fast while the third-party vendor is down, preventing thread/connection exhaustion and high latency in our services. Escalate to the vendor as well.
-
-## Follow-ups
-- Enable automated circuit breakers with adaptive trip thresholds for third-party integrations.
-- Review retry idempotency key handling to ensure retries do not exacerbate downstream vendor load during outages.
+Enable circuit breaker (`enable_circuit_breaker`) on `payments-api` toward `paygate` to fail fast, protect system resources, and escalate to vendor (`escalate_to_vendor`).

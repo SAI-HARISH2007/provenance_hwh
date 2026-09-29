@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Verdict is fully supported by logs, metrics, and timeline of the feature flag rollout.\"}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 2783,
+"output_tokens": 43,
+"latency_ms": 1433,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Verdict is fully supported by logs, metrics, and timeline of the feature flag rollout.\"}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TK2Y5/QxAqJ6CFrWBtbM1TqNdA3FlDiae8osoY5XowcI+99G2255mRqzSxGaUFiqEQxLd0+OZyfkqcpx5SPlAIiMmGihDQ4oOeMLcc1af3/EP13W4ozwwqfs="
+}
+}
+}
+}

@@ -1,0 +1,53 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_271397",
+"name": "get_config",
+"arguments": {
+"service": "orders-api"
+}
+},
+{
+"id": "call_271398",
+"name": "query_logs",
+"arguments": {
+"level": "ERROR",
+"service": "orders-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2788,
+"output_tokens": 42,
+"latency_ms": 1030,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_271397",
+"function": {
+"arguments": "{\"service\":\"orders-api\"}",
+"name": "get_config"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TagdnLDIFYjPLyPhkel1E2SjPpE4vTdHT3nR8voD9rIxx2grmKy5IJvOVM9vcAQVs8YmviULPKZ0DEaE5KtpVDRrFbJDAsL9m87Db6KAYm+CjluW1k/taLJs="
+}
+}
+},
+{
+"id": "call_271398",
+"function": {
+"arguments": "{\"level\":\"ERROR\",\"service\":\"orders-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

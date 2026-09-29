@@ -6,23 +6,23 @@
     "action": "disable_feature_flag",
     "target": "orders-api",
     "confidence": 1.0,
-    "summary": "Enabling the new_pricing_engine feature flag to 100% caused validation errors due to negative cart totals with percentage_stacked coupons.",
+    "summary": "Enabling the new_pricing_engine feature flag to 100% caused ValidationErrors due to negative totals for carts with stacked percentage coupons.",
     "evidence": [
       "2026-08-30T02:53:00.000Z [flag] orders-api: new_pricing_engine 20% -> 100% (sam)",
-      "ERROR orders-api: pricing_engine=new ValidationError: negative total for cart with coupon_type=percentage_stacked"
+      "ERROR orders-api: pricing_engine=new ValidationError: negative total for cart with coupon_type=percentage_stacked order_id=ord_22020 rid=18c99e5d"
     ],
-    "report_markdown": "# Incident Report: orders-api ValidationError spike\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, an alert fired for `orders-api` indicating a 27% error rate consisting of `ValidationError` exceptions during order creation. The root cause was traced to rolling out the `new_pricing_engine` feature flag to 100%.\n\n## Timeline\n- **2026-08-30T02:53:00.000Z**: `new_pricing_engine` feature flag increased from 20% to 100% by sam.\n- **2026-08-30T02:58:55.000Z**: First `ValidationError` due to negative total with `coupon_type=percentage_stacked` logged.\n- **2026-08-30T03:12:00.000Z**: Alert fires indicating elevated error rates on `orders-api` and `api-gateway`.\n\n## Root Cause\nThe new pricing engine calculates stacked percentage coupons incorrectly, resulting in a negative total amount for carts, which triggers validation failures upon order creation.\n\n## Evidence\n- Config change: `orders-api: new_pricing_engine 20% -> 100%`\n- Log entries: `ERROR orders-api: pricing_engine=new ValidationError: negative total for cart with coupon_type=percentage_stacked`\n\n## Remediation\nDisable or roll back the `new_pricing_engine` feature flag on the `orders-api` service.\n\n## Follow-ups\n1. Fix the calculation bug in `new_pricing_engine` regarding `percentage_stacked` coupons.\n2. Add unit tests covering stacked percentage coupons under the new pricing logic before re-enabling."
+    "report_markdown": "# Incident Report: orders-api ValidationError spike\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, an alert fired for `orders-api` indicating a 27% error rate spike (ValidationError) on `order_create`. The root cause was traced to rolling out the `new_pricing_engine` feature flag to 100%, which introduced a calculation bug resulting in negative totals for carts using stacked percentage coupons.\n\n## Timeline\n- **2026-08-30T02:53:00.000Z**: `new_pricing_engine` feature flag rolled out from 20% to 100% by sam.\n- **2026-08-30T02:58:55.000Z**: First `ValidationError` due to negative total logged in `orders-api`.\n- **2026-08-30T03:12:00.000Z**: Alert fires for `order_create` 27% error rate.\n\n## Root Cause\nFeature flag misconfiguration/bug: The `new_pricing_engine` calculation logic produces negative totals for carts with `coupon_type=percentage_stacked`.\n\n## Evidence\n- Feature flag change audit: `2026-08-30T02:53:00.000Z [flag] orders-api: new_pricing_engine 20% -> 100% (sam)`\n- Error logs showing validation failure: `ERROR orders-api: pricing_engine=new ValidationError: negative total for cart with coupon_type=percentage_stacked order_id=ord_22020 rid=18c99e5d`\n\n## Remediation\n- Disable the `new_pricing_engine` feature flag on `orders-api`.\n\n## Follow-ups\n- Fix the pricing calculation logic for stacked percentage coupons in the new pricing engine before re-enabling.\n- Add unit tests covering percentage stacked coupons with the new pricing engine."
   },
   "variant": "baseline",
-  "run_id": "20260927T092400Z_baseline-s11-feature-flag-misconfig",
-  "trace": "traces/20260927T092400Z_baseline-s11-feature-flag-misconfig.jsonl",
+  "run_id": "20260929T013159Z_baseline-s11-feature-flag-misconfig",
+  "trace": "traces/20260929T013159Z_baseline-s11-feature-flag-misconfig.jsonl",
   "model": "gemini-3.5-flash-lite",
   "provider": "gemini",
   "status": "success",
   "llm_calls": 1,
-  "input_tokens": 4474,
-  "output_tokens": 628,
-  "would_be_cost_usd": 0.0007,
+  "input_tokens": 4484,
+  "output_tokens": 708,
+  "would_be_cost_usd": 0.00073,
   "wall_s": 0.01,
   "probes_run": 0,
   "verified": false,

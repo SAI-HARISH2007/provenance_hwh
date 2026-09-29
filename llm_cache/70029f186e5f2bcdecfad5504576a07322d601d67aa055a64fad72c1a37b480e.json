@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Clock skew directly proven by probe on node inv-5; action is safe and correct.\"}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 3224,
+"output_tokens": 44,
+"latency_ms": 1231,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Clock skew directly proven by probe on node inv-5; action is safe and correct.\"}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0Tdnu1mheACyUS0Rl7ecuX9zjI7mOqi+nA60/nX6iSOI/LeCHbw9jBE9FkCM2OS3JcjmWs3So1JWfoBOT41rmx/gJBQ5o+R6qXPQQVnzQqFWEO//64OkXWTJs="
+}
+}
+}
+}

@@ -1,24 +1,25 @@
-# Incident Report: Payments API Degradation
+# Incident Report: Payments-API Outage
 
 ## Summary
-Starting at 2026-08-30T03:12:00.000Z, the `payments-api` service experienced high error rates (~64%) and elevated p95 latency (>8s). This was caused by an outage/upstream maintenance at the third-party payment gateway (`paygate.example`).
+At 2026-08-30T03:12:00.000Z, an alert fired for `payments-api` indicating high latency (p95 > 8s) and a 62% failure rate. Investigation revealed that the external payment gateway (`paygate.example`) is returning 503 Service Unavailable and timing out after 8000ms.
 
 ## Timeline
-- **02:50:32Z**: First timeout error logged for `paygate` requests.
-- **02:52:04Z**: First 503 Service Unavailable response (`upstream maintenance`) received from paygate.
-- **03:12:00Z**: P1 alert fired for `payments-api` charge p95 > 8s and 62% failures.
+- **2026-08-30T02:50:32.000Z**: First timeout error logged from `payments-api` calling `paygate`.
+- **2026-08-30T02:52:04.000Z**: First upstream 503 error received with body `upstream maintenance`.
+- **2026-08-30T03:12:00.000Z**: Alert triggered for `payments-api` as failure rates spiked to ~64.5%.
 
 ## Root Cause
-The third-party payment gateway (`paygate.example`) is experiencing downtime/maintenance, returning request timeouts and 503 Service Unavailable errors. Since the circuit breaker on `payments-api` is turned off, requests hang for up to the 8-second timeout threshold, degrading the API gateway and user experience.
+Third-party outage affecting the external payment gateway (`paygate.example`), which is undergoing upstream maintenance and failing to process requests in a timely manner.
 
 ## Evidence
-- Log entries showing repeated timeouts: `paygate request timeout after 8000ms url=https://api.paygate.example/charges`
-- Log entries showing upstream maintenance: `paygate 503 Service Unavailable body='upstream maintenance'`
-- Metrics: `payments-api` error rate jumped to 64.5% and latency p95 rose to 8.17s.
+- `paygate request timeout after 8000ms url=https://api.paygate.example/charges`
+- `paygate 503 Service Unavailable body='upstream maintenance'`
+- `payments-api` error rate surged to 64.5% and p95 latency increased to over 8.1s.
 
 ## Remediation
-Enable the circuit breaker on `payments-api` to fail fast and prevent thread/connection exhaustion while the third-party vendor resolves the outage.
+- Enable the circuit breaker on `payments-api` to prevent request pile-ups, fail fast, and protect downstream services.
+- Escalate to the third-party vendor (`paygate`) regarding the ongoing maintenance/outage.
 
 ## Follow-ups
-- Escalate to the `paygate` vendor to check status on maintenance.
-- Review default circuit breaker settings and alerting thresholds for third-party dependencies.
+- Monitor vendor status page for resolution.
+- Once the third party recovers, disable or adjust the circuit breaker thresholds.

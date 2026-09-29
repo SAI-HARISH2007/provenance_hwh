@@ -1,0 +1,19 @@
+{
+"text": "{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Root cause directly proven by cert probe; remediation is safe and targeted.\"}",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 1402,
+"output_tokens": 35,
+"latency_ms": 925,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Root cause directly proven by cert probe; remediation is safe and targeted.\"}",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0Ti/awPddFRj5Zm54wPRcVCPL7aPCKG8GNaenyuGzsNqpEWWRJWJXU/os1SeCpx7LUUyUDxIrExBF1/KTnxhkwIgTQkv/ZWy6Vby8WcZ57ROZ9zruhK5jMYGk="
+}
+}
+}
+}

@@ -6,24 +6,22 @@
     "action": "update_config",
     "target": "orders-api",
     "confidence": 1.0,
-    "summary": "orders-api fails to connect to inventory-api because inventory-api was migrated to namespace fulfilment and its old DNS name was retired.",
+    "summary": "orders-api is failing to reach inventory-api because inventory-api was migrated to the fulfilment namespace and its old DNS name was retired.",
     "evidence": [
-      "get_alert: inventory dependency errors 47% on orders-api",
-      "recent_changes: inventory-api migrated to namespace 'fulfilment' (old DNS name retired)",
-      "query_logs: orders-api trying to dial tcp inventory-api.default.svc:8080: i/o timeout",
-      "run_probe dns: inventory-api.default.svc -> NXDOMAIN",
-      "run_probe dns: inventory-api.fulfilment.svc -> 10.0.91.14 (9ms)"
+      "recent_changes showing inventory-api migrated to namespace fulfilment and old DNS name retired at 2026-08-30T02:48:00.000Z",
+      "query_logs showing orders-api failing with dial tcp inventory-api.default.svc:8080: i/o timeout",
+      "run_probe dns showing inventory-api.default.svc -> NXDOMAIN and inventory-api.fulfilment.svc resolving successfully"
     ],
-    "report_markdown": "# Incident Report: Orders-API Inventory Dependency Errors\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, an alert fired for `orders-api` due to inventory dependency errors (47% error rate). Investigation revealed that `inventory-api` was recently migrated to a new Kubernetes namespace (`fulfilment`) and its old DNS name (`inventory-api.default.svc`) was retired. `orders-api` is still configured to reach the old DNS name, resulting in connection timeouts/NXDOMAIN errors.\n\n## Timeline\n- **2026-08-30T02:46:00Z**: `orders-api` deploy `orders-3.8.2` shipped (timeout/retry adjustments).\n- **2026-08-30T02:48:00Z**: `inventory-api` migrated to namespace `fulfilment` by `ops-bot`, retiring the old DNS name (`inventory-api.default.svc`).\n- **2026-08-30T02:49:34Z**: `orders-api` logs begin showing persistent connection failures to `inventory-api.default.svc:8080`.\n- **2026-08-30T03:12:00Z**: Alert fires (`inventory dependency errors 47%`).\n\n## Root Cause\n**DNS resolution failure** (or dependency misconfiguration resulting from infrastructure migration). Specifically, `inventory-api` moved namespaces, but `orders-api` configuration still points to the retired DNS name in the default namespace.\n\n## Evidence\n- **Recent Changes**: `inventory-api` migrated to namespace `fulfilment`, old DNS name retired.\n- **Logs**: `orders-api` logging `dial tcp inventory-api.default.svc:8080: i/o timeout`.\n- **DNS Probe**: `inventory-api.default.svc` resolves to `NXDOMAIN`, whereas `inventory-api.fulfilment.svc` resolves successfully (`10.0.91.14`).\n\n## Proposed Remediation\nUpdate `orders-api` configuration to point to the new DNS name (`inventory-api.fulfilment.svc`). This is safe and directly addresses the endpoint mismatch caused by the infrastructure migration.\n\n## Follow-ups\n- Ensure upstream callers are automatically notified or their configurations updated during cross-namespace service migrations.\n"
+    "report_markdown": "# Incident Report: Orders-API Inventory Dependency Errors\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, a P1 alert fired for `orders-api` indicating that 47% of requests were experiencing inventory dependency errors. Investigation revealed that `inventory-api` had been migrated to a new Kubernetes namespace (`fulfilment`) and its old DNS name retired, while `orders-api` was still configured to call the old DNS endpoint (`inventory-api.default.svc:8080`).\n\n## Timeline\n- **02:46:00.000Z**: `orders-api` deployed version `orders-3.8.2` (timeout/retry adjustments).\n- **02:48:00.000Z**: `inventory-api` migrated to namespace `fulfilment` by ops-bot; old DNS name retired.\n- **02:49:34.000Z onwards**: `orders-api` logs show repeated `i/o timeout` / dial errors trying to reach `inventory-api.default.svc:8080`.\n- **03:12:00.000Z**: P1 alert fired due to inventory dependency errors.\n\n## Root Cause\n**dns_resolution_failure** (or misconfigured caller endpoint). The inventory dependency moved to a new namespace/hostname (`inventory-api.fulfilment.svc`), but `orders-api` configuration still points to the retired `inventory-api.default.svc`.\n\n## Evidence\n- `recent_changes`: `inventory-api: migrate service to new namespace 'fulfilment' (old DNS name retired)`\n- `query_logs` (orders-api): `dial tcp inventory-api.default.svc:8080: i/o timeout`\n- `run_probe dns`: `inventory-api.default.svc -> NXDOMAIN`, whereas `inventory-api.fulfilment.svc -> 10.0.91.14`\n\n## Proposed Remediation\nUpdate the `orders-api` configuration to point to the new inventory service endpoint (`inventory-api.fulfilment.svc:8080`) using `update_config`. This safely corrects the caller's dependency address without requiring a service rollback or restart.\n\n## Follow-ups\n- Ensure all dependent services are tracked during namespace migrations to prevent stale endpoint configs.\n"
   },
   "variant": "final",
-  "run_id": "20260927T092401Z_final-s09-dns-resolution-failure",
-  "trace": "traces/20260927T092401Z_final-s09-dns-resolution-failure.jsonl",
+  "run_id": "20260929T013200Z_final-s09-dns-resolution-failure",
+  "trace": "traces/20260929T013200Z_final-s09-dns-resolution-failure.jsonl",
   "model": "gemini-3.5-flash-lite",
   "status": "success",
   "llm_calls": 5,
-  "input_tokens": 16432,
-  "output_tokens": 936,
+  "input_tokens": 16482,
+  "output_tokens": 916,
   "wall_s": 0.01,
   "probes_run": 2,
   "verified": true,
@@ -32,7 +30,7 @@
     "approve": true,
     "issues": [],
     "suggested_checks": [],
-    "note": "Root cause is fully backed by logs and DNS probes showing the old endpoint returning NXDOMAIN after migration."
+    "note": "Verdict is well-supported by logs, changes, and DNS probes; remediation is safe and correctly targeted."
   },
   "reviewer_approved": true,
   "approval": {
@@ -53,5 +51,10 @@
     "harm": false,
     "effect": "update_config on orders-api applied; error rate returning to baseline, healthz 200 across services within 90s"
   },
-  "would_be_cost_usd": 0.00202
+  "memory_hits": 0,
+  "memory_used": false,
+  "memory_rejections": 0,
+  "memory_checks": [],
+  "memory_cited": [],
+  "would_be_cost_usd": 0.00201
 }

@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\n \"approve\": true,\n \"issues\": [],\n \"suggested_checks\": [],\n \"note\": \"Clear evidence of blocking DDL holding an AccessExclusiveLock; termination of the pid is the correct immediate safe fix.\"\n}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 1522,
+"output_tokens": 55,
+"latency_ms": 1121,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\n \"approve\": true,\n \"issues\": [],\n \"suggested_checks\": [],\n \"note\": \"Clear evidence of blocking DDL holding an AccessExclusiveLock; termination of the pid is the correct immediate safe fix.\"\n}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TAnwmVdoQPi8bvvEDhaUEeu6oTZOsiTCUHHLtD0MUatE6FbvNZgLYaEeOznDuAitlLxsBvWZ7Nzx0afYdOOUuivqV17NiiGg+EMwXKSkIQx4glh543h1feEY="
+}
+}
+}
+}

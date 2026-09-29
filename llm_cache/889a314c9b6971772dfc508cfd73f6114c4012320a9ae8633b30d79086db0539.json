@@ -1,0 +1,38 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_258189",
+"name": "run_probe",
+"arguments": {
+"kind": "disk",
+"target": "postgres"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 5001,
+"output_tokens": 22,
+"latency_ms": 1043,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_258189",
+"function": {
+"arguments": "{\"kind\":\"disk\",\"target\":\"postgres\"}",
+"name": "run_probe"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TAroPf5h1tiOUcvdo2KR/9FnBf/RNxrw8I9vsI2YZhDpCIAWYIslOLMww4TOdvOPfL6jpEkfWGxGODq0UgaDl3yLGWrCCIIibILbSstxrh90mokXUOXZWCcU="
+}
+}
+}
+],
+"content": ""
+}
+}

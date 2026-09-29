@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\n  \"approve\": false,\n  \"issues\": [\n    \"Proposed action 'disable_feature_flag' does not match the available safe fixes for a poison message or queue backlog (there is no feature flag mentioned for this change, only an S3/inline behavior change in data-import).\"\n  ],\n  \"suggested_checks\": [\n    \"purge_queue\"\n  ],\n  \"note\": \"Action 'disable_feature_flag' is invalid for a poison message caused by a deployment/importer change; need to purge the queue or rollback the data-import deployment.\"\n}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 2687,
+"output_tokens": 135,
+"latency_ms": 1309,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\n  \"approve\": false,\n  \"issues\": [\n    \"Proposed action 'disable_feature_flag' does not match the available safe fixes for a poison message or queue backlog (there is no feature flag mentioned for this change, only an S3/inline behavior change in data-import).\"\n  ],\n  \"suggested_checks\": [\n    \"purge_queue\"\n  ],\n  \"note\": \"Action 'disable_feature_flag' is invalid for a poison message caused by a deployment/importer change; need to purge the queue or rollback the data-import deployment.\"\n}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TeiqS26MFfjNILwqwJdU0BCg6naGy6r9OlMnIbvJAYI/T3y4mU3pzG5/KAhi1K1v9NM+Z6mgWIu+7sEC2I3WMRs3eFHQAsxekNYkDXCmUrQu/MD9ijT2DIFI="
+}
+}
+}
+}

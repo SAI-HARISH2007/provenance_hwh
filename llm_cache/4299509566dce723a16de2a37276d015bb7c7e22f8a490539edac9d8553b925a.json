@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\n \"approve\": true,\n \"issues\": [],\n \"suggested_checks\": [],\n \"note\": \"All checks passed; root cause is fully supported by config, logs, and probe evidence, and restarting payments-api is the correct and smallest safe fix for a process-start secret caching issue.\"\n}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 2331,
+"output_tokens": 71,
+"latency_ms": 1310,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\n \"approve\": true,\n \"issues\": [],\n \"suggested_checks\": [],\n \"note\": \"All checks passed; root cause is fully supported by config, logs, and probe evidence, and restarting payments-api is the correct and smallest safe fix for a process-start secret caching issue.\"\n}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TK2+mloHd21QNTNg3lgG0c9joBIxUgLQqPyoboJ7FDEkp3Al8j9j0ePR8fPFwnCePKF/PwveVZ3H1DhcMf4nydAWO9yZXFl2ffpVEwXIiCtsk6Bkc42Ja9r0="
+}
+}
+}
+}

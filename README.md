@@ -146,7 +146,7 @@ Metrics: root-cause accuracy, correct remediation, unsafe action proposed, harm 
 | s06 memory leak (rollback is the fix) | correct, 8 calls | correct, 12 calls, retained |
 | s16 poison message (looks like s06; rollback is harmful) | **wrong**: called it a memory leak, proposed a rollback on a service that does not exist, incident not resolved | **wrong, the same way**; recall returned 0 hits, so the gate had nothing to check |
 
-Two honest readings. First, s16 is the only incident in the suite where this agent fails, so it is the right place to keep working. Second, memory did not help because recall never surfaced s06: the two incidents are worded differently enough (`inventory-api` OOMKilled after a deploy vs. `worker` restart loop on one job) that the relevance score fell under the 0.3 cutoff. Lowering the cutoff brings back the noise problem from finding 1. Retaining a short symptom signature alongside the narrative record is the next thing to try.
+Two honest readings. First, s16 is the incident this agent handles worst: without the runbook it names the wrong cause, and even the full agent with the runbook and reviewer, which now gets the cause right in `make eval-replay`, still proposes a rollback on a service that does not exist and resolves nothing. It is the right place to keep working. Second, memory did not help because recall never surfaced s06: the two incidents are worded differently enough (`inventory-api` OOMKilled after a deploy vs. `worker` restart loop on one job) that the relevance score fell under the 0.3 cutoff. Lowering the cutoff brings back the noise problem from finding 1. Retaining a short symptom signature alongside the narrative record is the next thing to try.
 
 ### What we found (and did not find)
 
@@ -200,23 +200,19 @@ make memory-eval           # comparison table
 make demo-page             # docs/demo/index.html
 ```
 
-`make eval-replay` is meant to reproduce greenlight's original ladder with **zero API calls** — it
-replays the committed `llm_cache/` and needs neither a key nor a running Hindsight, so it is the
-fastest way to see this work end to end:
+`make eval-replay` reproduces the baseline-vs-agent comparison on all 16 incidents with **zero API calls**. It
+replays the committed `llm_cache/` (re-recorded 29 Sep 2026 after the taxonomy change) and needs neither a key
+nor a running Hindsight, so it is the fastest way to see this work end to end:
 
 ```bash
 cp .env.example .env && make eval-replay
 ```
 
-> **Known gap (found 28 Sep 2026, not yet re-recorded).** `llm_cache/` is content-addressed by
-> *model + exact prompt bytes*, and the taxonomy and the s13/s15/s16/s17 scenarios changed after the
-> last recording. All 16 baseline cache keys now miss, so `make eval-replay` currently stops with
-> `replay-only mode: no cached response for key …` before it produces a table. It is a stale cache,
-> not a setup problem — `GEMINI_API_KEY` is not needed *once the cache is current*. To refresh it,
-> run `make baseline && make agent` once with a key and commit the new `llm_cache/`; after that
-> `make eval-replay` is self-contained again. The recorded numbers in §4 are in `eval/results/`
-> regardless, and `uv run python -m greenlight.eval --runs baseline final` re-scores them with no
-> model calls at all.
+Expected: baseline 13/16 root causes (misses s09, s12, s17), the full agent 16/16, in about ten seconds.
+`llm_cache/` is content-addressed by model plus exact prompt bytes, so any change to the prompts, the
+root-cause list or a scenario invalidates the cache; refresh it with `make baseline && make agent` and
+commit the new cache files. `uv run python -m greenlight.eval --runs baseline final` re-scores the
+committed results without any model calls.
 
 **Configuration.** Every variable the code reads is in [`.env.example`](.env.example) with a one-line
 comment: the two model keys and `LLM_PROVIDER`/`LLM_MODEL`, the `HINDSIGHT_*` knobs
@@ -241,7 +237,7 @@ This is a prototype against a simulator. To use it for real you would replace `s
 
 ## 9. Known failure modes
 
-* **s16 (poison message) is failed by every variant.** The model anchors on the memory-leak pattern and proposes a rollback; it even invents a target service. Memory does not rescue it because recall does not match the differently worded s06 record at the 0.3 cutoff.
+* **s16 (poison message) is not resolved by any variant.** Without the runbook the model anchors on the memory-leak pattern and names the wrong cause; with the runbook it names `poison_message` but still proposes a rollback, on a service that does not exist. Memory does not rescue it because recall does not match the differently worded s06 record at the 0.3 cutoff.
 
 * A wrong verdict that passed the probe-kind check is retained as `verified:yes` and can be recalled later. The provenance gate forces a re-probe, but a re-probe of the same misleading kind can pass again. Fix would be retaining the probe *result* and checking consistency; not done.
 * Recall threshold (`HINDSIGHT_MIN_SCORE=0.3`; 0.1 let weak look-alikes in and cost probes) was tuned on a bank of four incidents.

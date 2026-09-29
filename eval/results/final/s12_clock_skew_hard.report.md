@@ -1,24 +1,25 @@
-# Incident Report: Clock Skew on payments-api
+# Incident Report: Payments-API Clock Skew Causing 401 Auth Failures
 
 ## Summary
-At 2026-08-30T03:12:00.000Z, `api-gateway` fired an alert for a high 401 rate (9.5%) on `/v1/checkout`, while `auth-api` reported healthy. Investigation revealed a clock skew on `payments-api` caused by chronyd failing to restart after a scheduled host reboot following a kernel patch.
+At 2026-08-30T03:12:00.000Z, `api-gateway` fired a P1 alert for a 9.5% 401 rate on `/v1/checkout`, while `auth-api` was reported healthy. Investigation revealed that `payments-api` (running on host `payments-3`, which was recently rebooted following a kernel patch) experienced severe clock drift of -412.3 seconds due to `chronyd` failing to start on reboot. Because JWT validation relies on time-sensitive `nbf` (not before) and `exp` (expiration) claims, tokens issued by `auth-api` were rejected as "not yet valid" or expired by `payments-api`, resulting in 401 unauthorized responses.
 
 ## Timeline
-- **02:02:00 UTC**: `payments-api` host (`payments-3`) rebooted after a kernel patch. Chronyd failed to start automatically upon reboot.
-- **02:39:00 UTC**: `auth-api` deployed auth-1.6.0 (switch JWT signing to ES256 with dual-verify).
-- **03:12:00 UTC**: Alert fires on `api-gateway` for 401 errors on `/v1/checkout`.
+- **2026-08-30T02:02:00Z**: `payments-api` host (`payments-3`) rebooted after a kernel patch. `chronyd` failed to start automatically upon reboot.
+- **2026-08-30T02:39:00Z**: `auth-api` deployed version `auth-1.6.0` (switching JWT signing to ES256).
+- **2026-08-30T03:12:00Z**: `api-gateway` alerts on high 401 rate on `/v1/checkout`.
+- **2026-08-30T03:15:00Z**: Investigation via `run_probe` reveals `payments-api` has a clock offset of -412.3s.
 
 ## Root Cause
-`clock_skew` on `payments-api`. Following a node reboot (`payments-3`) at 02:02 UTC, `chronyd` did not start up, resulting in a time drift of -412.3 seconds. When `payments-api` issues or verifies JWT/token-secured requests or timestamps with auth tokens, the clock offset causes validation failures (tokens appearing either in the future or expired), resulting in 401 unauthorized responses.
+**clock_skew**: The host node running `payments-api` had its clock skewed by over 6 minutes (-412.3s) because `chronyd` was not running after the host reboot at 02:02Z. This caused token validation to fail due to time claim mismatches (`nbf`/`exp`).
 
 ## Evidence
-- `run_probe clock payments-api`: `payments-api (node payments-3) ntp offset -412.3s — chronyd not running`
-- `run_probe clock api-gateway`: `api-gateway ntp offset 0.003s`
-- `run_probe clock auth-api`: `auth-api ntp offset 0.002s`
-- Alert message: `401 rate 9.5% on /v1/checkout; auth-api healthy`
+1. Alert: `{"service": "api-gateway", "severity": "P1", "message": "401 rate 9.5% on /v1/checkout; auth-api healthy"}`
+2. Probe result (`run_probe clock payments-api`): `payments-api (node payments-3) ntp offset -412.3s — chronyd not running`
+3. Probe result (`run_probe clock auth-api`): `auth-api ntp offset 0.002s` (healthy)
 
 ## Proposed Remediation
-Sync the clock on `payments-api` / restart `chronyd` on node `payments-3`. (Action: `sync_clock` targeting `payments-api`). This is safe as it restores correct NTP time synchronization without restarting application services or losing state.
+`sync_clock` on `payments-api` (start `chronyd` / synchronize time with NTP). This is safe as it corrects the node time to match cluster time without requiring service restarts or deploys.
 
 ## Follow-ups
-- Ensure chronyd is properly enabled as a systemd service across all infrastructure hosts on boot.
+1. Investigate why `chronyd` failed to start on `payments-3` after the kernel patch reboot.
+2. Add monitoring/alerting for host clock offset across all pods/nodes.

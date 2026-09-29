@@ -1,0 +1,70 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_284485",
+"name": "query_logs",
+"arguments": {
+"service": "auth-api",
+"level": "ERROR"
+}
+},
+{
+"id": "call_284486",
+"name": "get_metrics",
+"arguments": {
+"service": "auth-api",
+"metric": "restarts"
+}
+},
+{
+"id": "call_284487",
+"name": "run_probe",
+"arguments": {
+"kind": "http",
+"target": "http://auth-api.internal/health"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2721,
+"output_tokens": 79,
+"latency_ms": 1119,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_284485",
+"function": {
+"arguments": "{\"service\":\"auth-api\",\"level\":\"ERROR\"}",
+"name": "query_logs"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0Tt0WapJxU/4YgbJahU4sLBYj9UYoHOr4iHkEa14rmv9st4y7QbNITyVBJ2o+clRLVtoBFVRlTh9BVF4qtd4oY9oPuohaE1IPvQTgm5SB16QA4wGqQ7KiXecA="
+}
+}
+},
+{
+"id": "call_284486",
+"function": {
+"arguments": "{\"service\":\"auth-api\",\"metric\":\"restarts\"}",
+"name": "get_metrics"
+},
+"type": "function"
+},
+{
+"id": "call_284487",
+"function": {
+"arguments": "{\"kind\":\"http\",\"target\":\"http://auth-api.internal/health\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\n \"approve\": true,\n \"issues\": [],\n \"suggested_checks\": [],\n \"note\": \"Clock skew directly proven by probe; remediation (syncing clock) is minimal and safe.\"\n}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 1849,
+"output_tokens": 50,
+"latency_ms": 1125,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\n \"approve\": true,\n \"issues\": [],\n \"suggested_checks\": [],\n \"note\": \"Clock skew directly proven by probe; remediation (syncing clock) is minimal and safe.\"\n}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TxS/CjE32l3RORN3FpN9IJaddpEwxaAxeuJlchzylU2btwEhzdRRAMai/CzCa+XtHQbtLS0aNAdtpWFkSoUusSVtABmo3pnglpk55/ZMWHyg8qa4PtnAHFC8="
+}
+}
+}
+}

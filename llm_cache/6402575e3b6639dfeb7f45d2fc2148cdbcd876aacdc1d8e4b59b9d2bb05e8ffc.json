@@ -1,0 +1,49 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_188379",
+"name": "submit_verdict",
+"arguments": {
+"confidence": 1,
+"evidence": [
+"postgres disk probe: 100% used (200G/200G), /var/lib/postgresql/log = 96G growing 1.1G/min",
+"orders-api logs: insert failed: could not extend file base/16384/2619",
+"inventory-api logs: reservation write failed: database I/O error",
+"recent changes: enable log_min_duration_statement=0 for slow-query investigation"
+],
+"target": "postgres",
+"service": "postgres",
+"report_markdown": "# Incident Report: Orders API Failures Due to Disk Full on Postgres\n\n## Summary\nOn 2026-08-30 at 03:12 UTC, `orders-api` experienced a 58% failure rate when creating orders, and `inventory-api` / `api-gateway` were degraded. Investigation revealed that the Postgres data/log volume was 100% full, causing database I/O errors and failures to extend database files (`could not extend file`).\n\n## Timeline\n- **01:02 UTC**: Configuration change made: `postgres: enable log_min_duration_statement=0` by raj to investigate slow queries. This caused massive logging of every single database statement.\n- **02:45 UTC**: Inventory writes begin failing with `database I/O error`.\n- **02:47 UTC**: Orders writes begin failing with `could not extend file \"base/16384/2619\"`.\n- **03:12 UTC**: P1 alert fires for `orders-api` order_create failure rate 58%.\n\n## Root Cause\n`disk_full`: Enabling `log_min_duration_statement=0` on Postgres caused verbose logging of all statements. Over roughly two hours, the Postgres log directory grew to 96GB, filling the 200GB disk to 100% and preventing writes or file extensions.\n\n## Evidence\n- `run_probe disk postgres`: `/var/lib/postgresql: 100% used (200G/200G); /var/lib/postgresql/log = 96G, growing 1.1G/min`\n- `query_logs` for `orders-api`: `insert failed: could not extend file \"base/16384/2619\"`\n- `query_logs` for `inventory-api`: `reservation write failed: database I/O error`\n- `recent_changes`: `postgres: enable log_min_duration_statement=0`\n\n## Proposed Remediation\nFree disk space by truncating/clearing excessive logs in `/var/lib/postgresql/log` and reverting the verbose logging config (`log_min_duration_statement`).\nAction: `free_disk_space` on `postgres`.\n",
+"summary": "Postgres disk is 100% full due to verbose logging caused by log_min_duration_statement=0 configuration change, causing database write and extend errors across orders-api and inventory-api.",
+"action": "free_disk_space",
+"root_cause": "disk_full"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 5083,
+"output_tokens": 718,
+"latency_ms": 2854,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_188379",
+"function": {
+"arguments": "{\"confidence\":1,\"evidence\":[\"postgres disk probe: 100% used (200G/200G), /var/lib/postgresql/log = 96G growing 1.1G/min\",\"orders-api logs: insert failed: could not extend file base/16384/2619\",\"inventory-api logs: reservation write failed: database I/O error\",\"recent changes: enable log_min_duration_statement=0 for slow-query investigation\"],\"target\":\"postgres\",\"service\":\"postgres\",\"report_markdown\":\"# Incident Report: Orders API Failures Due to Disk Full on Postgres\\n\\n## Summary\\nOn 2026-08-30 at 03:12 UTC, `orders-api` experienced a 58% failure rate when creating orders, and `inventory-api` / `api-gateway` were degraded. Investigation revealed that the Postgres data/log volume was 100% full, causing database I/O errors and failures to extend database files (`could not extend file`).\\n\\n## Timeline\\n- **01:02 UTC**: Configuration change made: `postgres: enable log_min_duration_statement=0` by raj to investigate slow queries. This caused massive logging of every single database statement.\\n- **02:45 UTC**: Inventory writes begin failing with `database I/O error`.\\n- **02:47 UTC**: Orders writes begin failing with `could not extend file \\\"base/16384/2619\\\"`.\\n- **03:12 UTC**: P1 alert fires for `orders-api` order_create failure rate 58%.\\n\\n## Root Cause\\n`disk_full`: Enabling `log_min_duration_statement=0` on Postgres caused verbose logging of all statements. Over roughly two hours, the Postgres log directory grew to 96GB, filling the 200GB disk to 100% and preventing writes or file extensions.\\n\\n## Evidence\\n- `run_probe disk postgres`: `/var/lib/postgresql: 100% used (200G/200G); /var/lib/postgresql/log = 96G, growing 1.1G/min`\\n- `query_logs` for `orders-api`: `insert failed: could not extend file \\\"base/16384/2619\\\"`\\n- `query_logs` for `inventory-api`: `reservation write failed: database I/O error`\\n- `recent_changes`: `postgres: enable log_min_duration_statement=0`\\n\\n## Proposed Remediation\\nFree disk space by truncating/clearing excessive logs in `/var/lib/postgresql/log` and reverting the verbose logging config (`log_min_duration_statement`).\\nAction: `free_disk_space` on `postgres`.\\n\",\"summary\":\"Postgres disk is 100% full due to verbose logging caused by log_min_duration_statement=0 configuration change, causing database write and extend errors across orders-api and inventory-api.\",\"action\":\"free_disk_space\",\"root_cause\":\"disk_full\"}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TgMxfyAbic8YNX+86cJukOoEo8mY/dhVc1Jiq45joZz3FscRpwuvYZShrKKwfCoIBW1bgMbzM86OpepBrwnTPiuJ6wQT2/xTsDXKYBMUjXRVplRUTs+TodPY="
+}
+}
+}
+],
+"content": ""
+}
+}

@@ -1,26 +1,24 @@
-# Incident Report: Orders-API Validation Errors Following Feature Flag Rollout
+# Incident Report: orders-api Validation Errors due to Feature Flag
 
 ## Summary
-At 2026-08-30T03:12:00.000Z, `orders-api` began experiencing a 27% error rate (`ValidationError`) on `order_create` requests. Investigation revealed that these errors are caused by the `new_pricing_engine` feature flag being rolled out from 20% to 100% at 02:53 UTC, which produces a `ValidationError` ("negative total for cart with coupon_type=percentage_stacked") for specific cart combinations.
+At 2026-08-30T03:12:00.000Z, `orders-api` began throwing `ValidationError` (`negative total for cart with coupon_type=percentage_stacked`) on approximately 27% of order creation requests. The root cause is a feature flag (`new_pricing_engine`) that was scaled up from 20% to 100% at 02:53 UTC, exposing a bug in the new pricing engine where stacked percentage coupons calculate a negative total.
 
 ## Timeline
-- **02:53:00 UTC**: Feature flag `new_pricing_engine` rolled out to 100% by sam.
-- **03:00:14 UTC**: First error logs appear showing `ValidationError: negative total for cart with coupon_type=percentage_stacked`.
-- **03:12:00 UTC**: P2 alert fires for `orders-api` (`order_create 27% errors (ValidationError)`).
+- **2026-08-30T02:53:00.000Z**: Feature flag `new_pricing_engine` for `orders-api` scaled from 20% to 100%.
+- **2026-08-30T02:57:26.000Z**: First `ValidationError` (`negative total for cart with coupon_type=percentage_stacked`) logged in `orders-api`.
+- **2026-08-30T03:12:00.000Z**: P2 alert fires for `orders-api` (`order_create 27% errors (ValidationError)`).
 
 ## Root Cause
-`feature_flag_misconfig`: The `new_pricing_engine` feature flag contains a bug when calculating totals for carts with `coupon_type=percentage_stacked`, resulting in negative totals and subsequent validation failures when enabled at 100%.
+Feature flag misconfiguration / buggy feature flag implementation (`feature_flag_misconfig`). The `new_pricing_engine` contains a calculation bug for carts using `coupon_type=percentage_stacked`, resulting in negative cart totals which fail validation. When it was at 20%, errors were infrequent; at 100%, it affected ~27% of requests.
 
 ## Evidence
-1. **Recent Changes**: Flag change `new_pricing_engine 20% -> 100%` at 02:53 UTC precisely preceded the errors.
-2. **Logs**: `query_logs` for `orders-api` shows explicit `ValidationError: negative total for cart with coupon_type=percentage_stacked` messages linked to `pricing_engine=new`.
-3. **Alert**: `get_alert` shows `orders-api` status degraded with 27% validation errors.
+1. **Recent Changes**: `orders-api: new_pricing_engine 20% -> 100%` at 02:53:00.000Z.
+2. **Logs**: Repeated `ERROR orders-api: pricing_engine=new ValidationError: negative total for cart with coupon_type=percentage_stacked`.
+3. **Metrics**: `error_rate_pct` on `orders-api` jumped from 0.4% to ~27% immediately following the flag change.
 
 ## Proposed Remediation
-Disable the faulty feature flag (`new_pricing_engine`) to immediately stop validation errors for stacked percentage coupons while the pricing logic bug is fixed.
-- **Action**: `disable_feature_flag`
-- **Target**: `orders-api` (flag: `new_pricing_engine`)
+Disable the faulty feature flag (`new_pricing_engine`) via `disable_feature_flag`. This is extremely safe and instant, returning orders-api to the previous stable pricing engine version while developers fix the percentage-stacking calculation bug.
 
 ## Follow-ups
-1. Fix the calculation logic in the `new_pricing_engine` for stacked percentage coupons so totals do not become negative.
-2. Add comprehensive unit tests covering stacked coupons under the new pricing engine before re-enabling.
+1. Fix the `new_pricing_engine` calculation logic for `coupon_type=percentage_stacked`.
+2. Add unit/integration tests covering percentage stacked coupons with the new pricing engine.

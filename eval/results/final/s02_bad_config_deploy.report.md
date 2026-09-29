@@ -1,19 +1,21 @@
-# Incident Report: payments-api Charge Failures
+# Incident Report: Payments-API Outage Due to Bad Config / Incorrect PayGate URL
 
 ## Summary
-At 2026-08-30T03:12:00.000Z, `payments-api` began failing 100% of charges (`charge_failed rate 100%`). Investigation revealed that a recent deploy (`payments-2.15.0`) at 03:03 UTC updated `PAYGATE_URL` to `https://api.paygate.example/v2/`, resulting in 404 Not Found errors when calling PayGate endpoints.
+At 2026-08-30T03:12:00Z, `payments-api` experienced a 100% failure rate on charges (`charge_failed`), causing `api-gateway` to become degraded. Investigation revealed that a recent deploy (`payments-2.15.0`) at 03:03:00Z updated the `PAYGATE_URL` configuration to `https://api.paygate.example/v2/`, which appended `/v2/` to endpoint paths (resulting in requests to `/v2/v2/...`), leading to 404 errors from the third-party gateway.
 
 ## Timeline
-- **2026-08-30T03:03:00.000Z**: `payments-api` deployed version `payments-2.15.0`, migrating to PayGate v2 endpoints by changing `PAYGATE_URL` to `https://api.paygate.example/v2/`.
-- **2026-08-30T03:12:00.000Z**: Paging alert fires due to 100% charge failure rate over 4 minutes.
-- **Investigation**: Logs showed constant `404` responses from PayGate. Probing `https://api.paygate.example/v2/status` succeeded, but updating the base URL configuration to include `/v2/` broke the relative endpoint paths used by the API client.
+- **2026-08-30T03:03:00Z**: `payments-api` deployed version `payments-2.15.0` with config change: `PAYGATE_URL: https://api.paygate.example -> https://api.paygate.example/v2/`
+- **2026-08-30T03:12:00Z**: `payments-api` alert fires (`charge_failed rate 100% for 4m`).
+- **2026-08-30T03:15:00Z**: Investigation confirms 404 responses from PayGate due to double-appended `/v2/v2/` paths.
 
 ## Root Cause
-A bad configuration deploy (`bad_config_deploy`) where `PAYGATE_URL` was incorrectly configured with a trailing `/v2/` path, causing all downstream requests to hit non-existent URLs (404).
+`bad_config_deploy`: The configuration update in `payments-2.15.0` incorrectly set `PAYGATE_URL` to include the `/v2/` path suffix, while the application code also appends `/v2/` or specific endpoint paths, resulting in invalid URLs (404 Not Found).
+
+## Evidence
+- `recent_changes`: `payments-api: payments-2.15.0: migrate to PayGate v2 endpoints (PAYGATE_URL: https://api.paygate.example -> https://api.paygate.example/v2/)`
+- `query_logs`: `payments-api` logs showing continuous `status=404` for PayGate requests.
+- `get_config`: Confirmed `PAYGATE_URL` is set to `https://api.paygate.example/v2/`.
+- `run_probe`: Verified vendor is up (`https://api.paygate.example/v2/status` -> 200).
 
 ## Proposed Remediation
-Update the configuration of `payments-api` to correct `PAYGATE_URL` back to `https://api.paygate.example` (or the correct base URL without the extra path component, letting the client append `/v2/...` correctly).
-
-## Follow-ups
-- Add integration tests verifying PayGate connectivity during deploys.
-- Ensure URL configuration changes validate endpoint existence during startup or via staging smoke tests.
+Update `payments-api` config (`update_config`) to revert `PAYGATE_URL` back to `https://api.paygate.example` (or the correct base URL without the path suffix), allowing the application to correctly form `/v2/...` request paths.

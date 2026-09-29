@@ -1,25 +1,25 @@
-# Incident Report: payments-api HTTP 429 Rate Limiting
+# Incident Report: Payments-API Rate Limiting (HTTP 429)
 
 ## Summary
-At 2026-08-30T03:12:00.000Z, the `payments-api` service experienced a degradation with 38% of charge attempts failing due to HTTP 429 (Too Many Requests) responses from the `PayGate` vendor. The root cause is a concurrent background refund backfill job running on the `worker` service that exhausts the vendor API rate limit sharing the production API key.
+At 2026-08-30T03:12:00Z, `payments-api` experienced a 38% failure rate due to HTTP 429 (Too Many Requests) responses from the upstream payment vendor (PayGate). The root cause was an unthrottled one-off refund backfill job executed by the `worker` service, which exhausted the shared API rate limit quota (600 requests/minute).
 
 ## Timeline
-- **02:46:00Z**: Worker service deploys a one-off refund backfill job (18k refunds) at concurrency 32, calling PayGate directly with the shared API key.
-- **02:47:26Z**: First `429 Too Many Requests` error logged in `payments-api` due to rate-limit exhaustion.
-- **03:12:00Z**: Alert fires indicating `charge_failed 38% (HTTP 429 from vendor)`.
+- **2026-08-30T02:46:00Z**: `worker` deployed with a one-off refund backfill job (18k refunds at concurrency 32), sharing the production PayGate API key.
+- **2026-08-30T02:47:26Z**: First `429 Too Many Requests` error logged in `payments-api`.
+- **2026-08-30T03:12:00Z**: Alert fires indicating `charge_failed 38% (HTTP 429 from vendor)`.
 
 ## Root Cause
-The `worker` service's high-concurrency refund backfill job is consuming the shared rate limit quota (`600/min` for key `pk_live_…c9`), leaving insufficient quota for `payments-api` transactions.
+The `worker` service ran a high-concurrency background job directly calling the payment vendor's `/refunds` endpoint using the same production API key utilized by `payments-api`, consuming the entire rate-limiting pool and starving live customer transactions.
 
 ## Evidence
-- Recent changes log showing the worker backfill deployment at concurrency 32.
-- Continuous `429 Too Many Requests` error logs from `payments-api` citing the shared API key limit.
+- Recent changes log showing the worker backfill deployment at concurrency 32 sharing the production key.
+- Frequent `429 Too Many Requests` error logs referencing the shared API key limit (`pk_live_…c9`).
+- Spike in `payments-api` error rate up to ~38% starting shortly after the worker deploy.
 
 ## Remediation
-1. Pause or throttle the background refund backfill job on the `worker` service.
-2. Ensure dedicated vendor rate limits or separate API keys are used for background workers.
+1. Pause or throttle the background refund backfill job in the `worker` service.
+2. Ensure background jobs use separate API credentials or implement strict rate-limiting/token-bucket backoff.
 
 ## Follow-ups
-- Implement rate-limit aware clients in background batch jobs.
-- Isolate API keys between transactional traffic (`payments-api`) and bulk background jobs (`worker`).
-- Enable circuit breakers and proper retry/backoff mechanisms across services.
+- Separate API keys/quotas between background batch workers and real-time user-facing APIs.
+- Add concurrency limits and rate-limiting safeguards to background migration/backfill scripts.

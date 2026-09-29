@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Verdict is well-supported by probe data and recent changes showing the worker exhausting the rate limit.\"}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 2230,
+"output_tokens": 45,
+"latency_ms": 1132,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Verdict is well-supported by probe data and recent changes showing the worker exhausting the rate limit.\"}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0T9hoe0ZiaQLIqoqELc4yatxREahXj8zy0Sap55mVXY+YjKelYYMudSEaZaLtK5EcaXkXZL5Ohar8Kseo9/iKpiS9GtBVNuBnwSdxfdkbceIAU75K/GX9kdJE="
+}
+}
+}
+}

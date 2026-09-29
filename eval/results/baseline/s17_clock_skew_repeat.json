@@ -1,0 +1,31 @@
+{
+  "case_id": "s17_clock_skew_repeat",
+  "verdict": {
+    "root_cause": "bad_config_deploy",
+    "service": "inventory-api",
+    "action": "no_action",
+    "target": "inventory-api",
+    "confidence": 0.4,
+    "summary": "The inventory-api is currently experiencing a high error rate (67.6%) which is manifesting as 401 Unauthorized errors at the API Gateway for inventory requests, though recent metrics and logs point to normal recent pod rescheduling.",
+    "evidence": [
+      "inventory-api: error_rate_pct: now 67.59 (30m ago 0.403, max 74.345)",
+      "api-gateway: message: '401 rate 6.8% on /v1/inventory/*; auth-api healthy; other routes fine'"
+    ],
+    "report_markdown": "# Incident Report: API Gateway 401 Errors on Inventory Routes\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, an alert fired indicating an elevated 401 error rate (6.8%) on `/v1/inventory/*` routes through the `api-gateway`. The `inventory-api` service reports a degraded status with an error rate peaking near 74%.\n\n## Timeline\n- **2026-08-30T02:14:00.000Z**: `inventory-api` pods rescheduled from node `inv-2` to `inv-5` due to maintenance node drain.\n- **2026-08-30T02:31:00.000Z**: `auth-api` rotated JWT signing key (`kid=2026-09b`).\n- **2026-08-30T03:12:00.000Z**: Alert triggered for 401 rate spike on inventory routes.\n\n## Root Cause\nElevated authentication/authorization failures occurring at the inventory service or downstream interactions following infrastructure node rescheduling.\n\n## Evidence\n- `inventory-api` error rate jumped from ~0.4% to 67.59%.\n- `api-gateway` logs show multiple 401 responses on `/v1/inventory/*` paths upstreamed to `inventory-api`.\n\n## Remediation\n- Verify `inventory-api` pod health, environment variables, and token validation logic against the recent JWKS updates from `auth-api`.\n- Monitor recovery as traffic re-balances.\n\n## Follow-ups\n- Investigate why pod rescheduling on `inventory-api` correlated with an increase in 401 responses.\n- Ensure smooth propagation of JWKS keys across all backend services."
+  },
+  "variant": "baseline",
+  "run_id": "20260929T013159Z_baseline-s17-clock-skew-repeat",
+  "trace": "traces/20260929T013159Z_baseline-s17-clock-skew-repeat.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "provider": "gemini",
+  "status": "success",
+  "llm_calls": 1,
+  "input_tokens": 5458,
+  "output_tokens": 648,
+  "would_be_cost_usd": 0.00081,
+  "wall_s": 0.0,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

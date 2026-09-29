@@ -1,0 +1,32 @@
+{
+  "case_id": "s16_poison_message",
+  "verdict": {
+    "root_cause": "poison_message",
+    "service": "worker",
+    "action": "update_config",
+    "target": "worker",
+    "confidence": 1.0,
+    "summary": "A large 912MB inlined data-import job payload causes the worker to repeatedly run out of memory and crash upon decoding, creating a poison message loop.",
+    "evidence": [
+      "2026-08-30T02:14:00.000Z [deploy] data-import: importer-2.4.0: attach source rows inline as base64 instead of an S3 ref (no size cap)",
+      "2026-08-30T03:06:54.000Z ERROR worker: OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB",
+      "worker restart loop: 9 restarts in 12 min; job queue backlog 4,300"
+    ],
+    "report_markdown": "# Incident Report: Worker Restart Loop Caused by Poison Message\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, the `worker` service entered a restart loop experiencing 9 restarts in 12 minutes with a growing job queue backlog of 4,300 jobs. The root cause is a poisoned message (`job_8f3a1c`) containing a 912MB inlined payload from a recent `data-import` deployment change, which exhausts the worker container's memory during decoding and triggers an OOM kill.\n\n## Timeline\n- **2026-08-30T02:14:00Z**: `data-import` deployed with inline base64 source rows (no size cap).\n- **2026-08-30T03:06:54Z**: First observed OOMKilled event while decoding 912MB job `job_8f3a1c`.\n- **2026-08-30T03:12:00Z**: Alert fires: worker restart loop (9 restarts in 12 min).\n\n## Root Cause\nA massive 912MB job payload was pushed into the `bulk-import` queue due to an unbounded inlining change. Whenever any worker picks up `job_8f3a1c`, decoding the payload consumes all available memory, causing an OOM kill (`exit 137`) and redelivery back to the queue, resulting in a persistent restart loop.\n\n## Evidence\n- `[deploy] data-import: importer-2.4.0: attach source rows inline as base64 instead of an S3 ref (no size cap)`\n- `ERROR worker: OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB`\n- `worker: mem_pct: now 102.399, restarts: now 9`\n\n## Remediation\n1. Update the worker config to skip or drop the offending job ID (`SKIP_JOB_IDS: ['job_8f3a1c']`) or set a strict payload size limit (`MAX_PAYLOAD_BYTES`).\n2. Restart the worker service to clear the loop and resume processing healthy jobs.\n\n## Follow-ups\n- Revert or fix `importer-2.4.0` to use S3 references rather than inline base64 payloads for large exports.\n- Implement payload size validation at the queue ingestion layer."
+  },
+  "variant": "baseline",
+  "run_id": "20260929T013159Z_baseline-s16-poison-message",
+  "trace": "traces/20260929T013159Z_baseline-s16-poison-message.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "provider": "gemini",
+  "status": "success",
+  "llm_calls": 1,
+  "input_tokens": 4628,
+  "output_tokens": 849,
+  "would_be_cost_usd": 0.0008,
+  "wall_s": 0.01,
+  "probes_run": 0,
+  "verified": false,
+  "actions_executed": [],
+  "harm_done": []
+}

@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\n \"approve\": true,\n \"issues\": [],\n \"suggested_checks\": [],\n \"note\": \"Verdict is well-supported by logs, changes, and DNS probes; remediation is safe and correctly targeted.\"\n}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 2891,
+"output_tokens": 53,
+"latency_ms": 1156,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\n \"approve\": true,\n \"issues\": [],\n \"suggested_checks\": [],\n \"note\": \"Verdict is well-supported by logs, changes, and DNS probes; remediation is safe and correctly targeted.\"\n}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TAtk11ivDmRuwJ22SeHKWMCOhph5LIa3qwd07sP1oWgiBX5cHt28bdJKmMvID/t159MhA2i9QRtWSQTA+v21beLypATwsfnLUMM/Q7gmjHp3a+blFSgguSAg="
+}
+}
+}
+}

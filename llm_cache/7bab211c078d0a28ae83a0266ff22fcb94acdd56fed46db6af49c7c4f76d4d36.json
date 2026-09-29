@@ -1,0 +1,50 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_207012",
+"name": "submit_verdict",
+"arguments": {
+"target": "worker",
+"evidence": [
+"alert: worker restart loop: 9 restarts in 12 min; job queue backlog 4,300",
+"recent_changes: data-import: importer-2.4.0: attach source rows inline as base64 instead of an S3 ref (no size cap) (by marco) - detail: the 02:14 export was 912MB; the importer inlined it into a single job message",
+"query_logs: ERROR worker: OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB",
+"get_metrics: worker.mem_pct reaches 102% repeatedly causing OOM kills",
+"run_probe: GET http://worker:8080/healthz -> 200 in 14ms (process up 41 s; last job job_8f3a1c failed 9 times; payload 912MB)"
+],
+"root_cause": "poison_message",
+"confidence": 1,
+"report_markdown": "# Incident Report: Worker Restart Loop / OOMKilled\n\n## Summary\nThe background worker service entered a persistent restart loop due to repeated `OOMKilled` (exit 137) errors. A recently deployed data importer change (`importer-2.4.0`) attached a 912MB source export inline as base64 within a single job message without a size cap. Whenever the worker attempts to decode this oversized payload (`job_8f3a1c`), memory consumption spikes to 102%, exhausting container memory and causing an OOM kill. The failed job is then retried endlessly, blocking the queue and crashing the worker repeatedly.\n\n## Timeline\n- **02:14 UTC**: `data-import` deployed version `importer-2.4.0`, changing data export to attach source rows inline as base64 (912MB export).\n- **02:47 UTC**: `worker` deployed version `worker-1.3.1` (structured logging, unrelated to decoding).\n- **03:00 UTC**: First `OOMKilled` logged on `worker` while decoding payload `job_8f3a1c` (912MB).\n- **03:12 UTC**: PagerDuty alert fires: worker restart loop (9 restarts in 12 min, job queue backlog 4,300).\n- **03:15 UTC**: Investigation confirms memory exhaustion due to oversized base64 payload in the job queue.\n\n## Root Cause\n- **Root Cause**: `poison_message`\n- **Explanation**: An oversized 912MB job payload (`job_8f3a1c`) injected into the queue by the new data-import mechanism acts as a poison message, crashing the worker with an Out-Of-Memory error on every processing attempt.\n\n## Evidence\n- `recent_changes`: `importer-2.4.0` inlined a 912MB export into a single job message.\n- `query_logs`: Repeated `ERROR worker: OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB`.\n- `get_metrics`: `worker.mem_pct` climbs up to 102.39% coinciding with the OOM crashes.\n- `run_probe`: Health check confirmed process is up briefly (`up 41 s`) and reported `last job job_8f3a1c failed 9 times; payload 912MB`.\n\n## Proposed Remediation\n- **Action**: `disable_feature_flag` (or drop/purge the poison message from the queue / rollback data-import / discard the 912MB job message). Since `disable_feature_flag` or clearing the poison message is standard procedure for poison messages: we will purge/drop the poison message `job_8f3a1c` from the queue or roll back the data-import flag/deploy. (Using `disable_feature_flag` / rolling back the data importer ingestion behavior).\n",
+"service": "worker",
+"action": "disable_feature_flag",
+"summary": "Worker is in a restart loop due to OOMKilled errors caused by attempting to decode an oversized 912MB inline base64 job payload (poison message)."
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 3897,
+"output_tokens": 983,
+"latency_ms": 3814,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_207012",
+"function": {
+"arguments": "{\"target\":\"worker\",\"evidence\":[\"alert: worker restart loop: 9 restarts in 12 min; job queue backlog 4,300\",\"recent_changes: data-import: importer-2.4.0: attach source rows inline as base64 instead of an S3 ref (no size cap) (by marco) - detail: the 02:14 export was 912MB; the importer inlined it into a single job message\",\"query_logs: ERROR worker: OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB\",\"get_metrics: worker.mem_pct reaches 102% repeatedly causing OOM kills\",\"run_probe: GET http://worker:8080/healthz -\\u003e 200 in 14ms (process up 41 s; last job job_8f3a1c failed 9 times; payload 912MB)\"],\"root_cause\":\"poison_message\",\"confidence\":1,\"report_markdown\":\"# Incident Report: Worker Restart Loop / OOMKilled\\n\\n## Summary\\nThe background worker service entered a persistent restart loop due to repeated `OOMKilled` (exit 137) errors. A recently deployed data importer change (`importer-2.4.0`) attached a 912MB source export inline as base64 within a single job message without a size cap. Whenever the worker attempts to decode this oversized payload (`job_8f3a1c`), memory consumption spikes to 102%, exhausting container memory and causing an OOM kill. The failed job is then retried endlessly, blocking the queue and crashing the worker repeatedly.\\n\\n## Timeline\\n- **02:14 UTC**: `data-import` deployed version `importer-2.4.0`, changing data export to attach source rows inline as base64 (912MB export).\\n- **02:47 UTC**: `worker` deployed version `worker-1.3.1` (structured logging, unrelated to decoding).\\n- **03:00 UTC**: First `OOMKilled` logged on `worker` while decoding payload `job_8f3a1c` (912MB).\\n- **03:12 UTC**: PagerDuty alert fires: worker restart loop (9 restarts in 12 min, job queue backlog 4,300).\\n- **03:15 UTC**: Investigation confirms memory exhaustion due to oversized base64 payload in the job queue.\\n\\n## Root Cause\\n- **Root Cause**: `poison_message`\\n- **Explanation**: An oversized 912MB job payload (`job_8f3a1c`) injected into the queue by the new data-import mechanism acts as a poison message, crashing the worker with an Out-Of-Memory error on every processing attempt.\\n\\n## Evidence\\n- `recent_changes`: `importer-2.4.0` inlined a 912MB export into a single job message.\\n- `query_logs`: Repeated `ERROR worker: OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB`.\\n- `get_metrics`: `worker.mem_pct` climbs up to 102.39% coinciding with the OOM crashes.\\n- `run_probe`: Health check confirmed process is up briefly (`up 41 s`) and reported `last job job_8f3a1c failed 9 times; payload 912MB`.\\n\\n## Proposed Remediation\\n- **Action**: `disable_feature_flag` (or drop/purge the poison message from the queue / rollback data-import / discard the 912MB job message). Since `disable_feature_flag` or clearing the poison message is standard procedure for poison messages: we will purge/drop the poison message `job_8f3a1c` from the queue or roll back the data-import flag/deploy. (Using `disable_feature_flag` / rolling back the data importer ingestion behavior).\\n\",\"service\":\"worker\",\"action\":\"disable_feature_flag\",\"summary\":\"Worker is in a restart loop due to OOMKilled errors caused by attempting to decode an oversized 912MB inline base64 job payload (poison message).\"}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0T2RVtdLNFTJpXFa7EYm7uUtLYPE+3Xys7lTwj1iNunzxZvF6clTmFSsz6vjKSE5V33z6VADmM1Fms77EC43E1h8Maix/9aoIryMb5UcEuNsUoinMjelaAG7s="
+}
+}
+}
+],
+"content": ""
+}
+}

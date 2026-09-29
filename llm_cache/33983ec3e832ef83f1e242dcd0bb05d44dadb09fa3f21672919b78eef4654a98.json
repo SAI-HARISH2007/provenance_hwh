@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\n  \"approve\": true,\n  \"issues\": [],\n  \"suggested_checks\": [],\n  \"note\": \"Root cause directly backed by probe and disk metrics showing 100% usage from unarchived WAL segments.\"\n}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 3201,
+"output_tokens": 59,
+"latency_ms": 1204,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\n  \"approve\": true,\n  \"issues\": [],\n  \"suggested_checks\": [],\n  \"note\": \"Root cause directly backed by probe and disk metrics showing 100% usage from unarchived WAL segments.\"\n}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0Tto3r4bSHf8tF5C/IRkOtYevZDX08J8pJWGizvIcUYuMMK/aTeitLNhqPebRoexPh+/Z8hhjI0ofY8FMct82ZHQy8AGeIu/Fm2YIUg1ljuRB+UMLDMvNz8xs="
+}
+}
+}
+}

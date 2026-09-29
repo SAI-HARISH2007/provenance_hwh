@@ -1,0 +1,62 @@
+{
+  "case_id": "s16_poison_message",
+  "verdict": {
+    "root_cause": "poison_message",
+    "service": "worker",
+    "action": "rollback_deploy",
+    "target": "data-import",
+    "confidence": 1.0,
+    "summary": "Worker is in a restart loop due to OOMKilled errors caused by attempting to decode an oversized 912MB inline base64 job payload (poison message).",
+    "evidence": [
+      "alert: worker restart loop: 9 restarts in 12 min; job queue backlog 4,300",
+      "recent_changes: data-import: importer-2.4.0: attach source rows inline as base64 instead of an S3 ref (no size cap) (by marco)",
+      "query_logs: ERROR worker: OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB",
+      "get_metrics: worker.mem_pct reaches 102% repeatedly causing OOM kills",
+      "run_probe: GET http://worker:8080/healthz -> 200 in 14ms (process up 41 s; last job job_8f3a1c failed 9 times; payload 912MB)"
+    ],
+    "report_markdown": "# Incident Report: Worker Restart Loop / OOMKilled\n\n## Summary\nThe background worker service entered a persistent restart loop due to repeated `OOMKilled` (exit 137) errors. A recently deployed data importer change (`importer-2.4.0`) attached a 912MB source export inline as base64 within a single job message without a size cap. Whenever the worker attempts to decode this oversized payload (`job_8f3a1c`), memory consumption spikes to 102%, exhausting container memory and causing an OOM kill. The failed job is then retried endlessly, blocking the queue and crashing the worker repeatedly.\n\n## Timeline\n- **02:14 UTC**: `data-import` deployed version `importer-2.4.0`, changing data export to attach source rows inline as base64 (912MB export).\n- **02:47 UTC**: `worker` deployed version `worker-1.3.1` (structured logging, unrelated to decoding).\n- **03:00 UTC**: First `OOMKilled` logged on `worker` while decoding payload `job_8f3a1c` (912MB).\n- **03:12 UTC**: PagerDuty alert fires: worker restart loop (9 restarts in 12 min, job queue backlog 4,300).\n- **03:15 UTC**: Investigation confirms memory exhaustion due to oversized base64 payload in the job queue.\n\n## Root Cause\n- **Root Cause**: `poison_message`\n- **Explanation**: An oversized 912MB job payload (`job_8f3a1c`) injected into the queue by the new data-import mechanism acts as a poison message, crashing the worker with an Out-Of-Memory error on every processing attempt.\n\n## Evidence\n- `recent_changes`: `importer-2.4.0` inlined a 912MB export into a single job message.\n- `query_logs`: Repeated `ERROR worker: OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB`.\n- `get_metrics`: `worker.mem_pct` climbs up to 102.39% coinciding with the OOM crashes.\n- `run_probe`: Health check confirmed process is up briefly (`up 41 s`) and reported `last job job_8f3a1c failed 9 times; payload 912MB`.\n\n## Proposed Remediation\n- **Action**: `rollback_deploy` (Roll back `data-import` from version `importer-2.4.0` to prevent further inline generation of oversized 912MB payloads, and purge the existing poison message `job_8f3a1c` from the queue).\n"
+  },
+  "variant": "final",
+  "run_id": "20260929T013200Z_final-s16-poison-message",
+  "trace": "traces/20260929T013200Z_final-s16-poison-message.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "status": "success",
+  "llm_calls": 8,
+  "input_tokens": 26612,
+  "output_tokens": 2173,
+  "wall_s": 0.01,
+  "probes_run": 1,
+  "verified": true,
+  "gate_rejections": 1,
+  "reviewer": {
+    "approve": true,
+    "issues": [],
+    "suggested_checks": [],
+    "note": "All checks passed successfully; clear evidence of poison message from data-import causing worker OOM."
+  },
+  "reviewer_approved": true,
+  "approval": {
+    "decision": "approved",
+    "by": "eval-policy"
+  },
+  "actions_executed": [
+    [
+      "rollback_deploy",
+      "data-import"
+    ]
+  ],
+  "harm_done": [],
+  "resolved": false,
+  "remediation_effect": {
+    "executed": true,
+    "resolved": false,
+    "harm": false,
+    "effect": "rollback_deploy on data-import applied; no change in symptoms after 3 minutes"
+  },
+  "memory_hits": 0,
+  "memory_used": false,
+  "memory_rejections": 0,
+  "memory_checks": [],
+  "memory_cited": [],
+  "would_be_cost_usd": 0.00353
+}

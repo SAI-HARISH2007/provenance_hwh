@@ -1,0 +1,70 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_308161",
+"name": "get_metrics",
+"arguments": {
+"service": "redis",
+"metric": "used_memory_pct"
+}
+},
+{
+"id": "call_308162",
+"name": "get_metrics",
+"arguments": {
+"metric": "evicted_keys_per_min",
+"service": "redis"
+}
+},
+{
+"id": "call_308163",
+"name": "query_logs",
+"arguments": {
+"level": "WARN",
+"service": "orders-api"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2784,
+"output_tokens": 79,
+"latency_ms": 1223,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_308161",
+"function": {
+"arguments": "{\"service\":\"redis\",\"metric\":\"used_memory_pct\"}",
+"name": "get_metrics"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TSgf0rgGlTF37N0+N2wzdmVfPPmVf0FAV0sg4kHcnBKvR2iT2k2Mu+/lcu2+4XSNjnGQA08dmKPqajFyEfuU0Ws7gDt0tuOzybmBNHJX5L3LxIsKo3m3q7qM="
+}
+}
+},
+{
+"id": "call_308162",
+"function": {
+"arguments": "{\"metric\":\"evicted_keys_per_min\",\"service\":\"redis\"}",
+"name": "get_metrics"
+},
+"type": "function"
+},
+{
+"id": "call_308163",
+"function": {
+"arguments": "{\"level\":\"WARN\",\"service\":\"orders-api\"}",
+"name": "query_logs"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

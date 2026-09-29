@@ -1,0 +1,19 @@
+{
+"text": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Clear evidence of memory leak/OOM caused by recent in-process cache deploy; safe and correct rollback action.\"}\n```",
+"tool_calls": [],
+"stop_reason": "stop",
+"input_tokens": 2210,
+"output_tokens": 49,
+"latency_ms": 1119,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"content": "```json\n{\"approve\": true, \"issues\": [], \"suggested_checks\": [], \"note\": \"Clear evidence of memory leak/OOM caused by recent in-process cache deploy; safe and correct rollback action.\"}\n```",
+"role": "assistant",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0TE5N/HSLeE3Rf3o9C1K094GK3V47ePFfRjz5MYd7meJgM2003m6F9zM9UovNEwljOa8qRjiXml08N5V2dLfW+BbD4UojhZax2ZrUs8QMlIRDd/yLBEr4UtAk="
+}
+}
+}
+}

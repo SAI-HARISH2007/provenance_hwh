@@ -1,0 +1,55 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_310181",
+"name": "query_logs",
+"arguments": {
+"limit": 10,
+"service": "payments-api",
+"level": "ERROR"
+}
+},
+{
+"id": "call_310182",
+"name": "run_probe",
+"arguments": {
+"target": "https://api.paygate.example",
+"kind": "http"
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2850,
+"output_tokens": 58,
+"latency_ms": 1083,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_310181",
+"function": {
+"arguments": "{\"limit\":10,\"service\":\"payments-api\",\"level\":\"ERROR\"}",
+"name": "query_logs"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0T7uRY47Wuq/lU+/SxLylrT6B1GnW8UR+z/T0+6nkoxa44ErUhlX97bbkCBj0X/eeGhbq0+K8Gu5eIqgrjZwirA+7uIvYp0kCDXI3pEvpbzAb7gVm532ENp9c="
+}
+}
+},
+{
+"id": "call_310182",
+"function": {
+"arguments": "{\"target\":\"https://api.paygate.example\",\"kind\":\"http\"}",
+"name": "run_probe"
+},
+"type": "function"
+}
+],
+"content": ""
+}
+}

@@ -1,0 +1,47 @@
+{
+"text": "",
+"tool_calls": [
+{
+"id": "call_236465",
+"name": "submit_verdict",
+"arguments": {
+"action": "terminate_blocking_query",
+"target": "postgres",
+"service": "postgres",
+"confidence": 1,
+"root_cause": "migration_lock_contention",
+"summary": "Postgres migration 0143 created a non-concurrent index on orders(customer_id), holding an AccessExclusiveLock for 16 minutes and causing connection pool exhaustion and timeouts on orders-api.",
+"report_markdown": "# Incident Report: orders-api Timeouts and Postgres Lock Contention\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, `orders-api` experienced a P1 alert for 35% timeouts on `order_create` with p95 latency reaching 5s. Investigation revealed migration 0143 ran a non-concurrent `CREATE INDEX` on `orders(customer_id)`, which acquired an `AccessExclusiveLock` on the `orders` table and has been blocking writes and reads for 16 minutes, causing connection pool exhaustion and timeouts.\n\n## Timeline\n- **02:55:00Z**: Migration 0143 runs `CREATE INDEX` (non-concurrent) on `orders(customer_id)` as part of `orders-3.8.1-rc` deploy hook.\n- **03:12:00Z**: `orders-api` alerts fire due to 35% timeouts and p95 5s latency.\n\n## Root Cause\nMigration lock contention: A non-concurrent `CREATE INDEX` statement (`pid 48112`) is holding an `AccessExclusiveLock` on the `orders` table, causing 74 database connections to wait and exhausting the Postgres connection pool.\n\n## Evidence\n- Postgres probe shows: `96/100 connections; 74 waiting on AccessExclusiveLock held by pid 48112 (CREATE INDEX orders_customer_id_idx, running 16m, 38% done)`\n- Recent changes show migration 0143 executing a non-concurrent index creation at 02:55Z.\n\n## Proposed Remediation\nTerminate the blocking migration query (`pid 48112`) to release the `AccessExclusiveLock` on the `orders` table. Once terminated, concurrent queries will unblock and the connection pool will recover. Afterwards, the index creation should be re-attempted concurrently (`CREATE INDEX CONCURRENTLY`).\n\n## Follow-ups\n1. Ensure all future migrations use `CREATE INDEX CONCURRENTLY` to avoid table-level locking in production.\n2. Review deploy hook practices to prevent running blocking DDL during normal operations.",
+"evidence": [
+"postgres probe: 96/100 connections; 74 waiting on AccessExclusiveLock held by pid 48112 (CREATE INDEX orders_customer_id_idx, running 16m, 38% done)",
+"recent_changes: migration 0143 ran CREATE INDEX (non-concurrent) on orders(customer_id) at 2026-08-30T02:55:00.000Z"
+]
+}
+}
+],
+"stop_reason": "tool_calls",
+"input_tokens": 2942,
+"output_tokens": 702,
+"latency_ms": 2786,
+"model": "gemini-3.5-flash-lite",
+"provider": "gemini",
+"raw_message": {
+"role": "assistant",
+"tool_calls": [
+{
+"id": "call_236465",
+"function": {
+"arguments": "{\"action\":\"terminate_blocking_query\",\"target\":\"postgres\",\"service\":\"postgres\",\"confidence\":1,\"root_cause\":\"migration_lock_contention\",\"summary\":\"Postgres migration 0143 created a non-concurrent index on orders(customer_id), holding an AccessExclusiveLock for 16 minutes and causing connection pool exhaustion and timeouts on orders-api.\",\"report_markdown\":\"# Incident Report: orders-api Timeouts and Postgres Lock Contention\\n\\n## Summary\\nAt 2026-08-30T03:12:00.000Z, `orders-api` experienced a P1 alert for 35% timeouts on `order_create` with p95 latency reaching 5s. Investigation revealed migration 0143 ran a non-concurrent `CREATE INDEX` on `orders(customer_id)`, which acquired an `AccessExclusiveLock` on the `orders` table and has been blocking writes and reads for 16 minutes, causing connection pool exhaustion and timeouts.\\n\\n## Timeline\\n- **02:55:00Z**: Migration 0143 runs `CREATE INDEX` (non-concurrent) on `orders(customer_id)` as part of `orders-3.8.1-rc` deploy hook.\\n- **03:12:00Z**: `orders-api` alerts fire due to 35% timeouts and p95 5s latency.\\n\\n## Root Cause\\nMigration lock contention: A non-concurrent `CREATE INDEX` statement (`pid 48112`) is holding an `AccessExclusiveLock` on the `orders` table, causing 74 database connections to wait and exhausting the Postgres connection pool.\\n\\n## Evidence\\n- Postgres probe shows: `96/100 connections; 74 waiting on AccessExclusiveLock held by pid 48112 (CREATE INDEX orders_customer_id_idx, running 16m, 38% done)`\\n- Recent changes show migration 0143 executing a non-concurrent index creation at 02:55Z.\\n\\n## Proposed Remediation\\nTerminate the blocking migration query (`pid 48112`) to release the `AccessExclusiveLock` on the `orders` table. Once terminated, concurrent queries will unblock and the connection pool will recover. Afterwards, the index creation should be re-attempted concurrently (`CREATE INDEX CONCURRENTLY`).\\n\\n## Follow-ups\\n1. Ensure all future migrations use `CREATE INDEX CONCURRENTLY` to avoid table-level locking in production.\\n2. Review deploy hook practices to prevent running blocking DDL during normal operations.\",\"evidence\":[\"postgres probe: 96/100 connections; 74 waiting on AccessExclusiveLock held by pid 48112 (CREATE INDEX orders_customer_id_idx, running 16m, 38% done)\",\"recent_changes: migration 0143 ran CREATE INDEX (non-concurrent) on orders(customer_id) at 2026-08-30T02:55:00.000Z\"]}",
+"name": "submit_verdict"
+},
+"type": "function",
+"extra_content": {
+"google": {
+"thought_signature": "EmAKXgFpFH0T64/OA/DYUD22knOIIZpWWdhRjuVOQ05oQnweLuYZ0nud0NPboyfE95GlwTwqqBi2Rvl966L6pJxBMiFdsqvrcoHXMBaG6G7CfgHM7AsMUD4ieJSNCrMXKlg="
+}
+}
+}
+],
+"content": ""
+}
+}

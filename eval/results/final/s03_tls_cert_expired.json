@@ -6,22 +6,22 @@
     "action": "rotate_tls_cert",
     "target": "auth-api",
     "confidence": 1.0,
-    "summary": "auth-api TLS certificate expired at 03:00 UTC, causing 401/5xx errors across authenticated routes.",
+    "summary": "auth-api TLS certificate expired at 03:00:00Z, causing widespread 401/5xx errors on authenticated routes.",
     "evidence": [
       "GET https://auth-api:8443/healthz -> TLS handshake failed: certificate expired",
       "auth-api cert: subject=CN=auth-api.internal notAfter=2026-08-30T03:00:00Z \\u2014 EXPIRED 12 minutes ago"
     ],
-    "report_markdown": "# Incident Report: auth-api TLS Certificate Expiration\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, `api-gateway` fired an alert reporting a 401/5xx error rate of 41% on all authenticated routes. Investigation revealed `auth-api` is down because its TLS certificate expired at 2026-08-30T03:00:00Z, causing all downstream authentication verifications to fail.\n\n## Timeline\n- **02:20 UTC**: `orders-api` deployed (unrelated refactor).\n- **03:00 UTC**: `auth-api` TLS certificate expired.\n- **03:12 UTC**: P1 alert fired due to high 401/5xx rates on authenticated routes.\n- **03:14 UTC**: Investigation confirmed TLS certificate expiration via certificate probe.\n\n## Root Cause\nThe TLS certificate for `auth-api` (`CN=auth-api.internal`) expired at `2026-08-30T03:00:00Z`.\n\n## Evidence\n- `run_probe cert auth-api`: `auth-api cert: subject=CN=auth-api.internal notAfter=2026-08-30T03:00:00Z — EXPIRED 12 minutes ago`\n- `run_probe http auth-api`: `TLS handshake failed: certificate expired`\n\n## Proposed Remediation\nRotate the TLS certificate for `auth-api` (`rotate_tls_cert`). This is safe as it renews the expired cryptographic asset required for secure internal communication.\n\n## Follow-ups\n- Implement automated certificate monitoring / auto-renewal (e.g., cert-manager) to prevent future expirations.\n"
+    "report_markdown": "# Incident Report: auth-api Certificate Expiration\n\n## Summary\nAt 2026-08-30T03:12:00.000Z, `api-gateway` fired an alert for a 401/5xx error rate of 41% across authenticated routes. Investigation revealed that the `auth-api` service was down because its TLS certificate expired exactly at 03:00:00Z.\n\n## Timeline\n- **02:20:00Z**: `orders-api` deploy (unrelated refactor)\n- **03:00:00Z**: `auth-api` TLS certificate expiration (`notAfter=2026-08-30T03:00:00Z`)\n- **03:12:00Z**: P1 alert fired due to authentication failures across the API gateway\n\n## Root Cause\n`tls_cert_expired`: The TLS certificate for `auth-api` expired at 2026-08-30T03:00:00Z, causing all inbound TLS connections and token verification requests to fail with TLS handshake errors and subsequent 401/5xx errors at the gateway.\n\n## Evidence\n- `run_probe` on `http://auth-api.internal/health` returned `TLS handshake failed: certificate expired`.\n- `run_probe cert auth-api` confirmed `notAfter=2026-08-30T03:00:00Z — EXPIRED 12 minutes ago`.\n\n## Proposed Remediation\nRotate the TLS certificate for `auth-api` (`rotate_tls_cert`). This is safe, targeted, and directly resolves the handshake failures.\n"
   },
   "variant": "final",
-  "run_id": "20260927T092401Z_final-s03-tls-cert-expired",
-  "trace": "traces/20260927T092401Z_final-s03-tls-cert-expired.jsonl",
+  "run_id": "20260929T013200Z_final-s03-tls-cert-expired",
+  "trace": "traces/20260929T013200Z_final-s03-tls-cert-expired.jsonl",
   "model": "gemini-3.5-flash-lite",
   "status": "success",
   "llm_calls": 5,
-  "input_tokens": 12059,
-  "output_tokens": 740,
-  "wall_s": 0.01,
+  "input_tokens": 12338,
+  "output_tokens": 726,
+  "wall_s": 0.02,
   "probes_run": 2,
   "verified": true,
   "gate_rejections": 0,
@@ -29,7 +29,7 @@
     "approve": true,
     "issues": [],
     "suggested_checks": [],
-    "note": "Root cause directly proven by TLS cert probe, remediation is specific and safe."
+    "note": "Root cause directly proven by cert probe; remediation is safe and targeted."
   },
   "reviewer_approved": true,
   "approval": {
@@ -50,5 +50,10 @@
     "harm": false,
     "effect": "rotate_tls_cert on auth-api applied; error rate returning to baseline, healthz 200 across services within 90s"
   },
-  "would_be_cost_usd": 0.0015
+  "memory_hits": 0,
+  "memory_used": false,
+  "memory_rejections": 0,
+  "memory_checks": [],
+  "memory_cited": [],
+  "would_be_cost_usd": 0.00152
 }
