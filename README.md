@@ -2,11 +2,35 @@
 
 *Built over a weekend on top of [greenlight](https://github.com/SAI-HARISH2007/greenlight), an earlier incident-investigation agent by the same author. Everything about memory in this repo is new; the simulator, the investigator loop and the verification gate are inherited and disclosed in [What existed / what is new](#5-what-existed--what-is-new). The original greenlight README is kept at [`docs/README_greenlight_original.md`](docs/README_greenlight_original.md).*
 
+**In sixty seconds:** [console](https://sai-harish2007.github.io/provenance_hwh/console/) (incident queue, memory bank, analytics; every number from real runs) · [comparison page](https://sai-harish2007.github.io/provenance_hwh/demo/) (each incident with and without memory, memory panel and gate decisions) · [video, 2½ min](https://youtu.be/Ct8z2-jrW4g) · [results](#4-evaluation) · [how Hindsight is used](#3-how-hindsight-is-used) · [what we found, including what did not work](#what-we-found-and-did-not-find)
+
+| Judging criterion | Where the evidence is |
+|---|---|
+| Innovation | §2: a recalled memory is a claim, not a fact; the **provenance gate** refuses a matching verdict until a probe in *this* incident confirms it. Nobody's memory demo says "the agent must doubt itself". |
+| Use of Hindsight memory | §3 table: retain with provenance tags, two-query recall filtered on relevance score, timestamps weeks apart, bank disposition, age limit. Visible in every trace (`hindsight_memory/recall`, `retain`) and on the demo page. |
+| Technical implementation | deterministic simulator, verification + provenance gates, reviewer, human checkpoint, 51 offline tests, CI on every push, `make eval-replay` with zero API calls, JSONL trace per incident. |
+| User experience | the console and comparison page above (static HTML rendered from the same results and traces; `make console`, `make demo-page`), the video, the scripted offline replay that shows the gate firing. |
+| Real-world impact | §1 (the on-call engineer at a small team), §7 (what it takes to point this at a real stack), §9 (known failure modes, stated rather than hidden). |
+
 > **TL;DR** A page fires at 3 a.m. The agent reads the change history, gathers evidence, must prove its hypothesis with an active probe before it may conclude, and proposes one remediation that only runs after a human approves. New in Provenance: it **remembers every incident** through [Hindsight](https://github.com/vectorize-io/hindsight), recalls similar ones before it starts, and treats every recalled memory as **a claim about the past, not a fact about now**. A verdict that matches a remembered incident is rejected until the agent re-verifies the mechanism in *this* incident. Memory changes which probe runs first and lets the report cite what happened last time; it cannot talk the agent into a stale fix.
 
 Everything here runs against a deterministic simulator (8 services, 16 scripted incidents). No real system is touched. Every number in this README is reproducible from the repo.
 
 ---
+
+## 0. What it looks like
+
+The console is static HTML rendered from the recorded results and traces (`make console`, `docs/console/`). Every row, tag and number on it comes from an eval run; nothing is typed in by hand.
+
+![Incident queue: what was recalled, what the gate did, what it cost](docs/console/shots/incidents.png)
+
+*A repeat incident: Hindsight recalled the earlier disk-full case with its provenance tags, the agent went straight to the disk probe, and the gate accepted the verdict only because the probe ran again in this incident.*
+
+![A recalled verdict re-verified by a probe in this incident](docs/console/shots/recalled_verified.png)
+
+*The trap: memory says "rollback fixed this last time". The gate rejects the remembered fix until the agent probes the blamed service now, which shows a revoked API key instead. (Offline replay with a scripted model; live runs did not take the bait.)*
+
+![The provenance gate rejecting a remembered fix](docs/console/shots/gate_rejects.png)
 
 ## 1. Who has this problem
 
@@ -91,6 +115,8 @@ Three agents, same model, same tools, same incidents, **no hand-written runbook*
 * `mem_gate` — memory + provenance gate (Provenance)
 
 Metrics: root-cause accuracy, correct remediation, unsafe action proposed, harm done, LLM calls, probes, tokens, memory hits, recalled fixes challenged by the gate, reports that cite a past incident. Produced by `make memory-seq`, scored by `make memory-eval`.
+
+**What memory changed, in one breath.** Accuracy did not move: all three agents got all six incidents right, so read the percentages below as a floor, not the story. What moved is *how* the agent got there. On the repeat incidents it recalled the earlier one, with its tags (`verified:yes`, `action:free_disk_space`), and ran the decisive probe first instead of rediscovering it. Every recalled memory arrives labelled with where it came from and whether it was ever verified, and a verdict that matches a memory is not accepted until a probe in the current incident backs it. On the look-alike trap the live model did not take the bait; the gate fires in the [scripted offline replay](#the-s16-pair-the-first-incident-the-agent-gets-wrong) and on the demo page. We also found that unfiltered memory made the agent *worse* (finding 1 below), which is the kind of result a memory demo usually leaves out.
 
 <!-- RESULTS:BEGIN -->
 | Metric | fair-nomem | fair-naive | fair-gate |
@@ -197,7 +223,8 @@ cp .env.example .env       # add GEMINI_API_KEY (runtime model) and GROQ_API_KEY
 make hindsight             # self-hosted Hindsight in Docker (§3), or set HINDSIGHT_BASE_URL/API_KEY
 make memory-seq            # the 6-incident sequence × 3 agents (live model calls, free tier)
 make memory-eval           # comparison table
-make demo-page             # docs/demo/index.html
+make demo-page             # docs/demo/index.html (three columns side by side)
+make console               # docs/console/ (the operator console, one page per incident)
 ```
 
 `make eval-replay` reproduces the baseline-vs-agent comparison on all 16 incidents with **zero API calls**. It

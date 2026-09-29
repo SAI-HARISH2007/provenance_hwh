@@ -3,7 +3,7 @@
 MODEL ?= gemini-3.5-flash-lite
 CASES ?=
 COMPOSE ?= docker compose
-.PHONY: setup test coverage lint hindsight hindsight-stop baseline agent ablation eval eval-replay traces demo clean memory-seq memory-eval demo-page
+.PHONY: setup test coverage lint hindsight hindsight-stop baseline agent ablation eval eval-replay traces demo clean memory-seq memory-eval demo-page console
 
 setup:            ## clean-env install (Python 3.13 + uv), pinned by uv.lock
 	uv sync --frozen
@@ -69,6 +69,9 @@ memory-seq:       ## the memory story: same 4 incidents in order, without memory
 memory-eval:      ## score the memory sequence (no API calls) and paste the table into the README
 	uv run python -m greenlight.eval --runs fair-nomem fair-naive fair-gate
 	uv run python scripts/fill_results.py
+
+console:          ## product-style console over the same results + traces -> docs/console/*.html
+	uv run python scripts/console_page.py
 
 demo-page:        ## offline demo page from results + traces -> docs/demo/index.html
 	uv run python scripts/gate_demo.py

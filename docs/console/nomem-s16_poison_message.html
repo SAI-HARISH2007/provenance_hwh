@@ -1,0 +1,115 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>s16_poison_message · Provenance</title><style>
+:root{--bg:#0a0d12;--bg2:#0f141b;--panel:#131a23;--panel2:#18212c;--line:#1f2a37;--line2:#2a3646;--txt:#e6edf5;--mut:#8b9bb0;--dim:#5f7086;
+--ok:#22c55e;--okbg:#0f2a1c;--bad:#ef4444;--badbg:#2a1215;--warn:#f59e0b;--warnbg:#2a1f0a;--mem:#8b8cff;--membg:#171a3a;--acc:#38bdf8;--accbg:#0c2231}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--txt);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+.side{background:var(--bg2);border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:4px}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px}
+.brand .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#8b8cff,#38bdf8);display:grid;place-items:center;font-weight:800;color:#0a0d12}
+.brand b{font-size:16px;letter-spacing:-.01em}.brand small{display:block;color:var(--dim);font-size:11px;margin-top:-2px}
+.nav a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--mut);font-weight:500}
+.nav a.on{background:var(--panel2);color:var(--txt)}.nav a:hover{color:var(--txt)}
+.nav .badge{margin-left:auto;background:var(--line2);color:var(--txt);border-radius:999px;font-size:11px;padding:0 7px;font-weight:600}
+.nav .badge.red{background:#3a1519;color:#ff9a9a}
+.nav .sec{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:16px 10px 6px}
+.ico{width:16px;height:16px;flex:none;opacity:.9}
+.side .foot{margin-top:auto;border-top:1px solid var(--line);padding-top:12px;font-size:12px;color:var(--mut)}
+.side .foot .env{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:var(--panel)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(34,197,94,.15)}
+.main{min-width:0}
+.top{display:flex;align-items:center;gap:14px;padding:12px 26px;border-bottom:1px solid var(--line);background:var(--bg2);position:sticky;top:0;z-index:2}
+.crumb{color:var(--mut)}.crumb b{color:var(--txt);font-weight:600}.crumb span{margin:0 8px;color:var(--dim)}
+.search{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--dim);width:280px;font-size:13px}
+.search kbd{margin-left:auto;font:11px ui-monospace,monospace;background:var(--line);border-radius:4px;padding:1px 5px;color:var(--mut)}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill.ok{background:var(--okbg);color:#7ee2a8}.pill.bad{background:var(--badbg);color:#ff9a9a}.pill.warn{background:var(--warnbg);color:#ffc862}
+.pill.mem{background:var(--membg);color:#b9baff}.pill.neu{background:var(--line);color:var(--mut)}.pill.acc{background:var(--accbg);color:#8fd8ff}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);display:grid;place-items:center;font-weight:700;font-size:12px;color:#fff}
+.page{padding:22px 26px 60px;max-width:1440px}
+.h{display:flex;align-items:flex-start;gap:16px;margin-bottom:18px}.h h1{font-size:22px;margin:0;letter-spacing:-.01em;font-weight:650}.h p{margin:4px 0 0;color:var(--mut)}
+.h .actions{margin-left:auto;display:flex;gap:8px}
+.btn{border:1px solid var(--line2);background:var(--panel);color:var(--txt);border-radius:8px;padding:7px 12px;font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+.btn.primary{background:#5b5cf0;border-color:#5b5cf0;color:#fff}.btn.danger{background:transparent;border-color:#5a2a2f;color:#ff9a9a}.btn.ok{background:#178a45;border-color:#178a45;color:#fff}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.tile .k{color:var(--mut);font-size:12px;font-weight:500}.tile .v{font-size:26px;font-weight:650;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums}
+.tile .d{font-size:12px;color:var(--dim);margin-top:2px}.tile .d b{font-weight:600}.tile .d.up{color:#7ee2a8}.tile .d.down{color:#ff9a9a}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.card>h3{margin:0;padding:12px 16px;border-bottom:1px solid var(--line);font-size:13px;font-weight:600;color:var(--txt);display:flex;align-items:center;gap:8px}
+.card>h3 .r{margin-left:auto;font-weight:500;color:var(--mut);font-size:12px}
+.card .body{padding:14px 16px}
+table{border-collapse:collapse;width:100%;font-size:13px}th{color:var(--mut);font-weight:500;text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);font-size:12px;background:var(--bg2)}
+td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}tr:last-child td{border-bottom:0}tr.row:hover td{background:var(--panel2)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+.sev{display:inline-block;font-weight:700;font-size:11px;border-radius:5px;padding:2px 7px}.sev.P1{background:#3a1519;color:#ff9a9a}.sev.P2{background:var(--warnbg);color:#ffc862}.sev.P3{background:var(--line);color:var(--mut)}
+.svc{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:#ffd08a;white-space:nowrap}td.nw{white-space:nowrap}
+.grid2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;align-items:start}
+.stack{display:grid;gap:14px}
+.alertbar{display:flex;align-items:center;gap:14px;background:linear-gradient(90deg,#1b0f12,var(--panel));border:1px solid #3d1a1f;border-radius:12px;padding:14px 18px;margin-bottom:14px}
+.alertbar .msg{font-size:16px;font-weight:600}.alertbar .meta{color:var(--mut);font-size:12.5px;margin-top:2px}.alertbar .right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tl{list-style:none;margin:0;padding:0}.tl li{display:grid;grid-template-columns:54px 24px 1fr;gap:10px;padding:9px 16px;border-bottom:1px solid var(--line);align-items:start}
+.tl li:last-child{border-bottom:0}.tl .t{color:var(--dim);font-size:11.5px;font-variant-numeric:tabular-nums;padding-top:3px}
+.tl .i{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:var(--line)}.tl .i svg{width:13px;height:13px}
+.tl .i.probe{background:var(--accbg);color:#8fd8ff}.tl .i.verdict{background:var(--okbg);color:#7ee2a8}.tl .i.rej{background:var(--badbg);color:#ff9a9a}.tl .i.mem{background:var(--membg);color:#b9baff}.tl .i.human{background:var(--warnbg);color:#ffc862}.tl .i.tool{color:var(--mut)}
+.tl .n{font-weight:600;font-size:13px}.tl .n code{font-family:ui-monospace,Menlo,monospace;font-weight:500;color:#cdd6e0;background:var(--line);border-radius:4px;padding:0 5px;font-size:12px}
+.tl .o{color:var(--mut);font-size:12.5px;margin-top:2px;font-family:ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-word}
+.tl li.rej .o{color:#ffb3b3}.tl li.rej{background:#1c0f11}.tl li.verdict{background:#0c1a12}
+.hit{border:1px solid #2a2f6a;background:var(--membg);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.hit .txt{font-size:13px}.hit .meta{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:12px;margin-top:8px}
+.bar{height:6px;background:#23285a;border-radius:99px;width:120px;overflow:hidden}.bar i{display:block;height:100%;background:var(--mem)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.tag{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;border-radius:5px;padding:2px 7px;background:#1f2450;color:#c3c4ff;border:1px solid #33398a}
+.tag.v{background:#0f2a1c;color:#7ee2a8;border-color:#1e5a37}.tag.h{background:#2a1215;color:#ff9a9a;border-color:#5a2a2f}.tag.a{background:#2a1f0a;color:#ffc862;border-color:#5a4210}
+.gate{border-radius:10px;padding:12px 14px;border:1px solid}.gate.acc{background:var(--okbg);border-color:#1e5a37}.gate.rej{background:var(--badbg);border-color:#6b2a2f}
+.gate b{display:flex;align-items:center;gap:8px;font-size:13px}.gate p{margin:6px 0 0;color:var(--mut);font-size:12.5px;line-height:1.5}
+.gate.rej p{color:#f3c3c3}.gate.acc p{color:#bfe8cf}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:6px 12px;font-size:13px}.kv .k{color:var(--mut)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.rem{display:flex;align-items:center;gap:12px;background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:12px 14px}
+.rem .a{font-family:ui-monospace,Menlo,monospace;font-weight:600;font-size:13px}.rem .r{margin-left:auto;display:flex;gap:8px}
+.mini{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.mini div{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.mini .k{font-size:11px;color:var(--mut)}.mini .v{font-size:16px;font-weight:650;font-variant-numeric:tabular-nums}
+.filters{display:flex;gap:8px;margin-bottom:12px;align-items:center}.filters .f{border:1px solid var(--line2);border-radius:8px;padding:5px 10px;font-size:12.5px;color:var(--mut);background:var(--panel)}
+.filters .f.on{color:var(--txt);border-color:#5b5cf0;background:#1a1b3f}
+.chart{display:grid;grid-template-columns:150px 1fr;gap:8px 12px;align-items:center;font-size:12.5px}
+.chart .lbl{color:var(--mut);font-family:ui-monospace,Menlo,monospace}.chart .bars{display:grid;gap:3px}
+.chart .b{display:flex;align-items:center;gap:8px}.chart .b i{display:block;height:9px;border-radius:3px}.chart .b span{font-variant-numeric:tabular-nums;color:var(--mut);font-size:11.5px}
+.legend{display:flex;gap:14px;color:var(--mut);font-size:12px;margin-bottom:12px}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.note{color:var(--dim);font-size:12px;margin-top:10px}
+.lbl-small{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+</style></head><body><div class=app>
+<aside class=side><div class=brand><div class=logo>P</div><div><b>Provenance</b><small>on-call agent with memory</small></div></div>
+<nav class=nav><div class=sec>Operate</div><a href="index.html" class="on"><svg class=ico viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13l3.5 7v7H2v-7z"/></svg>Incidents<span class="badge red">1</span></a><a href="memory.html" class=""><svg class=ico viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4a4 4 0 0 0-4 4v1a3 3 0 0 0-2 5 3 3 0 0 0 2 5h8a3 3 0 0 0 2-5 3 3 0 0 0-2-5V8a4 4 0 0 0-4-4z"/><path d="M12 4v15"/></svg>Memory bank</a><a href="analytics.html" class=""><svg class=ico viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>Analytics</a><a href="index.html#runbooks" class=""><svg class=ico viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z"/><path d="M20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z"/></svg>Runbooks</a><a href="index.html#services" class=""><svg class=ico viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="18" height="6" rx="1"/></svg>Services<span class="badge">8</span></a><a href="index.html#settings" class=""><svg class=ico viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</a></nav>
+<div class=foot><div class=env><span class=dot></span><div><div style="color:var(--txt);font-weight:600">acme-shop · prod-sim</div><div>Hindsight bank: provenance-demo</div></div></div></div></aside>
+<div class=main><div class=top><div class=crumb><a href="index.html">Incidents</a><span>/</span><b>s16_poison_message</b></div><div class=search><svg class=ico viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search incidents, services, memories<kbd>⌘K</kbd></div>
+<span class="pill ok"><span class=dot></span>Hindsight connected</span><div class=avatar>SH</div></div>
+<div class=page>
+<div class=alertbar><span class="sev P2" style="font-size:13px;padding:6px 10px">P2</span>
+<div><div class=msg><span class=svc style="font-size:15px">worker</span> &nbsp;worker restart loop: 9 restarts in 12 min; job queue backlog 4,300</div><div class=meta>s16_poison_message · fired 25 Aug 2026, 23:12 UTC · worker restart loop (exit 137) on a 912MB poison job, not a memory leak</div></div>
+<div class=right><span class="pill neu">gemini-3.5-flash-lite</span><span class="pill bad">Wrong cause</span></div></div>
+<div class=grid2><div class=stack>
+<div class=card><h3>Investigation timeline<span class=r>no memory · 5 tool calls</span></h3><ul class=tl><li class="tool"><span class=t>15:08:50</span><span class="i tool"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span><div><div class=n><code>get_alert</code> </div><div class=o>P2 worker: worker restart loop: 9 restarts in 12 min; job queue backlog 4,300 (fired 03:12:00 UTC)</div></div></li><li class="tool"><span class=t>15:09:11</span><span class="i tool"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span><div><div class=n><code>recent_changes</code> last_hours=24</div><div class=o>2026-08-29T19:12:00.000Z [deploy] orders-api: orders-3.8.1: refactor order serializer (by lee)
+2026-08-30T02:14:00.000Z [deploy] data-import: importer-2.4.0: attach source rows inline as base64 instead of an S3 ref (no size cap) (by marco)
+    detail: the 02:14 export was 912MB; the importer inlined</div></div></li><li class="tool"><span class=t>15:09:15</span><span class="i tool"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span><div><div class=n><code>query_logs</code> level=ERROR, limit=20, pattern=, service=worker</div><div class=o>2026-08-30T03:00:36.000Z ERROR worker: OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB
+2026-08-30T03:00:49.000Z ERROR worker: OOMKilled (exit 137) while decoding payload job=job_8f3a1c size=912MB
+2026-08-30T03:01:45.000Z ERROR worker: OOMKilled (exit 137) while decoding payload</div></div></li><li class="tool"><span class=t>15:09:35</span><span class="i tool"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span><div><div class=n><code>get_metrics</code> metric=mem_pct, service=worker</div><div class=o>worker.mem_pct last 30 min (1/min, oldest→newest)
+min=49.496 max=102.399 last=102.399  ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▂▃▃▄▅▄▅▆▇▇█
+values: 52.801 49.84 49.496 52.146 49.757 54.55 49.984 50.405 49.753 53.819 50.121 53.447 51.791 53.984 51.708 53.544 53.017 52.898 53.741 59.436 64.532 68.018 74.227 76.396 75.428 8</div></div></li><li class="verdict"><span class=t>15:09:50</span><span class="i verdict"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m5 13 4 4L19 7"/></svg></span><div><div class=n>Verdict: <code>memory_leak_oom</code> at <code>data-import</code> → <code>rollback_deploy</code> on <code>data-import</code></div><div class=o>Worker OOM caused by oversized job payload from data-import change</div></div></li><li class="probe"><span class=t>15:10:19</span><span class="i probe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/></svg></span><div><div class=n>Probe <code>http</code> on <code>worker</code></div><div class=o>GET http://worker:8080/healthz -&gt; 200 in 14ms (process up 41 s; last job job_8f3a1c failed 9 times; payload 912MB)</div></div></li><li class="verdict"><span class=t>15:10:58</span><span class="i verdict"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m5 13 4 4L19 7"/></svg></span><div><div class=n>Verdict: <code>memory_leak_oom</code> at <code>data-import</code> → <code>rollback_deploy</code> on <code>data-import</code></div><div class=o>Worker OOM caused by oversized job payload from data-import change</div></div></li><li class="human"><span class=t>15:10:58</span><span class="i human"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><div class=n>Human checkpoint → <code>approved</code></div><div class=o>eval-policy</div></div></li><li class="human"><span class=t>15:10:58</span><span class="i human"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><div class=n>Remediate: <code>rollback_deploy</code> on <code>data-import</code></div><div class=o>{&quot;executed&quot;: true, &quot;resolved&quot;: false, &quot;harm&quot;: false, &quot;effect&quot;: &quot;rollback_deploy on data-import applied; no change in symptoms after 3 minutes&quot;}</div></div></li><li class="human"><span class=t>15:10:58</span><span class="i human"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><div class=n>Effect: <code>no_effect</code></div><div class=o>rollback_deploy on data-import applied; no change in symptoms after 3 minutes</div></div></li></ul></div>
+<div class=card><h3>Proposed remediation<span class=r>requires human approval</span></h3><div class=body>
+<div class=rem><span class=a>rollback_deploy → data-import</span><span class="pill bad">memory_leak_oom</span><span class=r>
+<span class="btn ok">✓ Approved · eval-policy</span><span class="btn danger">Deny</span></span></div>
+<p style="color:var(--mut);font-size:13px;margin:12px 0 0">Worker OOM caused by oversized job payload from data-import change</p>
+<p class=note>Effect: rollback_deploy on data-import applied; no change in symptoms after 3 minutes</p>
+</div></div>
+</div><div class=stack>
+<div class=card><div class=body style="padding:10px 12px"><div class=mini>
+<div><div class=k>Calls</div><div class=v>7</div></div><div><div class=k>Probes</div><div class=v>1</div></div>
+<div><div class=k>Tokens</div><div class=v>19,670</div></div><div><div class=k>Hits</div><div class=v>0</div></div>
+<div><div class=k>Cost</div><div class=v>$0.0026</div></div></div></div></div>
+<div class=card><h3><svg class=ico viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4a4 4 0 0 0-4 4v1a3 3 0 0 0-2 5 3 3 0 0 0 2 5h8a3 3 0 0 0 2-5 3 3 0 0 0-2-5V8a4 4 0 0 0-4-4z"/><path d="M12 4v15"/></svg>Recalled from Hindsight<span class=r>at kickoff</span></h3><div class=body><div class=hit style="color:var(--mut)">Nothing similar in memory. This is the first incident of its kind; it will be retained once closed.</div></div></div>
+<div class=card><h3>Provenance gate</h3><div class=body><div class="gate acc" style="background:var(--bg2);border-color:var(--line)"><b style="color:var(--mut)">Gate not triggered</b><p>The verdict did not match any remembered incident, so no re-verification was required.</p></div></div></div>
+<div class=card><h3>Retained after close</h3><div class=body><span style="color:var(--mut)">Not retained (run did not close cleanly).</span></div></div>
+</div></div></div></div></div></body></html>
